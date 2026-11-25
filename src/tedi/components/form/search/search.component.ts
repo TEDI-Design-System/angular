@@ -135,7 +135,7 @@ const SEARCH_OVERLAY_POSITIONS: ConnectedPosition[] = [
     role: "search",
     class: "tedi-search",
     "(focusout)": "onFocusOut($event)",
-    "[attr.aria-label]": "searchAriaLabel()",
+    "[attr.aria-label]": "ariaLabel() || null",
     "[style.--tedi-search-field-height]": "fieldHeight()",
     "[class.tedi-search--button-icon-only]": "!!button() && !button()?.text",
     "[class.tedi-search--has-button]": "!!button()",
@@ -147,9 +147,14 @@ export class SearchComponent<T = unknown> implements ControlValueAccessor {
    */
   inputId = input.required<string>();
   /**
-   * Visible label text. When omitted, provide `ariaLabel` for accessibility.
+   * Label of the search field. Always set it; use `hideLabel` when it must not be visible.
    */
   label = input<string>();
+  /**
+   * Hides the label visually while keeping it as the field's name.
+   * @default false
+   */
+  hideLabel = input(false, { transform: booleanAttribute });
   /**
    * Value of the search input. Supports two-way binding and reactive forms.
    */
@@ -193,8 +198,8 @@ export class SearchComponent<T = unknown> implements ControlValueAccessor {
    */
   feedbackText = input<ComponentInputs<FeedbackTextComponent>>();
   /**
-   * Accessible name for the search region. Falls back to `label`, then
-   * `placeholder`, then the translated "search" label.
+   * Accessible name for the search landmark. Unnamed by default; set it when the
+   * page has more than one search. It does not name the field.
    */
   ariaLabel = input<string>();
   /**
@@ -339,21 +344,11 @@ export class SearchComponent<T = unknown> implements ControlValueAccessor {
 
   readonly feedbackId = computed(() => `${this.inputId()}-feedback`);
 
-  readonly searchAriaLabel = computed(
-    () =>
-      this.ariaLabel() ||
-      this.label() ||
-      this.placeholder() ||
-      this.translationService.translate("search"),
-  );
-
-  /**
-   * Accessible name for the input itself. A visible `label` already names it
-   * via `for`/`id`, so the attribute is only emitted when there is none —
-   * otherwise `aria-label` would silently override the visible text.
-   */
+  /** Only without a `label`, which would otherwise be overridden. */
   readonly inputAriaLabel = computed(() =>
-    this.label() ? null : this.searchAriaLabel(),
+    this.label()
+      ? null
+      : this.placeholder() || this.translationService.translate("search"),
   );
 
   /**

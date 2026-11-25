@@ -216,10 +216,10 @@ describe("TagComponent", () => {
     fixture.detectChanges();
 
     const button = fixture.nativeElement.querySelector("[tedi-closing-button]");
-    expect(button.getAttribute("aria-label")).toBe("Eemalda");
+    expect(button.getAttribute("title")).toBe("Eemalda");
     // The tag text is the *description*, which distinguishes which tag is being
     // removed when several are on screen. TalkBack does not surface a name
-    // computed via aria-labelledby, so the name stays a plain aria-label.
+    // computed via aria-labelledby, so the name comes from the plain title.
     expect(button.getAttribute("aria-describedby")).toBe(component.uniqueId);
     expect(button.getAttribute("aria-labelledby")).toBeNull();
   });

@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { SideNavComponent, SideNavItemSize } from "./sidenav.component";
 import { SideNavService } from "../../../services/sidenav/sidenav.service";
-import { computed, signal, Signal } from "@angular/core";
+import { computed, signal, Signal, WritableSignal } from "@angular/core";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 
 const mockCallbackHolder: { callback: (() => void) | null } = {
@@ -32,10 +32,12 @@ describe("SideNavComponent", () => {
     isMobileDrawerOpen: Signal<boolean>;
     drawerTop: ReturnType<typeof signal>;
     tooltipEnabled: ReturnType<typeof signal>;
+    toggleElement: WritableSignal<HTMLElement | null>;
     registerItem: jest.Mock;
     unregisterItem: jest.Mock;
     handleGoToMainMenu: jest.Mock;
     handleCollapse: jest.Mock;
+    closeMobileDrawer: jest.Mock;
   };
 
   beforeEach(() => {
@@ -52,10 +54,12 @@ describe("SideNavComponent", () => {
       isMobileDrawerOpen: computed(() => isMobile() && isMobileOpen()),
       drawerTop: signal<number | null>(null),
       tooltipEnabled: signal(false),
+      toggleElement: signal<HTMLElement | null>(null),
       registerItem: jest.fn(),
       unregisterItem: jest.fn(),
       handleGoToMainMenu: jest.fn(),
       handleCollapse: jest.fn(),
+      closeMobileDrawer: jest.fn(),
     };
 
     TestBed.configureTestingModule({
@@ -236,6 +240,113 @@ describe("SideNavComponent", () => {
       fixture.destroy();
 
       expect(document.body.style.overflow).toBe("");
+    });
+
+    describe("focus management", () => {
+      const openDrawer = () => {
+        sidenavService.isMobile.set(true);
+        sidenavService.isMobileOpen.set(true);
+        fixture.detectChanges();
+      };
+
+      it("should make the content outside the drawer inert while open", () => {
+        const page = document.createElement("main");
+        document.body.appendChild(page);
+
+        openDrawer();
+
+        expect(page.hasAttribute("inert")).toBe(true);
+        expect(sidenavElement.hasAttribute("inert")).toBe(false);
+
+        sidenavService.isMobileOpen.set(false);
+        fixture.detectChanges();
+
+        expect(page.hasAttribute("inert")).toBe(false);
+        page.remove();
+      });
+
+      it("should leave content that is already inert untouched", () => {
+        const page = document.createElement("div");
+        page.setAttribute("inert", "");
+        document.body.appendChild(page);
+
+        openDrawer();
+        sidenavService.isMobileOpen.set(false);
+        fixture.detectChanges();
+
+        expect(page.hasAttribute("inert")).toBe(true);
+        page.remove();
+      });
+
+      it("should keep the toggle active while making the rest of its container inert", () => {
+        const header = document.createElement("header");
+        const toggle = document.createElement("button");
+        const logo = document.createElement("img");
+
+        header.append(toggle, logo);
+        document.body.appendChild(header);
+        sidenavService.toggleElement.set(toggle);
+
+        openDrawer();
+
+        expect(header.hasAttribute("inert")).toBe(false);
+        expect(toggle.hasAttribute("inert")).toBe(false);
+        expect(logo.hasAttribute("inert")).toBe(true);
+
+        sidenavService.isMobileOpen.set(false);
+        fixture.detectChanges();
+
+        expect(logo.hasAttribute("inert")).toBe(false);
+        header.remove();
+      });
+
+      it("should keep the backdrop, CDK overlay container and live announcer active", () => {
+        const kept = [
+          "tedi-sidenav-overlay",
+          "div.cdk-overlay-container",
+          "div.cdk-live-announcer-element",
+        ].map((selector) => {
+          const [tag, ...classes] = selector.split(".");
+          const el = document.createElement(tag);
+
+          el.className = classes.join(" ");
+          document.body.appendChild(el);
+          return el;
+        });
+
+        openDrawer();
+
+        kept.forEach((el) => expect(el.hasAttribute("inert")).toBe(false));
+        kept.forEach((el) => el.remove());
+      });
+
+      it("should add focus trap anchors around the drawer while open", () => {
+        openDrawer();
+
+        expect(
+          document.querySelectorAll(".cdk-focus-trap-anchor").length,
+        ).toBeGreaterThan(0);
+
+        fixture.destroy();
+
+        expect(document.querySelectorAll(".cdk-focus-trap-anchor").length).toBe(
+          0,
+        );
+      });
+
+      it("should close the drawer on Escape while open", () => {
+        openDrawer();
+
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+
+        expect(sidenavService.closeMobileDrawer).toHaveBeenCalled();
+      });
+
+      it("should ignore Escape while the drawer is closed", () => {
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+
+        expect(sidenavService.closeMobileDrawer).not.toHaveBeenCalled();
+      });
     });
   });
 

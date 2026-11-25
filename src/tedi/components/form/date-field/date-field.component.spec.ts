@@ -111,6 +111,14 @@ describe("DateFieldComponent", () => {
       expect(input?.id).toBe("test-date-field");
     });
 
+    it("marks the input required", () => {
+      const { el } = createField({ required: true });
+      const input = el.querySelector(
+        "input.tedi-date-input__input",
+      ) as HTMLInputElement;
+      expect(input.required).toBe(true);
+    });
+
     it("assigns the name to the date-input", () => {
       const { el } = createField({ name: "birth-date" });
       const input = el.querySelector(

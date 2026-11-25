@@ -120,6 +120,21 @@ export default {
         },
       },
     },
+    delay: {
+      control: "select",
+      description:
+        "Time in ms the pointer has to stay over the trigger before the tooltip opens on hover. Focus and click open it right away.",
+      options: [0, 100, 200, 300],
+      table: {
+        category: "tooltip",
+        type: {
+          summary: "TooltipDelay",
+        },
+        defaultValue: {
+          summary: "0",
+        },
+      },
+    },
     timeoutDelay: {
       control: "number",
       description:
@@ -219,6 +234,7 @@ export const Default: Story = {
   args: {
     position: "top",
     preventOverflow: true,
+    delay: 0,
     timeoutDelay: 100,
     offset: 4,
     interactive: true,
@@ -228,7 +244,7 @@ export const Default: Story = {
   render: (args) => ({
     props: args,
     template: `
-      <tedi-tooltip [position]="position" [timeoutDelay]="timeoutDelay" [offset]="offset" [preventOverflow]="preventOverflow" [openWith]="openWith">
+      <tedi-tooltip [position]="position" [delay]="delay" [timeoutDelay]="timeoutDelay" [offset]="offset" [preventOverflow]="preventOverflow" [openWith]="openWith">
         <tedi-tooltip-trigger [interactive]="interactive">
           <button tedi-info-button></button>
         </tedi-tooltip-trigger>

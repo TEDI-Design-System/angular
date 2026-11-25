@@ -6,7 +6,9 @@ import {
   output,
   ChangeDetectionStrategy,
   ViewEncapsulation,
+  inject,
 } from "@angular/core";
+import { _IdGenerator } from "@angular/cdk/a11y";
 import { IconComponent } from "../../base/icon/icon.component";
 import { ClosingButtonComponent } from "../../buttons/closing-button/closing-button.component";
 import { NgTemplateOutlet } from "@angular/common";
@@ -28,7 +30,7 @@ export type AlertSize = "default" | "small";
   host: {
     "[style.display]": "open() ? 'flex' : 'none'",
     "[class]": "classes()",
-    "[attr.role]": "role() === 'none' ? null : role()",
+    "[attr.role]": "null",
   },
 })
 export class AlertComponent {
@@ -57,18 +59,16 @@ export class AlertComponent {
    */
   showClose = input<boolean>(false);
   /**
-   * Accessible name for the close button. Override the generic default
-   * ("Close") when several alerts can be on screen at once, so the button
-   * says which one it closes.
+   * Accessible name for the close button. The title, when set, is its
+   * description, so the default ("Close") already says which alert it closes.
    */
   closeAriaLabel = input<string>();
   /**
-   * The ARIA role of the alert, informing screen readers about the alert's purpose.
-   * The role carries its own live-region semantics, so no separate `aria-live` is set.
-   * Options:
-   * - 'alert': For high-priority messages that demand immediate attention (announced assertively).
-   * - 'status': For less urgent messages providing feedback or updates (announced politely).
-   * - 'none': No role and no announcement.
+   * Live-region role of the message.
+   * - 'alert': urgent message that appears later (error, needs action). Announced assertively.
+   * - 'status': non-urgent message that appears later (saved, info). Announced politely.
+   * - 'none': content already on the page when it loads. Some screen readers read a
+   *   `role="alert"` present at load immediately.
    * @default alert
    */
   role = input<AlertRole>("alert");
@@ -105,6 +105,8 @@ export class AlertComponent {
    * Close click output
    */
   readonly closeClick = output<void>();
+
+  readonly titleId = inject(_IdGenerator).getId("tedi-alert-title-");
 
   classes = computed(() => {
     return {

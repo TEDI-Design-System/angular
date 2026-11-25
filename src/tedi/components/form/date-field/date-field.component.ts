@@ -11,6 +11,7 @@ import {
   input,
   linkedSignal,
   model,
+  DoCheck,
   OnInit,
   output,
   Renderer2,
@@ -48,7 +49,10 @@ import {
   TEDI_FIELD_CONTEXT,
 } from "../form-field/field-context.token";
 import { deriveControlState } from "../form-field/derive-control-state";
-import { controlDescribedBy } from "../form-field/control-described-by";
+import {
+  controlDescribedBy,
+  TEDI_DESCRIBABLE_CONTROL,
+} from "../form-field/control-described-by";
 import {
   breakpointInput,
   BreakpointInput,
@@ -109,6 +113,10 @@ export type DateFieldSize = "default" | "small";
       useExisting: forwardRef(() => DateFieldComponent),
     },
     {
+      provide: TEDI_DESCRIBABLE_CONTROL,
+      useExisting: forwardRef(() => DateFieldComponent),
+    },
+    {
       provide: TEDI_FIELD_CONTEXT,
       useFactory: (field: DateFieldComponent) => field.childContext,
       deps: [forwardRef(() => DateFieldComponent)],
@@ -125,7 +133,11 @@ export type DateFieldSize = "default" | "small";
   },
 })
 export class DateFieldComponent
-  implements OnInit, ControlValueAccessor, FormFieldControl<DateFieldValue>
+  implements
+    OnInit,
+    DoCheck,
+    ControlValueAccessor,
+    FormFieldControl<DateFieldValue>
 {
   private readonly fieldContext = inject(TEDI_FIELD_CONTEXT, {
     optional: true,
@@ -644,6 +656,10 @@ export class DateFieldComponent
         this.overlayOpen.set(false);
       });
     });
+  }
+
+  ngDoCheck(): void {
+    this.derived.sync();
   }
 
   writeValue(value: DateFieldValue): void {

@@ -44,6 +44,39 @@ export class PopoverTriggerDirective {
 
   @HostListener("click")
   onClick() {
+    if (this.popover.openWith() !== "click") return;
     this.popover.togglePopover();
+  }
+
+  @HostListener("mouseenter")
+  onMouseEnter() {
+    if (this.popover.openWith() !== "hover") return;
+    this.popover.showPopoverOnHover();
+  }
+
+  @HostListener("mouseleave")
+  onMouseLeave() {
+    if (this.popover.openWith() !== "hover") return;
+    this.popover.scheduleHide();
+  }
+
+  @HostListener("focusin")
+  onFocusIn() {
+    if (this.popover.openWith() !== "hover") return;
+    this.popover.showPopoverOnFocus();
+  }
+
+  @HostListener("focusout", ["$event"])
+  onFocusOut(event: FocusEvent) {
+    if (this.popover.openWith() !== "hover") return;
+    if (this.popover.isContentHovered()) return;
+    if (this.popover.isInOwnOverlay(event.relatedTarget as Node | null)) return;
+    this.popover.hidePopover();
+  }
+
+  @HostListener("keydown.escape")
+  onEscape() {
+    if (this.popover.openWith() !== "hover") return;
+    this.popover.hidePopover();
   }
 }

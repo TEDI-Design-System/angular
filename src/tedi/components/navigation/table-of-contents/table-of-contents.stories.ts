@@ -459,7 +459,7 @@ export const ItemStates: Story = {
               [numbered]="variant.numbered"
               [divided]="variant.divided"
               activeId="selected"
-              [ariaLabel]="variant.header + ' states'"
+              [ariaLabel]="variant.header"
             >
               @for (state of states; track state.id) {
                 <tedi-table-of-contents-item [itemId]="state.id" [separator]="variant.separator">

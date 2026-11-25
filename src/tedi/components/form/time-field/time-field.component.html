@@ -114,6 +114,7 @@
     [value]="inputValue()"
     [disabled]="isDisabled()"
     [readOnly]="inputIsTrigger()"
+    [required]="required()"
     [attr.aria-invalid]="invalid() || null"
     [attr.aria-describedby]="describedBy.attribute()"
     (click)="onInputClick($event)"

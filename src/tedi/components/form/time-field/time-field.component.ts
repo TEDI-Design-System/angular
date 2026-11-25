@@ -10,6 +10,7 @@ import {
   Injector,
   input,
   model,
+  DoCheck,
   OnInit,
   signal,
   ViewEncapsulation,
@@ -42,7 +43,10 @@ import {
   TEDI_FIELD_CONTEXT,
 } from "../form-field/field-context.token";
 import { deriveControlState } from "../form-field/derive-control-state";
-import { controlDescribedBy } from "../form-field/control-described-by";
+import {
+  controlDescribedBy,
+  TEDI_DESCRIBABLE_CONTROL,
+} from "../form-field/control-described-by";
 import {
   TimePickerModalComponent,
   TimePickerModalData,
@@ -84,6 +88,10 @@ export type TimeFieldUseNativePicker = boolean | "sm" | "md" | "lg" | "xl";
       provide: TEDI_FORM_FIELD_CONTROL,
       useExisting: forwardRef(() => TimeFieldComponent),
     },
+    {
+      provide: TEDI_DESCRIBABLE_CONTROL,
+      useExisting: forwardRef(() => TimeFieldComponent),
+    },
   ],
   host: {
     class: "tedi-time-field",
@@ -92,7 +100,11 @@ export type TimeFieldUseNativePicker = boolean | "sm" | "md" | "lg" | "xl";
   },
 })
 export class TimeFieldComponent
-  implements OnInit, ControlValueAccessor, FormFieldControl<string | null>
+  implements
+    OnInit,
+    DoCheck,
+    ControlValueAccessor,
+    FormFieldControl<string | null>
 {
   private readonly fieldContext = inject(TEDI_FIELD_CONTEXT, {
     optional: true,
@@ -116,6 +128,11 @@ export class TimeFieldComponent
   readonly value = model<string | null>(null);
   /** Placeholder shown when the input is empty. */
   readonly placeholder = input<string>();
+  /**
+   * Marks the input as required.
+   * @default false
+   */
+  readonly required = input<boolean>(false);
   /**
    * Marks the field as invalid. Sets `aria-invalid` on the input and triggers
    * the error styling. Combines with the state derived from reactive forms.
@@ -263,6 +280,10 @@ export class TimeFieldComponent
   );
   popoverIsOpen(): boolean {
     return !!this.popover()?.isOpen();
+  }
+
+  ngDoCheck(): void {
+    this.derived.sync();
   }
 
   constructor() {

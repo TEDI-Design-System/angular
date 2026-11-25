@@ -191,16 +191,16 @@ const Template: StoryFn<ToggleComponent> = (args) => ({
         <b>{{ state }}</b>
         <tedi-col [width]="3" style="display: flex; flex-wrap: wrap; align-items: center; column-gap: 2rem; row-gap: 0.75rem;">
           <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" ariaLabel="Vaikimisi lüliti, väljas" />
-            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" ariaLabel="Vaikimisi lüliti, sees" [checked]="true" />
+            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" ariaLabel="E-posti teavitused" />
+            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" ariaLabel="SMS-teavitused" [checked]="true" />
           </div>
           <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" size="large" ariaLabel="Suur lüliti, väljas" />
-            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" size="large" ariaLabel="Suur lüliti, sees" [checked]="true" />
+            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" size="large" ariaLabel="Meeldetuletused" />
+            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" size="large" ariaLabel="Uudiskiri" [checked]="true" />
           </div>
           <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" size="large" [icon]="true" ariaLabel="Suur lüliti ikooniga, väljas" />
-            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" size="large" [icon]="true" ariaLabel="Suur lüliti ikooniga, sees" [checked]="true" />
+            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" size="large" [icon]="true" ariaLabel="Asukoha jagamine" />
+            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" size="large" [icon]="true" ariaLabel="Andmete jagamine arstiga" [checked]="true" />
           </div>
         </tedi-col>
       </tedi-row>
