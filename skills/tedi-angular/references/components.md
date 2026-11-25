@@ -211,6 +211,10 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   `icon` input, not from projection, so you cannot swap in your own `tedi-icon` or add trailing
   content. It is decorative and `aria-hidden`, which means the projected text is the whole accessible
   name — if the icon carries meaning the text doesn't, compose a heading and an icon yourself.
+- **`tedi-sheet` content goes in `<ng-template tediSheetContent>`.** The sheet renders it into an
+  overlay only while open, so content placed directly in `<tedi-sheet>` stays on the page. The
+  header, body, footer, `tediSheetTrigger` and `tediSheetClose` find the sheet through DI and must be
+  inside it.
 
 ### File upload
 
@@ -318,6 +322,10 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   can wrap: it centres the icon on the *first line* rather than the middle of the block. A heading
   value in `modifiers` overrides `element`'s typography and the icon follows it, so
   `element="h2" modifiers="h4"` is an `<h2>` that looks like an `h4` throughout.
+- **`tedi-sheet` for mobile bottom sheets, not `ModalService` with `position: 'bottom'`.** The sheet
+  adds drag to close, snap points and a collapsed state, and with `showOverlay`, `trapFocus` and
+  `lockScroll` off (plus `closeOnBackdropClick` off) it stays docked while the page behind remains
+  usable.
 
 ### Responsive behaviour that isn't an input
 
