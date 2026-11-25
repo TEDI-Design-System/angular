@@ -18,6 +18,7 @@ import { IconComponent } from "../../base/icon/icon.component";
 import { TextComponent } from "../../base/text/text.component";
 import { TagComponent } from "../../tags/tag/tag.component";
 import { CheckboxComponent } from "../../form/checkbox/checkbox.component";
+import { CheckboxGroupComponent } from "../../form/checkbox-group/checkbox-group.component";
 import { RadioComponent } from "../../form/radio/radio.component";
 import { RadioGroupComponent } from "../../form/radio-group/radio-group.component";
 import { LabelComponent } from "../../content/label/label.component";
@@ -120,6 +121,7 @@ export default {
         TextComponent,
         TagComponent,
         CheckboxComponent,
+        CheckboxGroupComponent,
         RadioComponent,
         RadioGroupComponent,
         LabelComponent,
@@ -496,7 +498,7 @@ export const ActionsSlot: Story = {
       <ng-template tediSheetContent>
         <tedi-sheet-header closeButton title="Seaded" variant="default" />
         <tedi-sheet-body>
-          <div [tediVerticalSpacing]="0.5">
+          <tedi-checkbox-group direction="vertical">
             <label tedi-label color="primary" class="flex align-items-center gap-2">
               <input tedi-checkbox type="checkbox" checked />
               Näita pikkusi
@@ -505,7 +507,7 @@ export const ActionsSlot: Story = {
               <input tedi-checkbox type="checkbox" />
               Näita nurki
             </label>
-          </div>
+          </tedi-checkbox-group>
         </tedi-sheet-body>
         <tedi-sheet-footer fullWidth>
           <button tedi-button variant="secondary" tediSheetClose>Tühista</button>
@@ -564,7 +566,7 @@ export const CornerRadius: Story = {
         <ng-template tediSheetContent [radius]="example.radius">
           <tedi-sheet-header closeButton title="Seaded" variant="default" />
           <tedi-sheet-body>
-            <div [tediVerticalSpacing]="0.5">
+            <tedi-checkbox-group direction="vertical">
               <label tedi-label color="primary" class="flex align-items-center gap-2">
                 <input tedi-checkbox type="checkbox" checked />
                 Näita pikkusi
@@ -573,7 +575,7 @@ export const CornerRadius: Story = {
                 <input tedi-checkbox type="checkbox" />
                 Näita nurki
               </label>
-            </div>
+            </tedi-checkbox-group>
           </tedi-sheet-body>
         </ng-template>
       </tedi-sheet>
@@ -589,7 +591,7 @@ export const CornerRadius: Story = {
       <ng-template tediSheetContent [radius]="{ xs: 'none', md: 'card' }">
         <tedi-sheet-header closeButton title="Seaded" variant="default" />
         <tedi-sheet-body>
-          <div [tediVerticalSpacing]="0.5">
+          <tedi-checkbox-group direction="vertical">
             <label tedi-label color="primary" class="flex align-items-center gap-2">
               <input tedi-checkbox type="checkbox" checked />
               Näita pikkusi
@@ -598,7 +600,7 @@ export const CornerRadius: Story = {
               <input tedi-checkbox type="checkbox" />
               Näita nurki
             </label>
-          </div>
+          </tedi-checkbox-group>
         </tedi-sheet-body>
       </ng-template>
     </tedi-sheet>
@@ -630,7 +632,7 @@ export const HeaderVariant: Story = {
         <ng-template tediSheetContent>
           <tedi-sheet-header closeButton title="Seaded" [variant]="example.variant" />
           <tedi-sheet-body>
-            <div [tediVerticalSpacing]="0.5">
+            <tedi-checkbox-group direction="vertical">
               <label tedi-label color="primary" class="flex align-items-center gap-2">
                 <input tedi-checkbox type="checkbox" checked />
                 Näita pikkusi
@@ -639,7 +641,7 @@ export const HeaderVariant: Story = {
                 <input tedi-checkbox type="checkbox" />
                 Näita nurki
               </label>
-            </div>
+            </tedi-checkbox-group>
           </tedi-sheet-body>
         </ng-template>
       </tedi-sheet>
@@ -770,7 +772,7 @@ export const HeaderType: Story = {
                   [closeButton]="example.closeButton ?? true"
                 />
                 <tedi-sheet-body>
-                  <div [tediVerticalSpacing]="0.5">
+                  <tedi-checkbox-group direction="vertical">
                     <label tedi-label color="primary" class="flex align-items-center gap-2">
                       <input tedi-checkbox type="checkbox" checked />
                       Näita pikkusi
@@ -779,7 +781,7 @@ export const HeaderType: Story = {
                       <input tedi-checkbox type="checkbox" />
                       Näita nurki
                     </label>
-                  </div>
+                  </tedi-checkbox-group>
                 </tedi-sheet-body>
               </ng-template>
             </tedi-sheet>
@@ -805,7 +807,7 @@ export const HeaderType: Story = {
             </button>
           </tedi-sheet-header>
           <tedi-sheet-body>
-            <div [tediVerticalSpacing]="0.5">
+            <tedi-checkbox-group direction="vertical">
               <label tedi-label color="primary" class="flex align-items-center gap-2">
                 <input tedi-checkbox type="checkbox" checked />
                 Näita pikkusi
@@ -814,7 +816,7 @@ export const HeaderType: Story = {
                 <input tedi-checkbox type="checkbox" />
                 Näita nurki
               </label>
-            </div>
+            </tedi-checkbox-group>
           </tedi-sheet-body>
         </ng-template>
       </tedi-sheet>
@@ -928,7 +930,7 @@ export const HeaderType: Story = {
             </div>
           </tedi-sheet-header>
           <tedi-sheet-body>
-            <div [tediVerticalSpacing]="0.5">
+            <tedi-checkbox-group direction="vertical">
               <label tedi-label color="primary" class="flex align-items-center gap-2">
                 <input tedi-checkbox type="checkbox" checked />
                 Näita pikkusi
@@ -937,7 +939,7 @@ export const HeaderType: Story = {
                 <input tedi-checkbox type="checkbox" />
                 Näita nurki
               </label>
-            </div>
+            </tedi-checkbox-group>
           </tedi-sheet-body>
         </ng-template>
       </tedi-sheet>
@@ -1007,14 +1009,14 @@ export const SnapPoints: Story = {
   <ng-template tediSheetContent [snapPoints]="[0.4, 0.9]">
     <tedi-sheet-header closeButton title="Kihid" variant="default" collapsible />
     <tedi-sheet-body>
-      <div [tediVerticalSpacing]="0.5">
+      <tedi-checkbox-group direction="vertical">
         @for (layer of layers; track $index) {
           <label tedi-label color="primary" class="flex align-items-center gap-2">
             <input tedi-checkbox type="checkbox" />
             {{ layer }}
           </label>
         }
-      </div>
+      </tedi-checkbox-group>
     </tedi-sheet-body>
   </ng-template>
 </tedi-sheet>
@@ -1059,7 +1061,7 @@ export const Controlled: Story = {
   <ng-template tediSheetContent>
     <tedi-sheet-header closeButton title="Seaded" variant="default" />
     <tedi-sheet-body>
-      <div [tediVerticalSpacing]="0.5">
+      <tedi-checkbox-group direction="vertical">
         <label tedi-label color="primary" class="flex align-items-center gap-2">
           <input tedi-checkbox type="checkbox" checked />
           Näita pikkusi
@@ -1068,7 +1070,7 @@ export const Controlled: Story = {
           <input tedi-checkbox type="checkbox" />
           Näita nurki
         </label>
-      </div>
+      </tedi-checkbox-group>
     </tedi-sheet-body>
     <tedi-sheet-footer fullWidth>
       <button tedi-button variant="secondary" tediSheetClose>Tühista</button>
@@ -1185,14 +1187,14 @@ export const ContentNavigation: Story = {
         </tedi-radio-group>
       </div>
       <div [hidden]="step !== 'senders'">
-        <div [tediVerticalSpacing]="0.5">
+        <tedi-checkbox-group direction="vertical">
           @for (sender of senders; track sender) {
             <label tedi-label color="primary" class="flex align-items-center gap-2">
               <input tedi-checkbox type="checkbox" [checked]="selected.includes(sender)" (change)="toggleSender(sender)" />
               {{ sender }}
             </label>
           }
-        </div>
+        </tedi-checkbox-group>
       </div>
     </tedi-sheet-body>
     @if (step === "filters") {
@@ -1265,7 +1267,7 @@ export const Padding: Story = {
         <ng-template tediSheetContent [padding]="padding">
           <tedi-sheet-header closeButton title="Seaded" variant="default" />
           <tedi-sheet-body>
-            <div [tediVerticalSpacing]="0.5">
+            <tedi-checkbox-group direction="vertical">
               <label tedi-label color="primary" class="flex align-items-center gap-2">
                 <input tedi-checkbox type="checkbox" checked />
                 Näita pikkusi
@@ -1274,7 +1276,7 @@ export const Padding: Story = {
                 <input tedi-checkbox type="checkbox" />
                 Näita nurki
               </label>
-            </div>
+            </tedi-checkbox-group>
           </tedi-sheet-body>
           <tedi-sheet-footer fullWidth>
             <button tedi-button variant="secondary" tediSheetClose>Tühista</button>
@@ -1322,7 +1324,7 @@ export const FooterAlignment: Story = {
         <ng-template tediSheetContent>
           <tedi-sheet-header closeButton title="Seaded" variant="default" />
           <tedi-sheet-body>
-            <div [tediVerticalSpacing]="0.5">
+            <tedi-checkbox-group direction="vertical">
               <label tedi-label color="primary" class="flex align-items-center gap-2">
                 <input tedi-checkbox type="checkbox" checked />
                 Näita pikkusi
@@ -1331,7 +1333,7 @@ export const FooterAlignment: Story = {
                 <input tedi-checkbox type="checkbox" />
                 Näita nurki
               </label>
-            </div>
+            </tedi-checkbox-group>
           </tedi-sheet-body>
           <tedi-sheet-footer [align]="example.align" [fullWidth]="example.fullWidth ?? false">
             <button tedi-button variant="secondary" tediSheetClose>Tühista</button>
@@ -1474,7 +1476,7 @@ export const OpenWithoutHandleForVisualTest: Story = {
       </button>
     </tedi-sheet-header>
     <tedi-sheet-body>
-      <div [tediVerticalSpacing]="0.5">
+      <tedi-checkbox-group direction="vertical">
         <label tedi-label color="primary" class="flex align-items-center gap-2">
           <input tedi-checkbox type="checkbox" checked />
           Näita pikkusi
@@ -1483,7 +1485,7 @@ export const OpenWithoutHandleForVisualTest: Story = {
           <input tedi-checkbox type="checkbox" />
           Näita nurki
         </label>
-      </div>
+      </tedi-checkbox-group>
     </tedi-sheet-body>
   </ng-template>
 </tedi-sheet>
@@ -1525,14 +1527,14 @@ export const OpenSnapPointForVisualTest: Story = {
   <ng-template tediSheetContent [snapPoints]="[0.4, 0.9]" [defaultSnapPoint]="0">
     <tedi-sheet-header closeButton title="Kihid" variant="default" collapsible />
     <tedi-sheet-body>
-      <div [tediVerticalSpacing]="0.5">
+      <tedi-checkbox-group direction="vertical">
         @for (layer of layers; track $index) {
           <label tedi-label color="primary" class="flex align-items-center gap-2">
             <input tedi-checkbox type="checkbox" />
             {{ layer }}
           </label>
         }
-      </div>
+      </tedi-checkbox-group>
     </tedi-sheet-body>
   </ng-template>
 </tedi-sheet>
