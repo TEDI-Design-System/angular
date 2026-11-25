@@ -9,6 +9,16 @@
     aria-atomic="true"
     class="sr-only"
   ></div>
+  @if (reorderableColumns()) {
+    <span [id]="resolvedId() + '-reorder-hint'" hidden>{{
+      columnReorderInstructions()
+    }}</span>
+  }
+  @if (reorderableRows()) {
+    <span [id]="resolvedId() + '-row-reorder-hint'" hidden>{{
+      rowReorderInstructions()
+    }}</span>
+  }
 }
 
 @if (resolvedTopSlot(); as top) {
@@ -139,6 +149,9 @@
                 [attr.colspan]="header.colSpan > 1 ? header.colSpan : null"
                 [attr.rowspan]="rowSpan"
                 [attr.aria-sort]="ariaSort"
+                [attr.aria-labelledby]="
+                  headerLabelledBy(header, rowIndex, srHeaderLabel)
+                "
                 [style.width.px]="headerCellWidth(header.column)"
                 [style.min-width.px]="columnMinWidth(header.column)"
                 [style.max-width.px]="columnMaxWidth(header.column)"
@@ -146,7 +159,9 @@
                 [style.right.px]="stickyRight(header.column.id)"
               >
                 @if (srHeaderLabel) {
-                  <span class="sr-only">{{ srHeaderLabel }}</span>
+                  <span class="sr-only" [id]="headerLabelId(header) + '-sr'">{{
+                    srHeaderLabel
+                  }}</span>
                 }
                 @if (header.column.id === SELECT_COLUMN_ID) {
                   @if (selectionMode() === "multiple") {
@@ -183,6 +198,7 @@
                         "
                         [id]="reorderHandleId(header.column.id)"
                         [attr.aria-label]="dragColumnLabel()"
+                        [attr.aria-describedby]="resolvedId() + '-reorder-hint'"
                         [attr.aria-pressed]="
                           reorderableColumns()
                             ? pickedUpColumnId() === header.column.id
@@ -196,28 +212,44 @@
                         />
                       </button>
                     }
-                    <ng-container
-                      *flexRender="
-                        header.column.columnDef.header;
-                        props: header.getContext();
-                        let content
-                      "
+                    <span
+                      class="tedi-table__header-label"
+                      [id]="headerLabelId(header)"
                     >
-                      @if (shouldRenderSortableHeader(header.column, content)) {
-                        <button
-                          tedi-table-header-button
-                          [icon]="sortIcon(header.column)"
-                          [selected]="!!header.column.getIsSorted()"
-                          (click)="handleSortToggle(header.column)"
-                        >
+                      <ng-container
+                        *flexRender="
+                          header.column.columnDef.header;
+                          props: header.getContext();
+                          let content
+                        "
+                      >
+                        @if (
+                          shouldRenderSortableHeader(header.column, content)
+                        ) {
+                          <button
+                            tedi-table-header-button
+                            [icon]="sortIcon(header.column)"
+                            [selected]="!!header.column.getIsSorted()"
+                            (click)="handleSortToggle(header.column)"
+                          >
+                            {{ content }}
+                          </button>
+                        } @else if (isString(content) || isNumber(content)) {
                           {{ content }}
-                        </button>
-                      } @else if (isString(content) || isNumber(content)) {
-                        {{ content }}
-                      } @else {
-                        {{ content }}
-                      }
-                    </ng-container>
+                        } @else {
+                          {{ content }}
+                        }
+                      </ng-container>
+                    </span>
+                    @if (shouldRenderSortButtonAfterHeader(header)) {
+                      <button
+                        tedi-table-header-button
+                        [icon]="sortIcon(header.column)"
+                        [selected]="!!header.column.getIsSorted()"
+                        [aria-label]="sortAriaLabel(header.column)"
+                        (click)="handleSortToggle(header.column)"
+                      ></button>
+                    }
                     @if (shouldRenderFilterButton(header.column)) {
                       @if (filterUsesModal()) {
                         <button
@@ -261,36 +293,33 @@
                                   />
                                 }
                               </div>
-                              <div class="tedi-table__filter-actions">
-                                <button
-                                  tedi-button
-                                  variant="secondary"
-                                  size="small"
-                                  type="button"
-                                  (click)="
-                                    handleFilterClear(
-                                      header.column,
-                                      filterPopover
-                                    )
-                                  "
-                                >
-                                  {{ filterClearLabel() }}
-                                </button>
-                                <button
-                                  tedi-button
-                                  variant="primary"
-                                  size="small"
-                                  type="button"
-                                  (click)="
-                                    handleFilterApply(
-                                      header.column,
-                                      filterPopover
-                                    )
-                                  "
-                                >
-                                  {{ filterApplyLabel() }}
-                                </button>
-                              </div>
+                              @let filterActions =
+                                filterActionsFor(header.column);
+                              @if (filterActions.length) {
+                                <div class="tedi-table__filter-actions">
+                                  @for (action of filterActions; track action) {
+                                    <button
+                                      tedi-button
+                                      size="small"
+                                      type="button"
+                                      [variant]="
+                                        action === 'apply'
+                                          ? 'primary'
+                                          : 'secondary'
+                                      "
+                                      (click)="
+                                        handleFilterAction(
+                                          action,
+                                          header.column,
+                                          filterPopover
+                                        )
+                                      "
+                                    >
+                                      {{ filterActionLabel(action) }}
+                                    </button>
+                                  }
+                                </div>
+                              }
                             </div>
                           </tedi-popover-content>
                         </tedi-popover>
@@ -410,9 +439,7 @@
             [attr.aria-label]="rowAriaLabelFor(row)"
             [attr.aria-rowindex]="ariaRowIndex"
             [attr.aria-current]="isActiveRow ? 'true' : null"
-            (click)="
-              (interactive() || expandsOnClick) && handleRowClick($event, row)
-            "
+            (click)="handleRowClick($event, row)"
             (keydown)="handleRowKeydown($event, row)"
             (mouseenter)="handleRowMouseEnter(row)"
             (mouseleave)="handleRowMouseLeave()"
@@ -421,27 +448,43 @@
               @let cellMeta = getColumnMeta(cell.column);
               @let cellContext = cell.getContext();
               @let resolvedSpan = resolveRowSpan(cell, cellContext);
-              @if (resolvedSpan !== 0) {
-                <td
-                  [class]="
-                    'tedi-table__cell' +
-                    (cellMeta?.align
-                      ? ' tedi-table__cell--align-' + cellMeta?.align
-                      : '') +
-                    (cellMeta?.vAlign
-                      ? ' tedi-table__cell--valign-' + cellMeta?.vAlign
-                      : '') +
-                    controlCellClass(cell.column.id) +
-                    stickyLeftClass(cell.column.id) +
-                    stickyRightClass(cell.column.id)
-                  "
+              @let cellClass =
+                "tedi-table__cell" +
+                (cellMeta?.align
+                  ? " tedi-table__cell--align-" + cellMeta?.align
+                  : "") +
+                (cellMeta?.vAlign
+                  ? " tedi-table__cell--valign-" + cellMeta?.vAlign
+                  : "") +
+                controlCellClass(cell.column.id) +
+                stickyLeftClass(cell.column.id) +
+                stickyRightClass(cell.column.id);
+              @let cellRowSpan =
+                resolvedSpan !== null && resolvedSpan > 1 ? resolvedSpan : null;
+              @if (resolvedSpan !== 0 && cellMeta?.rowHeader) {
+                <th
+                  scope="row"
+                  [class]="cellClass"
                   [style.left.px]="stickyLeft(cell.column.id)"
                   [style.right.px]="stickyRight(cell.column.id)"
-                  [attr.rowspan]="
-                    resolvedSpan !== null && resolvedSpan > 1
-                      ? resolvedSpan
-                      : null
-                  "
+                  [attr.rowspan]="cellRowSpan"
+                >
+                  <ng-container
+                    *flexRender="
+                      cell.column.columnDef.cell;
+                      props: cellContext;
+                      let content
+                    "
+                  >
+                    {{ content }}
+                  </ng-container>
+                </th>
+              } @else if (resolvedSpan !== 0) {
+                <td
+                  [class]="cellClass"
+                  [style.left.px]="stickyLeft(cell.column.id)"
+                  [style.right.px]="stickyRight(cell.column.id)"
+                  [attr.rowspan]="cellRowSpan"
                 >
                   @if (cell.column.id === DRAG_COLUMN_ID) {
                     <button
@@ -453,6 +496,9 @@
                       "
                       [id]="rowReorderHandleId(row.id)"
                       [attr.aria-label]="dragRowLabel()"
+                      [attr.aria-describedby]="
+                        resolvedId() + '-row-reorder-hint'
+                      "
                       [attr.aria-pressed]="
                         reorderableRows()
                           ? pickedUpRow() === row.original
@@ -521,7 +567,7 @@
                           [ariaLabel]="
                             expandButtonHasLabel()
                               ? undefined
-                              : expandRowLabel(expandOpen)
+                              : expandRowLabel()
                           "
                           (openChange)="handleExpandToggle(row)"
                           (click)="$event.stopPropagation()"

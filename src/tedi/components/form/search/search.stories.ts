@@ -144,9 +144,19 @@ export default {
     },
     label: {
       description:
-        "Visible label text. When omitted, provide `ariaLabel` for accessibility.",
+        "Label of the search field. Always set it; use `hideLabel` when it must not be visible.",
       control: { type: "text" },
       table: { category: "inputs", type: { summary: "string" } },
+    },
+    hideLabel: {
+      description:
+        "Hides the label visually while keeping it as the field's name.",
+      control: { type: "boolean" },
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
     },
     value: {
       description:
@@ -226,7 +236,7 @@ export default {
     },
     ariaLabel: {
       description:
-        'Accessible name for the search region. Falls back to `label`, then `placeholder`, then the translated "search" label.',
+        "Accessible name for the search landmark. Unnamed by default; set it when the page has more than one search. It does not name the field.",
       control: { type: "text" },
       table: { category: "inputs", type: { summary: "string" } },
     },
@@ -403,20 +413,20 @@ export const Sizes: Story = {
               [inputId]="'size-' + size + '-plain'"
               [size]="size"
               label="Otsing"
-              [ariaLabel]="'Otsing – ' + size + ', ilma nuputa'"
+              [ariaLabel]="(size | titlecase) + ', lihtne'"
             />
             <tedi-search
               [inputId]="'size-' + size + '-icon'"
               [size]="size"
               label="Otsing"
-              [ariaLabel]="'Otsing – ' + size + ', nupp ikooniga'"
+              [ariaLabel]="(size | titlecase) + ', ikooniga'"
               [button]="{ ariaLabel: 'Otsi' }"
             />
             <tedi-search
               [inputId]="'size-' + size + '-button'"
               [size]="size"
               label="Otsing"
-              [ariaLabel]="'Otsing – ' + size + ', nupp ikooni ja tekstiga'"
+              [ariaLabel]="(size | titlecase) + ', tekstiga'"
               [button]="{ text: 'Otsi' }"
             />
           </div>
@@ -444,26 +454,26 @@ export const States: Story = {
             <tedi-search
               [inputId]="'search-states-' + state"
               label="Otsing"
-              [ariaLabel]="'Otsing – ' + state"
+              [ariaLabel]="state"
             />
           </tedi-col>
         </tedi-row>
         <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
           <tedi-col width="1"><p tedi-text modifiers="bold">Disabled</p></tedi-col>
           <tedi-col width="1" [sm]="{ width: 5 }">
-            <tedi-search inputId="search-states-disabled" label="Otsing" ariaLabel="Otsing – Disabled" [disabled]="true" />
+            <tedi-search inputId="search-states-disabled" label="Otsing" ariaLabel="Disabled" [disabled]="true" />
           </tedi-col>
         </tedi-row>
         <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
           <tedi-col width="1"><p tedi-text modifiers="bold">Success</p></tedi-col>
           <tedi-col width="1" [sm]="{ width: 5 }">
-            <tedi-search inputId="search-states-success" label="Otsing" ariaLabel="Otsing – Success" [feedbackText]="{ text: 'Tagasiside tekst', type: 'valid' }" />
+            <tedi-search inputId="search-states-success" label="Otsing" ariaLabel="Success" [feedbackText]="{ text: 'Tagasiside tekst', type: 'valid' }" />
           </tedi-col>
         </tedi-row>
         <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
           <tedi-col width="1"><p tedi-text modifiers="bold">Error</p></tedi-col>
           <tedi-col width="1" [sm]="{ width: 5 }">
-            <tedi-search inputId="search-states-error" label="Otsing" ariaLabel="Otsing – Error" [feedbackText]="{ text: 'Tagasiside tekst', type: 'error' }" />
+            <tedi-search inputId="search-states-error" label="Otsing" ariaLabel="Error" [feedbackText]="{ text: 'Tagasiside tekst', type: 'error' }" />
           </tedi-col>
         </tedi-row>
       </tedi-row>
@@ -1016,11 +1026,10 @@ export const WithReactiveForms: Story = {
 
 /**
  * Always prefer a native `<label>` element for form controls.
- * If the label must not be visible in the UI, hide it visually using an `sr-only`
- * (or equivalent) class rather than removing it. This preserves correct semantics
- * and provides the most reliable experience for screen reader users.
- * Use `ariaLabel` only as a fallback when a real `<label>` cannot be rendered.
- * This follows WCAG 2.1 and EN 301 549 9.2.5.3.
+ * If the label must not be visible in the UI, hide it with `hideLabel` rather than
+ * removing it. This preserves correct semantics and provides the most reliable
+ * experience for screen reader users.
+ * `ariaLabel` names the search landmark, not the field. Set it only when the page has more than one search.
  */
 export const AccessibilityNoVisibleLabel: Story = {
   name: "Accessibility: no visible label",
@@ -1028,8 +1037,9 @@ export const AccessibilityNoVisibleLabel: Story = {
     template: `
       <tedi-search
         inputId="search-accessible"
+        label="Otsi tooteid või teenuseid"
+        [hideLabel]="true"
         placeholder="Otsi tooteid või teenuseid..."
-        ariaLabel="Otsi tooteid või teenuseid"
       />
     `,
   }),

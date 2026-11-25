@@ -15,6 +15,8 @@ import { TediTableComponent } from "./table.component";
 import { TediTableColumnsMenuComponent } from "./table-columns-menu/table-columns-menu.component";
 import { groupRowSpan } from "./row-span.utils";
 import type {
+  TableFilterAction,
+  TableFilterModalData,
   TableFilterOptions,
   TablePaginationOptions,
   TableState,
@@ -45,16 +47,19 @@ const TRANSLATIONS: Record<string, Translator> = {
   "table.filter-placeholder": () => "Filter…",
   "table.filter-apply": () => "Apply",
   "table.filter-clear": () => "Clear",
+  "table.filter-cancel": () => "Cancel",
   "table.filter-button-aria": (col) => `Filter ${col ?? ""}`.trim(),
+  "table.sort": (dir, col) =>
+    `${dir === "asc" ? "Sort descending" : dir === "desc" ? "Remove sorting" : "Sort ascending"} ${col ?? ""}`.trim(),
   "table.columns": () => "Columns",
   "table.select-column": () => "Select",
   "table.expand-column": () => "Expand",
   "table.reorder-column": () => "Reorder",
   "table.scroll-region": () => "Table content",
-  "table.expand-row": () => "Expand row",
-  "table.collapse-row": () => "Collapse row",
-  "table.select-all": (selected) => (selected ? "Deselect all" : "Select all"),
-  "table.select-row": (selected) => (selected ? "Deselect row" : "Select row"),
+  "table.select-all": () => "Select all rows",
+  "table.select-row": () => "Select row",
+  "table.reorder.instructions": () => "Column reorder instructions",
+  "table.row-reorder.instructions": () => "Row reorder instructions",
   "table.reorder.pickup": (label) => `Column ${label ?? ""} picked up`.trim(),
   "table.reorder.move": (label, pos) =>
     `Column ${label ?? ""} at position ${pos ?? ""}`.trim(),
@@ -67,11 +72,10 @@ const TRANSLATIONS: Record<string, Translator> = {
   "table.row-reorder.drop": (pos) =>
     `Row dropped at position ${pos ?? ""}`.trim(),
   "table.row-reorder.cancel": () => "Row reordering cancelled",
-  "pagination.title": () => "Pagination",
+  "pagination.title": () => "Pages",
   "pagination.prev-page": () => "Previous page",
   "pagination.next-page": () => "Next page",
-  "pagination.page": (page, isCurrent) =>
-    isCurrent ? `Current page, page ${page}` : `Go to page ${page}`,
+  "pagination.page": (page) => `Page ${page}`,
   "pagination.results": (count) =>
     `${count} ${count === 1 ? "result" : "results"}`,
   "pagination.page-size": () => "Show per page",
@@ -134,6 +138,8 @@ const columns: TediColumnDef<Person>[] = [
       [controlColumnOrder]="controlColumnOrder()"
       [interactive]="interactive()"
       [rowAriaLabel]="rowAriaLabel()"
+      [rowSelectionLabel]="rowSelectionLabel()"
+      [selectionMode]="selectionMode()"
       [activeRowId]="activeRowId()"
       [selectedRowHighlight]="selectedRowHighlight()"
       [persist]="persist()"
@@ -199,6 +205,10 @@ class HostComponent {
   readonly rowAriaLabel = signal<((row: Row<Person>) => string) | undefined>(
     undefined,
   );
+  readonly rowSelectionLabel = signal<
+    ((row: Row<Person>) => string) | undefined
+  >(undefined);
+  readonly selectionMode = signal<"multiple" | "single">("multiple");
   readonly activeRowId = signal<string | undefined>(undefined);
   readonly selectedRowHighlight = signal(true);
   readonly persist = signal<TablePersistOptions | undefined>(undefined);
@@ -211,6 +221,14 @@ class HostComponent {
 
   readonly onStateChange = jest.fn();
   readonly onRowClick = jest.fn();
+}
+
+function labelledByText(el: Element): string {
+  return (el.getAttribute("aria-labelledby") ?? "")
+    .split(" ")
+    .map((id) => document.getElementById(id)?.textContent?.trim() ?? "")
+    .join(" ")
+    .trim();
 }
 
 function setupHost(
@@ -358,6 +376,104 @@ describe("TediTableComponent", () => {
     });
   });
 
+  describe("row header column", () => {
+    function setupRowHeader(beforeFirstRender?: (host: HostComponent) => void) {
+      return setupHost((host) => {
+        host.columns.set([
+          {
+            id: "name",
+            header: "Name",
+            accessorKey: "name",
+            meta: { rowHeader: true },
+          },
+          { id: "role", header: "Role", accessorKey: "role" },
+        ]);
+        beforeFirstRender?.(host);
+      });
+    }
+
+    function bodyRows(fixture: ComponentFixture<HostComponent>) {
+      return Array.from(
+        (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>(
+          "tbody > .tedi-table__row",
+        ),
+      );
+    }
+
+    it("renders the column's body cells as th scope=row and the rest as td", () => {
+      const rows = bodyRows(setupRowHeader());
+      expect(rows).toHaveLength(2);
+      rows.forEach((row) => {
+        const [nameCell, roleCell] = Array.from(row.children) as HTMLElement[];
+        expect(nameCell.tagName).toBe("TH");
+        expect(nameCell.getAttribute("scope")).toBe("row");
+        expect(nameCell.classList).toContain("tedi-table__cell");
+        expect(roleCell.tagName).toBe("TD");
+        expect(roleCell.hasAttribute("scope")).toBe(false);
+      });
+      expect(rows[0].querySelector("th")?.textContent?.trim()).toBe("Anna");
+    });
+
+    it("keeps the column's header cell a column header", () => {
+      const fixture = setupRowHeader();
+      const header = (fixture.nativeElement as HTMLElement).querySelector(
+        "thead .tedi-table__header-cell",
+      );
+      expect(header?.tagName).toBe("TH");
+      expect(header?.getAttribute("scope")).toBe("col");
+    });
+
+    it("renders every body cell as td without the option", () => {
+      bodyRows(setupHost()).forEach((row) =>
+        expect(row.querySelector("th")).toBeNull(),
+      );
+    });
+
+    it("keeps control columns as td and applies sticky classes to the row header", () => {
+      const rows = bodyRows(
+        setupRowHeader((host) => {
+          host.enableRowSelection.set(true);
+          host.stickyFirstColumn.set(true);
+        }),
+      );
+      const [selectCell, nameCell] = Array.from(
+        rows[0].children,
+      ) as HTMLElement[];
+      expect(selectCell.tagName).toBe("TD");
+      expect(nameCell.tagName).toBe("TH");
+      expect(nameCell.classList).toContain("tedi-table__cell--sticky-left");
+    });
+
+    it("renders one spanning th when the row header column is grouped", () => {
+      const fixture = setupHost((host) => {
+        host.data.set([
+          { id: "a", name: "Anna", role: "Engineer" },
+          { id: "b", name: "Anna", role: "Designer" },
+          { id: "c", name: "Bob", role: "Designer" },
+        ]);
+        host.groupRowsBy.set((row: Row<Person>) => row.original.name);
+        host.columns.set([
+          {
+            id: "name",
+            header: "Name",
+            accessorKey: "name",
+            groupBy: true,
+            meta: { rowHeader: true },
+          },
+          { id: "role", header: "Role", accessorKey: "role" },
+        ]);
+      });
+      const rows = bodyRows(fixture);
+      const rowHeaders = rows.map((row) => row.querySelectorAll("th"));
+      expect(rowHeaders[0]).toHaveLength(1);
+      expect(rowHeaders[0][0].getAttribute("scope")).toBe("row");
+      expect(rowHeaders[0][0].getAttribute("rowspan")).toBe("2");
+      expect(rowHeaders[1]).toHaveLength(0);
+      expect(rows[1].children).toHaveLength(1);
+      expect(rowHeaders[2][0].hasAttribute("rowspan")).toBe(false);
+    });
+  });
+
   describe("sticky columns", () => {
     it("marks no cell sticky by default", () => {
       const fixture = setupHost();
@@ -414,12 +530,62 @@ describe("TediTableComponent", () => {
   });
 
   describe("selection", () => {
+    it("keeps stable selection labels; state comes from checked", () => {
+      const fixture = setupHost();
+      fixture.componentInstance.enableRowSelection.set(true);
+      fixture.detectChanges();
+      const rowBoxes = fixture.nativeElement.querySelectorAll(
+        ".tedi-table__body input[type=checkbox]",
+      ) as NodeListOf<HTMLInputElement>;
+      expect(rowBoxes[0].getAttribute("aria-label")).toBe("Select row");
+
+      rowBoxes[0].click();
+      fixture.detectChanges();
+      expect(rowBoxes[0].checked).toBe(true);
+      expect(rowBoxes[0].getAttribute("aria-label")).toBe("Select row");
+
+      const selectAll = fixture.nativeElement.querySelector(
+        ".tedi-table__head input[type=checkbox]",
+      ) as HTMLInputElement;
+      selectAll.click();
+      fixture.detectChanges();
+      expect(selectAll.checked).toBe(true);
+      expect(selectAll.getAttribute("aria-label")).toBe("Select all rows");
+    });
+
+    it("names row selection controls with rowSelectionLabel", () => {
+      const fixture = setupHost((host) => {
+        host.enableRowSelection.set(true);
+        host.rowSelectionLabel.set((row) => `Select ${row.original.name}`);
+      });
+      const labels = Array.from(
+        fixture.nativeElement.querySelectorAll(
+          ".tedi-table__body input[type=checkbox]",
+        ) as NodeListOf<HTMLInputElement>,
+      ).map((el) => el.getAttribute("aria-label"));
+      expect(labels).toEqual(["Select Anna", "Select Jüri"]);
+    });
+
+    it("names single-selection radios with rowSelectionLabel", () => {
+      const fixture = setupHost((host) => {
+        host.enableRowSelection.set(true);
+        host.selectionMode.set("single");
+        host.rowSelectionLabel.set((row) => `Select ${row.original.name}`);
+      });
+      const labels = Array.from(
+        fixture.nativeElement.querySelectorAll(
+          ".tedi-table__body input[type=radio]",
+        ) as NodeListOf<HTMLInputElement>,
+      ).map((el) => el.getAttribute("aria-label"));
+      expect(labels).toEqual(["Select Anna", "Select Jüri"]);
+    });
+
     it("renders a select-all checkbox when enableRowSelection is true", () => {
       const fixture = setupHost();
       fixture.componentInstance.enableRowSelection.set(true);
       fixture.detectChanges();
       const selectAll = fixture.nativeElement.querySelector(
-        'input[aria-label="Select all"]',
+        'input[aria-label="Select all rows"]',
       );
       expect(selectAll).not.toBeNull();
     });
@@ -429,7 +595,7 @@ describe("TediTableComponent", () => {
       fixture.componentInstance.enableRowSelection.set(true);
       fixture.detectChanges();
       const selectAll = fixture.nativeElement.querySelector(
-        'input[aria-label="Select all"]',
+        'input[aria-label="Select all rows"]',
       ) as HTMLInputElement;
       selectAll.click();
       fixture.detectChanges();
@@ -443,7 +609,7 @@ describe("TediTableComponent", () => {
       fixture.componentInstance.enableRowSelection.set(true);
       fixture.detectChanges();
       const selectAll = fixture.nativeElement.querySelector(
-        'input[aria-label="Select all"]',
+        'input[aria-label="Select all rows"]',
       ) as HTMLInputElement;
       selectAll.click();
       fixture.detectChanges();
@@ -463,7 +629,7 @@ describe("TediTableComponent", () => {
       fixture.componentInstance.selectedRowHighlight.set(false);
       fixture.detectChanges();
       const selectAll = fixture.nativeElement.querySelector(
-        'input[aria-label="Select all"]',
+        'input[aria-label="Select all rows"]',
       ) as HTMLInputElement;
       selectAll.click();
       fixture.detectChanges();
@@ -482,7 +648,7 @@ describe("TediTableComponent", () => {
       fixture.componentInstance.enableRowSelection.set(true);
       fixture.detectChanges();
       const selectHeader = fixture.nativeElement
-        .querySelector('input[aria-label="Select all"]')
+        .querySelector('input[aria-label="Select all rows"]')
         ?.closest("th");
       expect(
         selectHeader?.classList.contains("tedi-table__cell--control"),
@@ -494,7 +660,7 @@ describe("TediTableComponent", () => {
       fixture.componentInstance.enableRowSelection.set(true);
       fixture.detectChanges();
       const selectAll = fixture.nativeElement.querySelector(
-        'input[aria-label="Select all"]',
+        'input[aria-label="Select all rows"]',
       ) as HTMLInputElement;
       selectAll.click();
       fixture.detectChanges();
@@ -509,7 +675,7 @@ describe("TediTableComponent", () => {
         host.enableRowSelection.set(true);
       });
       const selectAll = fixture.nativeElement.querySelector(
-        'input[aria-label="Select all"]',
+        'input[aria-label="Select all rows"]',
       ) as HTMLInputElement;
       selectAll.click();
       fixture.detectChanges();
@@ -520,6 +686,24 @@ describe("TediTableComponent", () => {
   });
 
   describe("expansion", () => {
+    it("keeps the expand button name stable; state comes from aria-expanded", () => {
+      const fixture = setupHost();
+      fixture.componentInstance.subTemplate.set(
+        fixture.componentInstance.subTemplateRef()!,
+      );
+      fixture.detectChanges();
+      const button = fixture.nativeElement.querySelector(
+        ".tedi-table__body button[aria-label]",
+      ) as HTMLButtonElement;
+      expect(button.getAttribute("aria-label")).toBe("Row details");
+      expect(button.getAttribute("aria-expanded")).toBe("false");
+
+      button.click();
+      fixture.detectChanges();
+      expect(button.getAttribute("aria-label")).toBe("Row details");
+      expect(button.getAttribute("aria-expanded")).toBe("true");
+    });
+
     it("renders an expand toggle column when renderSubComponent is set", () => {
       const fixture = setupHost();
       fixture.componentInstance.subTemplate.set(
@@ -527,7 +711,7 @@ describe("TediTableComponent", () => {
       );
       fixture.detectChanges();
       const expandButton = fixture.nativeElement.querySelector(
-        'button[aria-label="Expand row"]',
+        'button[aria-label="Row details"]',
       );
       expect(expandButton).not.toBeNull();
     });
@@ -552,7 +736,7 @@ describe("TediTableComponent", () => {
       );
       fixture.detectChanges();
       const expandHeader = fixture.nativeElement
-        .querySelector('.tedi-table__body button[aria-label="Expand row"]')
+        .querySelector('.tedi-table__body button[aria-label="Row details"]')
         ?.closest("td");
       expect(
         expandHeader?.classList.contains("tedi-table__cell--control"),
@@ -589,7 +773,7 @@ describe("TediTableComponent", () => {
       ) as HTMLTableRowElement;
       const lastCell = firstRow.querySelector("td:last-child");
       expect(
-        lastCell?.querySelector('button[aria-label="Expand row"]'),
+        lastCell?.querySelector('button[aria-label="Row details"]'),
       ).not.toBeNull();
     });
 
@@ -600,7 +784,7 @@ describe("TediTableComponent", () => {
       );
       fixture.detectChanges();
       const expandButton = fixture.nativeElement.querySelector(
-        'button[aria-label="Expand row"]',
+        'button[aria-label="Row details"]',
       ) as HTMLButtonElement;
       expandButton.click();
       fixture.detectChanges();
@@ -629,7 +813,7 @@ describe("TediTableComponent", () => {
     it("keeps all root rows on the page when a row is expanded (getSubRows)", () => {
       const fixture = setupNested();
       const expandButton = fixture.nativeElement.querySelector(
-        '.tedi-table__body button[aria-label="Expand row"]',
+        '.tedi-table__body button[aria-label="Row details"]',
       ) as HTMLButtonElement;
       expandButton.click();
       fixture.detectChanges();
@@ -648,7 +832,7 @@ describe("TediTableComponent", () => {
     it("indexes root rows sequentially and leaves sub-rows without aria-rowindex", () => {
       const fixture = setupNested();
       const expandButton = fixture.nativeElement.querySelector(
-        '.tedi-table__body button[aria-label="Expand row"]',
+        '.tedi-table__body button[aria-label="Row details"]',
       ) as HTMLButtonElement;
       expandButton.click();
       fixture.detectChanges();
@@ -1302,7 +1486,7 @@ describe("TediTableComponent", () => {
       fixture.componentInstance.enableRowSelection.set(true);
       fixture.detectChanges();
       const selectAll = fixture.nativeElement.querySelector(
-        'input[aria-label="Select all"]',
+        'input[aria-label="Select all rows"]',
       ) as HTMLInputElement;
       selectAll.click();
       fixture.detectChanges();
@@ -1546,15 +1730,17 @@ describe("TediTableComponent", () => {
         <tedi-table
           [data]="data"
           [columns]="columns()"
-          [interactive]="true"
+          [interactive]="interactive()"
           (rowClick)="onRowClick($event)"
         />
         <ng-template #linkCell>
           <a class="cell-link" href="#">link</a>
+          <input class="cell-checkbox" type="checkbox" />
         </ng-template>
       `,
     })
     class ClickGuardHostComponent {
+      readonly interactive = signal(true);
       readonly data: Person[] = [{ id: "1", name: "Anna", role: "Eng" }];
       readonly linkTpl = viewChild<TemplateRef<unknown>>("linkCell");
       readonly onRowClick = jest.fn();
@@ -1568,7 +1754,9 @@ describe("TediTableComponent", () => {
       ]);
     }
 
-    function setupGuard(): ComponentFixture<ClickGuardHostComponent> {
+    function setupGuard(
+      interactive = true,
+    ): ComponentFixture<ClickGuardHostComponent> {
       TestBed.configureTestingModule({
         imports: [ClickGuardHostComponent],
         providers: [
@@ -1577,9 +1765,37 @@ describe("TediTableComponent", () => {
         ],
       });
       const fixture = TestBed.createComponent(ClickGuardHostComponent);
+      fixture.componentInstance.interactive.set(interactive);
       fixture.detectChanges();
       return fixture;
     }
+
+    describe.each([
+      ["interactive", true],
+      ["non-interactive", false],
+    ])("in a %s table", (_label, interactive) => {
+      it("does not cancel the default action of a link in a cell", () => {
+        const fixture = setupGuard(interactive);
+        const link = fixture.nativeElement.querySelector(
+          ".cell-link",
+        ) as HTMLAnchorElement;
+        const click = new MouseEvent("click", {
+          bubbles: true,
+          cancelable: true,
+        });
+        link.dispatchEvent(click);
+        expect(click.defaultPrevented).toBe(false);
+      });
+
+      it("lets a checkbox in a cell toggle", () => {
+        const fixture = setupGuard(interactive);
+        const checkbox = fixture.nativeElement.querySelector(
+          ".cell-checkbox",
+        ) as HTMLInputElement;
+        checkbox.click();
+        expect(checkbox.checked).toBe(true);
+      });
+    });
 
     it("does not activate the row when an interactive control in a cell is clicked", () => {
       const fixture = setupGuard();
@@ -1700,6 +1916,175 @@ describe("TediTableComponent", () => {
     });
   });
 
+  describe("sortable with a custom header", () => {
+    @Component({
+      standalone: true,
+      imports: [TediTableComponent],
+      template: `
+        <tedi-table [data]="data()" [columns]="columns()" />
+        <ng-template #statusHeader>
+          <span class="custom-header">Status</span>
+          <button type="button" class="custom-header-info">i</button>
+        </ng-template>
+        <ng-template #filter let-ctx
+          ><input class="filter-input"
+        /></ng-template>
+      `,
+    })
+    class CustomHeaderHostComponent {
+      readonly data = signal<Person[]>(data);
+      readonly headerTpl = viewChild<TemplateRef<unknown>>("statusHeader");
+      readonly filterTpl =
+        viewChild<TemplateRef<TediTableFilterContext<unknown, Person>>>(
+          "filter",
+        );
+      readonly columnOverrides = signal<Partial<TediColumnDef<Person>>>({});
+      readonly headerAsFunction = signal(false);
+      readonly columns = computed<TediColumnDef<Person>[]>(() => [
+        {
+          id: "role",
+          accessorKey: "role",
+          header: this.headerAsFunction()
+            ? () => this.headerTpl()
+            : (this.headerTpl() ?? ""),
+          meta: { label: "Status" },
+          sortable: true,
+          ...this.columnOverrides(),
+        } as TediColumnDef<Person>,
+      ]);
+    }
+
+    function setupCustomHeader() {
+      TestBed.configureTestingModule({
+        imports: [CustomHeaderHostComponent],
+        providers: [
+          { provide: TediTranslationService, useClass: TranslationMock },
+          { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+        ],
+      });
+      const fixture = TestBed.createComponent(CustomHeaderHostComponent);
+      fixture.detectChanges();
+      fixture.detectChanges();
+      return fixture;
+    }
+
+    const headerCell = (fixture: ComponentFixture<unknown>): HTMLElement =>
+      fixture.nativeElement.querySelector(
+        ".tedi-table__head .tedi-table__header-cell",
+      );
+
+    it("keeps the icon-only sort button out of the column header name", () => {
+      const fixture = setupCustomHeader();
+      const th = headerCell(fixture);
+      const ids = (th.getAttribute("aria-labelledby") ?? "").split(" ");
+      const sortButton = th.querySelector(
+        "button.tedi-table-header-button",
+      ) as HTMLElement;
+      ids.forEach((id) =>
+        expect(document.getElementById(id)?.contains(sortButton)).toBe(false),
+      );
+      expect(labelledByText(th)).toContain("Status");
+    });
+
+    it("renders the custom header followed by an icon-only sort button", () => {
+      const fixture = setupCustomHeader();
+      const th = headerCell(fixture);
+      const custom = th.querySelector(".custom-header-info") as HTMLElement;
+      const sort = th.querySelector(
+        "button.tedi-table-header-button",
+      ) as HTMLElement;
+      expect(custom).not.toBeNull();
+      expect(sort).not.toBeNull();
+      expect(sort.contains(custom)).toBe(false);
+      expect(sort.textContent?.trim()).toBe("unfold_more");
+      expect(
+        custom.compareDocumentPosition(sort) & Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
+    });
+
+    it("names the sort button after the column and the next sort action", () => {
+      const fixture = setupCustomHeader();
+      const th = headerCell(fixture);
+      const sort = th.querySelector(
+        "button.tedi-table-header-button",
+      ) as HTMLButtonElement;
+      expect(sort.getAttribute("aria-label")).toBe("Sort ascending Status");
+      sort.click();
+      fixture.detectChanges();
+      expect(th.getAttribute("aria-sort")).toBe("ascending");
+      expect(sort.getAttribute("aria-label")).toBe("Sort descending Status");
+      expect(sort.classList).toContain("tedi-table-header-button--selected");
+      sort.click();
+      fixture.detectChanges();
+      expect(th.getAttribute("aria-sort")).toBe("descending");
+      expect(sort.getAttribute("aria-label")).toBe("Remove sorting Status");
+    });
+
+    it("falls back to the column id when meta.label is not set", () => {
+      const fixture = setupCustomHeader();
+      fixture.componentInstance.columnOverrides.set({ meta: undefined });
+      fixture.detectChanges();
+      const sort = headerCell(fixture).querySelector(
+        "button.tedi-table-header-button",
+      );
+      expect(sort?.getAttribute("aria-label")).toBe("Sort ascending role");
+    });
+
+    it("renders the sort button for a header function returning a template", () => {
+      const fixture = setupCustomHeader();
+      fixture.componentInstance.headerAsFunction.set(true);
+      fixture.detectChanges();
+      const th = headerCell(fixture);
+      expect(th.querySelector(".custom-header")).not.toBeNull();
+      expect(
+        th.querySelectorAll("button.tedi-table-header-button").length,
+      ).toBe(1);
+    });
+
+    it("places the filter trigger after the sort button", () => {
+      const fixture = setupCustomHeader();
+      fixture.componentInstance.columnOverrides.set({
+        filterable: true,
+        filterTemplate: fixture.componentInstance.filterTpl(),
+      });
+      fixture.detectChanges();
+      const buttons = headerCell(fixture).querySelectorAll(
+        "button.tedi-table-header-button",
+      );
+      expect(buttons.length).toBe(2);
+      expect(buttons[0].getAttribute("aria-label")).toBe(
+        "Sort ascending Status",
+      );
+      expect(buttons[1].getAttribute("aria-label")).toBe("Filter Status");
+    });
+
+    it("renders no sort button when sortable is off or sorting is disabled", () => {
+      const fixture = setupCustomHeader();
+      fixture.componentInstance.columnOverrides.set({ sortable: false });
+      fixture.detectChanges();
+      expect(
+        headerCell(fixture).querySelector("button.tedi-table-header-button"),
+      ).toBeNull();
+      fixture.componentInstance.columnOverrides.set({ enableSorting: false });
+      fixture.detectChanges();
+      expect(
+        headerCell(fixture).querySelector("button.tedi-table-header-button"),
+      ).toBeNull();
+    });
+
+    it("renders a single sort button around a function header returning a string", () => {
+      const fixture = setupCustomHeader();
+      fixture.componentInstance.columnOverrides.set({ header: () => "Status" });
+      fixture.detectChanges();
+      const buttons = headerCell(fixture).querySelectorAll(
+        "button.tedi-table-header-button",
+      );
+      expect(buttons.length).toBe(1);
+      expect(buttons[0].textContent).toContain("Status");
+      expect(buttons[0].hasAttribute("aria-label")).toBe(false);
+    });
+  });
+
   describe("filterable shorthand", () => {
     @Component({
       standalone: true,
@@ -1709,6 +2094,7 @@ describe("TediTableComponent", () => {
           [data]="data()"
           [columns]="columns()"
           [filterPopoverWidth]="popoverWidth()"
+          [filterActions]="filterActions()"
         />
         <ng-template #textFilter let-ctx>
           <tedi-form-field size="small">
@@ -1717,6 +2103,7 @@ describe("TediTableComponent", () => {
               type="text"
               [value]="ctx.value ?? ''"
               (input)="ctx.setValue($any($event.target).value)"
+              (keydown.escape)="ctx.cancel()"
               aria-label="Name filter input"
             />
           </tedi-form-field>
@@ -1731,6 +2118,7 @@ describe("TediTableComponent", () => {
         );
       readonly filterableOption = signal<boolean | TableFilterOptions>(true);
       readonly popoverWidth = signal<PopoverWidth>("small");
+      readonly filterActions = signal<TableFilterAction[]>(["clear", "apply"]);
 
       readonly columns = signal<TediColumnDef<Person>[]>([]);
 
@@ -1783,6 +2171,16 @@ describe("TediTableComponent", () => {
       return fixture.debugElement.query(By.directive(TediTableComponent))
         .componentInstance as TediTableComponent<Person>;
     }
+
+    it("names the column header from its text only, not the filter button", () => {
+      const fixture = setupFilterableHost();
+      const headers = fixture.nativeElement.querySelectorAll(
+        ".tedi-table__head th",
+      ) as NodeListOf<HTMLElement>;
+      const [nameTh, roleTh] = [headers[0], headers[1]];
+      expect(labelledByText(nameTh)).toBe("Name");
+      expect(roleTh.hasAttribute("aria-labelledby")).toBe(false);
+    });
 
     function findTriggerButton(
       fixture: ComponentFixture<FilterableHostComponent>,
@@ -2050,6 +2448,119 @@ describe("TediTableComponent", () => {
       expect(column.getFilterValue()).toBeUndefined();
     });
 
+    describe("footer actions", () => {
+      function footerButtons(): HTMLButtonElement[] {
+        return Array.from(
+          getPopoverContent()?.querySelectorAll<HTMLButtonElement>(
+            ".tedi-table__filter-actions button",
+          ) ?? [],
+        );
+      }
+
+      function footerLabels(): (string | undefined)[] {
+        return footerButtons().map((b) => b.textContent?.trim());
+      }
+
+      function clickFooter(label: string): void {
+        footerButtons()
+          .find((b) => b.textContent?.trim() === label)
+          ?.click();
+      }
+
+      function typeDraft(value: string): void {
+        const input = getPopoverContent()!.querySelector(
+          'input[aria-label="Name filter input"]',
+        ) as HTMLInputElement;
+        input.value = value;
+        input.dispatchEvent(new Event("input"));
+      }
+
+      function draftInputValue(): string {
+        return (
+          getPopoverContent()!.querySelector(
+            'input[aria-label="Name filter input"]',
+          ) as HTMLInputElement
+        ).value;
+      }
+
+      it("renders Clear then Apply by default", () => {
+        const fixture = setupFilterableHost();
+        openFilterPanel(fixture);
+        expect(footerLabels()).toEqual(["Clear", "Apply"]);
+      });
+
+      it("renders the table's filterActions in the given order", () => {
+        const fixture = setupFilterableHost((host) =>
+          host.filterActions.set(["cancel", "apply"]),
+        );
+        openFilterPanel(fixture);
+        expect(footerLabels()).toEqual(["Cancel", "Apply"]);
+        const variants = footerButtons().map((b) =>
+          b.classList.contains("tedi-button--primary"),
+        );
+        expect(variants).toEqual([false, true]);
+      });
+
+      it("lets a column override the table's filterActions", () => {
+        const fixture = setupFilterableHost();
+        fixture.componentInstance.build({
+          actions: ["apply", "cancel", "clear", "cancel"],
+        });
+        fixture.detectChanges();
+        openFilterPanel(fixture);
+        expect(footerLabels()).toEqual(["Apply", "Cancel", "Clear"]);
+      });
+
+      it("hides the footer when the actions list is empty", () => {
+        const fixture = setupFilterableHost((host) =>
+          host.filterActions.set([]),
+        );
+        openFilterPanel(fixture);
+        expect(
+          getPopoverContent()?.querySelector(".tedi-table__filter-actions"),
+        ).toBeNull();
+      });
+
+      it("Cancel keeps the applied filter and discards the draft", () => {
+        const fixture = setupFilterableHost((host) =>
+          host.filterActions.set(["cancel", "apply"]),
+        );
+        const column = getTableComponent(fixture)["table"].getColumn("name")!;
+        column.setFilterValue("Anna");
+        fixture.detectChanges();
+
+        openFilterPanel(fixture);
+        typeDraft("Stale draft");
+        fixture.detectChanges();
+        clickFooter("Cancel");
+        fixture.detectChanges();
+
+        expect(column.getFilterValue()).toBe("Anna");
+        // Reopen — the draft is back at the applied value.
+        openFilterPanel(fixture);
+        expect(draftInputValue()).toBe("Anna");
+      });
+
+      it("cancel() from the template context behaves like the Cancel button", () => {
+        const fixture = setupFilterableHost();
+        const column = getTableComponent(fixture)["table"].getColumn("name")!;
+        column.setFilterValue("Anna");
+        fixture.detectChanges();
+
+        openFilterPanel(fixture);
+        typeDraft("Stale draft");
+        fixture.detectChanges();
+        getPopoverContent()!
+          .querySelector('input[aria-label="Name filter input"]')!
+          .dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+        fixture.detectChanges();
+
+        expect(column.getFilterValue()).toBe("Anna");
+        openFilterPanel(fixture);
+        expect(draftInputValue()).toBe("Anna");
+      });
+    });
+
     it("clearFilters() resets the popover draft so a reopened popover shows empty inputs", () => {
       const fixture = setupFilterableHost();
       const table = getTableComponent(fixture);
@@ -2279,6 +2790,31 @@ describe("Table: filter modal", () => {
     expect(modalOpen.mock.calls[0][1].data.columnLabel).toBe("Name");
   });
 
+  it("passes the footer actions and a cancelling context to the modal", () => {
+    const fixture = setup("xs");
+    const column = (
+      fixture.debugElement.query(By.directive(TediTableComponent))
+        .componentInstance as TediTableComponent<Person>
+    )["table"].getColumn("name")!;
+    column.setFilterValue("Anna");
+    fixture.detectChanges();
+    trigger(fixture).click();
+    fixture.detectChanges();
+
+    const data = modalOpen.mock.calls[0][1].data as TableFilterModalData;
+    expect(data.actions).toEqual([
+      { action: "clear", label: "Clear" },
+      { action: "apply", label: "Apply" },
+    ]);
+
+    const close = jest.fn();
+    data.buildContext(close).setValue("Stale draft");
+    data.buildContext(close).cancel();
+    expect(close).toHaveBeenCalledTimes(1);
+    expect(column.getFilterValue()).toBe("Anna");
+    expect(data.buildContext(close).value).toBe("Anna");
+  });
+
   it("uses the popover (no modal) at or above the breakpoint", () => {
     const fixture = setup("lg");
     trigger(fixture).click();
@@ -2302,6 +2838,7 @@ describe("TableFilterModalComponent", () => {
           draft.set(undefined);
           close();
         },
+        cancel: () => close(),
         column: {},
       } as unknown as TediTableFilterContext<unknown, unknown>;
       (ctx as { $implicit: unknown }).$implicit = ctx;
@@ -2313,8 +2850,10 @@ describe("TableFilterModalComponent", () => {
           provide: MODAL_DATA,
           useValue: {
             columnLabel: "Status",
-            applyLabel: "Apply",
-            clearLabel: "Clear",
+            actions: [
+              { action: "cancel", label: "Cancel" },
+              { action: "apply", label: "Apply" },
+            ],
             template: null,
             buildContext,
           },
@@ -2342,6 +2881,69 @@ describe("TableFilterModalComponent", () => {
     modal.context.setValue([...((modal.context.value as string[]) ?? []), "a"]);
     modal.context.setValue([...((modal.context.value as string[]) ?? []), "b"]);
     expect(draft()).toEqual(["a", "b"]);
+  });
+
+  it("renders the footer actions in order and runs each one's context method", () => {
+    @Component({
+      standalone: true,
+      template: `<ng-template #tpl />`,
+    })
+    class TemplateHostComponent {
+      readonly tpl =
+        viewChild.required<
+          TemplateRef<TediTableFilterContext<unknown, unknown>>
+        >("tpl");
+    }
+
+    const calls: string[] = [];
+    const context = {
+      value: undefined,
+      setValue: () => undefined,
+      apply: () => calls.push("apply"),
+      clear: () => calls.push("clear"),
+      cancel: () => calls.push("cancel"),
+      column: {},
+    } as unknown as TediTableFilterContext<unknown, unknown>;
+    const data: Partial<TableFilterModalData> = {
+      columnLabel: "Status",
+      actions: [
+        { action: "apply", label: "Apply" },
+        { action: "cancel", label: "Cancel" },
+        { action: "clear", label: "Clear" },
+      ],
+      buildContext: () => context,
+    };
+
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: TediTranslationService, useClass: TranslationMock },
+        { provide: MODAL_DATA, useValue: data },
+        { provide: ModalRef, useValue: { close: jest.fn() } },
+      ],
+    });
+    const templateHost = TestBed.createComponent(TemplateHostComponent);
+    templateHost.detectChanges();
+    data.template = templateHost.componentInstance.tpl();
+
+    const fixture = TestBed.createComponent(TableFilterModalComponent);
+    fixture.detectChanges();
+
+    const buttons = Array.from(
+      (
+        fixture.nativeElement as HTMLElement
+      ).querySelectorAll<HTMLButtonElement>("tedi-modal-footer button"),
+    );
+    expect(buttons.map((b) => b.textContent?.trim())).toEqual([
+      "Apply",
+      "Cancel",
+      "Clear",
+    ]);
+    expect(
+      buttons.map((b) => b.classList.contains("tedi-button--primary")),
+    ).toEqual([true, false, false]);
+
+    buttons.forEach((b) => b.click());
+    expect(calls).toEqual(["apply", "cancel", "clear"]);
   });
 });
 
@@ -2916,6 +3518,62 @@ describe("Table: keyboard column reordering", () => {
   });
 
   describe("ARIA accessibility", () => {
+    it("describes the handle with the instructions and keeps it out of the header name", async () => {
+      TestBed.overrideComponent(ReorderTestHostComponent, {
+        set: {
+          template: `<tedi-table [data]="data()" [columns]="columns()" [reorderableColumns]="true" />`,
+        },
+      });
+      fixture = TestBed.createComponent(
+        ReorderTestHostComponent,
+      ) as ComponentFixture<ReorderTestHostComponent>;
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      const th = fixture.nativeElement.querySelector(
+        ".tedi-table__head .tedi-table__header-cell",
+      ) as HTMLElement;
+      const handle = th.querySelector(
+        ".tedi-table__drag-handle",
+      ) as HTMLElement;
+      const hint = document.getElementById(
+        handle.getAttribute("aria-describedby")!,
+      );
+      expect(hint?.textContent?.trim()).toBe("Column reorder instructions");
+      expect(hint?.hidden).toBe(true);
+      expect(labelledByText(th)).toBe("Name");
+    });
+
+    it("keeps header aria-labelledby off control columns and pointing at rendered elements", async () => {
+      TestBed.overrideComponent(ReorderTestHostComponent, {
+        set: {
+          template: `<tedi-table [data]="data()" [columns]="columns()" [reorderableColumns]="true" [reorderableRows]="true" [enableRowSelection]="true" />`,
+        },
+      });
+      fixture = TestBed.createComponent(
+        ReorderTestHostComponent,
+      ) as ComponentFixture<ReorderTestHostComponent>;
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      const ths = Array.from(
+        fixture.nativeElement.querySelectorAll(
+          ".tedi-table__head th",
+        ) as NodeListOf<HTMLElement>,
+      );
+      const selectTh = ths.find((th) =>
+        th.querySelector("input[type=checkbox]"),
+      );
+      expect(selectTh?.hasAttribute("aria-labelledby")).toBe(false);
+      const labelled = ths.filter((th) => th.hasAttribute("aria-labelledby"));
+      expect(labelled.length).toBeGreaterThan(0);
+      for (const th of labelled) {
+        for (const id of th.getAttribute("aria-labelledby")!.split(" ")) {
+          expect(document.getElementById(id)).not.toBeNull();
+        }
+      }
+    });
+
     it("should set aria-pressed correctly on picked-up cells", async () => {
       TestBed.overrideComponent(ReorderTestHostComponent, {
         set: {
@@ -3074,6 +3732,14 @@ describe("Table: keyboard row reordering", () => {
   it("renders a reorder handle for every body row", () => {
     const fixture = setup();
     expect(rowHandles(fixture).length).toBe(3);
+  });
+
+  it("describes row handles with the reorder instructions", () => {
+    const fixture = setup();
+    const hint = document.getElementById(
+      rowHandles(fixture)[0].getAttribute("aria-describedby")!,
+    );
+    expect(hint?.textContent?.trim()).toBe("Row reorder instructions");
   });
 
   it("enables mouse drag through the same input (row cdkDrag not disabled)", () => {

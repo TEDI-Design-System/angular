@@ -10,6 +10,7 @@ import {
   Injector,
   input,
   model,
+  DoCheck,
   OnInit,
   signal,
   ViewEncapsulation,
@@ -42,6 +43,10 @@ import {
   TEDI_FIELD_CONTEXT,
 } from "../form-field/field-context.token";
 import { deriveControlState } from "../form-field/derive-control-state";
+import {
+  controlDescribedBy,
+  TEDI_DESCRIBABLE_CONTROL,
+} from "../form-field/control-described-by";
 import {
   TimePickerModalComponent,
   TimePickerModalData,
@@ -83,6 +88,10 @@ export type TimeFieldUseNativePicker = boolean | "sm" | "md" | "lg" | "xl";
       provide: TEDI_FORM_FIELD_CONTROL,
       useExisting: forwardRef(() => TimeFieldComponent),
     },
+    {
+      provide: TEDI_DESCRIBABLE_CONTROL,
+      useExisting: forwardRef(() => TimeFieldComponent),
+    },
   ],
   host: {
     class: "tedi-time-field",
@@ -91,19 +100,39 @@ export type TimeFieldUseNativePicker = boolean | "sm" | "md" | "lg" | "xl";
   },
 })
 export class TimeFieldComponent
-  implements OnInit, ControlValueAccessor, FormFieldControl<string | null>
+  implements
+    OnInit,
+    DoCheck,
+    ControlValueAccessor,
+    FormFieldControl<string | null>
 {
   private readonly fieldContext = inject(TEDI_FIELD_CONTEXT, {
     optional: true,
   });
   private readonly derived = deriveControlState();
 
+  /**
+   * `aria-describedby` ids for the input — the wrapping form-field's feedback
+   * text, plus any set on `<tedi-time-field>` itself.
+   */
+  readonly describedBy = controlDescribedBy();
+
   /** Unique ID for label association and accessibility. */
   readonly inputId = input.required<string>();
+  /**
+   * `name` attribute of the input, used by native form submission. Omitted
+   * from the DOM when not set.
+   */
+  readonly name = input<string>();
   /** Selected time in `HH:mm` format. Two-way bindable. */
   readonly value = model<string | null>(null);
   /** Placeholder shown when the input is empty. */
   readonly placeholder = input<string>();
+  /**
+   * Marks the input as required.
+   * @default false
+   */
+  readonly required = input<boolean>(false);
   /**
    * Marks the field as invalid. Sets `aria-invalid` on the input and triggers
    * the error styling. Combines with the state derived from reactive forms.
@@ -253,6 +282,10 @@ export class TimeFieldComponent
     return !!this.popover()?.isOpen();
   }
 
+  ngDoCheck(): void {
+    this.derived.sync();
+  }
+
   constructor() {
     effect(() => {
       const val = this.value();
@@ -282,6 +315,10 @@ export class TimeFieldComponent
 
   setDisabledState(disabled: boolean): void {
     this.formDisabled.set(disabled);
+  }
+
+  setDescribedBy(ids: string[]): void {
+    this.describedBy.set(ids);
   }
 
   handleInput(event: Event) {

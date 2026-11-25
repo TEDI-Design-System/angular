@@ -47,6 +47,12 @@ In an existing clone, run `git config core.symlinks true`, delete the files unde
 
 Components live in two tiers: `src/tedi/` (TEDI-READY, must meet the [Definition of Done](https://github.com/TEDI-Design-System/general/wiki/Definition-of-Done)) and `src/community/` (looser requirements).
 
+## Visual tests
+
+Chromatic snapshots each component through one hidden `VisualTest` story, at mobile and desktop width (`VISUAL_TEST_VIEWPORTS`). The docs stories themselves are not snapshotted. When you add a story to a component that has `VisualTest`, add a block for it there too. The block reuses the docs story through `visualTest()` from `.storybook/visual-test-story`, so later changes to the story reach Chromatic. Don't copy the story's markup.
+
+`npm run test` fails when a docs story has no block. A story that only demonstrates behaviour (form integration, a controlled-state demo) opts out with `parameters: { visualTest: false }`. The full rules are in section 9 of [stories.md](.agents/skills/contributing/references/stories.md).
+
 ## Accessibility check
 
 Every pull request to `rc` or `main` runs an automated accessibility check (axe, through the Storybook test runner) on all `src/tedi/` stories. Violations in components the pull request changes fail the check. Violations elsewhere are reported as warnings.
@@ -64,6 +70,23 @@ This runs the raw tests, so every violation fails, including ones outside the co
 A story with a known, tracked accessibility issue can be marked with `parameters: { a11y: { test: "todo" } }` so it warns instead of failing. Link the tracking issue in a comment next to it.
 
 The automated check catches only part of the problems. TEDI-READY components also need manual testing (keyboard, screen reader, zoom), as listed in the Definition of Done.
+
+## Angular version support
+
+The library supports the three latest Angular majors (see [Supported versions](https://github.com/TEDI-Design-System/general/wiki/Supported-versions) in the wiki). It is built and tested against the base version pinned in `devDependencies`, and the `compatibility` job in CI installs the built package into a fresh app for every supported major to verify it is consumable.
+
+When a new Angular major is released (e.g. v23):
+
+1. **`package.json`** and **`src/package.json`** (the published manifest, whose peer ranges consumers install against): add `|| ^23.0.0` to every Angular peer dependency, and add the `ngx-quill` major that supports Angular 23 to the `ngx-quill` peer (each `ngx-quill` major supports a single Angular major; check its `peerDependencies` on npm).
+2. **`.github/workflows/angular-test-and-lint.yml`**: add `23` to the `angular-version` matrix in the `compatibility` job.
+3. **`README.md`**: update the supported versions under _Getting Started_.
+
+When an Angular major reaches end-of-life (e.g. v20):
+
+1. **`package.json`** and **`src/package.json`**: remove `^20.0.0 ||` from every Angular peer dependency, and drop the `ngx-quill` majors that only support Angular 20 from the `ngx-quill` peer.
+2. **`.github/workflows/angular-test-and-lint.yml`**: remove `20` from the `angular-version` matrix in the `compatibility` job.
+3. Bump `devDependencies` to the new minimum supported Angular version, so the library is always built and developed against a supported release.
+4. **`README.md`**: update the supported versions under _Getting Started_.
 
 ## AI tooling
 

@@ -21,7 +21,6 @@ export type FeedbackTextPosition = "left" | "right";
   host: {
     "[class]": "classes()",
     "[attr.id]": "elementId()",
-    "[attr.role]": "role()",
     "[attr.aria-live]": "ariaLive()",
   },
 })
@@ -44,30 +43,26 @@ export class FeedbackTextComponent {
    * Type of form-helper.
    * @default hint
    */
-  type = input<FeedbackTextType>("hint");
+  type = input<FeedbackTextType | undefined>("hint");
   /**
    * Position of the helper.
    * @default left
    */
-  position = input<FeedbackTextPosition>("left");
+  position = input<FeedbackTextPosition | undefined>("left");
 
-  role = computed(() => {
-    if (this.type() === "valid" || this.type() === "error") {
-      return "alert";
-    }
-
-    return undefined;
-  });
+  // Callers forwarding optional values can pass undefined; keep the defaults
+  private readonly resolvedType = computed(() => this.type() ?? "hint");
+  private readonly resolvedPosition = computed(() => this.position() ?? "left");
 
   ariaLive = computed(() => {
-    if (this.type() === "error" || this.type() === "valid") {
-      return "assertive";
+    if (this.resolvedType() === "error" || this.resolvedType() === "valid") {
+      return "polite";
     }
 
-    return "polite";
+    return null;
   });
 
   classes = computed(() => {
-    return `tedi-feedback-text tedi-feedback-text--${this.type()} tedi-feedback-text--${this.position()}`;
+    return `tedi-feedback-text tedi-feedback-text--${this.resolvedType()} tedi-feedback-text--${this.resolvedPosition()}`;
   });
 }

@@ -8,6 +8,10 @@ import { NumberFieldComponent } from "./number-field.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { LabelComponent } from "../../content/label/label.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-(work-in-progress)?node-id=4536-78765&m=dev" target="_blank">Figma ↗</a><br />
@@ -23,6 +27,9 @@ export default {
       imports: [RowComponent, LabelComponent, FeedbackTextComponent],
     }),
   ],
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
   render: (args) => ({
     props: args,
     template: `<tedi-number-field inputId="example-id" label="Label" />`,
@@ -176,7 +183,6 @@ export default {
 } as Meta<NumberFieldComponent>;
 
 export const Default: StoryObj<NumberFieldComponent> = {
-  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     inputId: "example-id",
     label: "Label",
@@ -252,7 +258,6 @@ export const WithHint: StoryObj<NumberFieldComponent> = {
 };
 
 export const Decimal: StoryObj<NumberFieldComponent> = {
-  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     inputId: "example-decimal",
     label: "Label",
@@ -304,4 +309,26 @@ export const CustomLabelAndFeedbackText: StoryObj<NumberFieldComponent> = {
       </div>
     `,
   }),
+};
+
+/** Chromatic snapshot for NumberField: add every new visual variant here too. */
+export const VisualTest: StoryObj<NumberFieldComponent> = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
+  render: () =>
+    visualTest([
+      { label: "Default", story: Default },
+      { label: "Sizes", story: Sizes },
+      { label: "States", story: States },
+      { label: "With hint", story: WithHint },
+      { label: "Decimal", story: Decimal },
+      { label: "With unit", story: WithUnit },
+      { label: "Full width", story: FullWidth },
+      {
+        label: "Custom label and feedback text",
+        story: CustomLabelAndFeedbackText,
+      },
+    ]),
 };

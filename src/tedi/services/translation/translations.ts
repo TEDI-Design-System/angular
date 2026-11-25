@@ -1,5 +1,23 @@
 import { Language } from "./translation.service";
 
+const ruPluralRules = new Intl.PluralRules("ru");
+
+/**
+ * Picks the Russian plural form for `count` (1 файл, 2 файла, 5 файлов; 21 → one, 11–14 → many).
+ * Fractions (`other`) take the genitive singular, the same as `few`.
+ */
+const pluralizeRu = (
+  count: number,
+  forms: { one: string; few: string; many: string },
+): string => {
+  const category = ruPluralRules.select(count);
+  return category === "one"
+    ? forms.one
+    : category === "many"
+      ? forms.many
+      : forms.few;
+};
+
 export const translationsMap = {
   close: {
     description: "Used for closing",
@@ -23,6 +41,19 @@ export const translationsMap = {
     et: "Ava",
     en: "Open",
     ru: "Открыть",
+  },
+  "rating.raters": {
+    description:
+      'Suffix in the read-only Rating summary showing how many people rated, e.g. "271 hindajat"',
+    components: ["Rating"],
+    et: (count: number) => `${count} ${count === 1 ? "hindaja" : "hindajat"}`,
+    en: (count: number) => `${count} ${count === 1 ? "rating" : "ratings"}`,
+    ru: (count: number) =>
+      pluralizeRu(count, {
+        one: `${count} оценка`,
+        few: `${count} оценки`,
+        many: `${count} оценок`,
+      }),
   },
   remove: {
     description: "Used for removing",
@@ -80,13 +111,6 @@ export const translationsMap = {
     et: (count: number) => `${count} ${count === 1 ? "vaste" : "vastet"}`,
     en: (count: number) => `${count} ${count === 1 ? "result" : "results"}`,
     ru: (count: number) => `Совпадений: ${count}`,
-  },
-  required: {
-    description: "Required field",
-    components: ["TableFilter"],
-    et: "Kohustuslik väli",
-    en: "Required field",
-    ru: "Обязательное поле",
   },
   breadcrumbs: {
     description: "Breadcrumbs navigation label",
@@ -252,9 +276,18 @@ export const translationsMap = {
   "file-upload.size-rejected": {
     description: "Error label for rejected size",
     components: ["FileUpload"],
-    et: (files: string) => `Fail(id) ${files} on liiga suured`,
-    en: (files: string) => `File(s) ${files} are too large`,
-    ru: (files: string) => `Файл(ы) ${files} слишком велики`,
+    et: (files: string, count: string) =>
+      count === "1"
+        ? `Fail ${files} on liiga suur`
+        : `Failid ${files} on liiga suured`,
+    en: (files: string, count: string) =>
+      count === "1"
+        ? `File ${files} is too large`
+        : `Files ${files} are too large`,
+    ru: (files: string, count: string) =>
+      count === "1"
+        ? `Файл ${files} слишком велик`
+        : `Файлы ${files} слишком велики`,
   },
   "file-upload.size-rejected-extended": {
     description: "Error label for rejected size",
@@ -276,9 +309,18 @@ export const translationsMap = {
   "file-upload.extension-rejected": {
     description: "Error label for rejected extension",
     components: ["FileUpload"],
-    et: (files: string) => `Fail(id) ${files} on vale laiendiga`,
-    en: (files: string) => `File(s) ${files} have the wrong extension`,
-    ru: (files: string) => `Файл(ы) ${files} имеют неправильное расширение`,
+    et: (files: string, count: string) =>
+      count === "1"
+        ? `Fail ${files} on vale laiendiga`
+        : `Failid ${files} on vale laiendiga`,
+    en: (files: string, count: string) =>
+      count === "1"
+        ? `File ${files} has the wrong extension`
+        : `Files ${files} have the wrong extension`,
+    ru: (files: string, count: string) =>
+      count === "1"
+        ? `Файл ${files} имеет неправильное расширение`
+        : `Файлы ${files} имеют неправильное расширение`,
   },
   "file-upload.extension-rejected-extended": {
     description: "Error label for rejected extension",
@@ -290,12 +332,60 @@ export const translationsMap = {
     ru: (files: string, validTypes: string) =>
       `Файл(ы) ${files} имеют неправильное расширение. Разрешенные расширения: ${validTypes}`,
   },
+  "file-upload.failed": {
+    description:
+      "Appended, for assistive technology only, to the name of a file marked invalid",
+    components: ["FileUpload"],
+    et: "Sobimatu fail",
+    en: "Invalid file",
+    ru: "Недопустимый файл",
+  },
+  "file-upload.cleared": {
+    description: "Announced to assistive technology when all files are removed",
+    components: ["FileUpload"],
+    et: "Kõik failid eemaldatud",
+    en: "All files removed",
+    ru: "Все файлы удалены",
+  },
   "file-dropzone.label": {
     description: "Default label for dropzone",
     components: ["FileDropzone"],
-    et: "Lohista failid siia või klõpsa, et sirvida",
+    et: "Lohista failid siia või klõpsa failide valimiseks",
     en: "Drop files here, or click to browse",
     ru: "Перетащите файлы сюда или нажмите, чтобы выбрать",
+  },
+  "file-upload.added": {
+    description: "Announced to assistive technology when files are added",
+    components: ["FileDropzone", "FileUpload"],
+    et: (count: string) =>
+      count === "1" ? "Lisatud 1 fail" : `Lisatud ${count} faili`,
+    en: (count: string) =>
+      count === "1" ? "1 file added" : `${count} files added`,
+    ru: (count: string) => `Добавлено файлов: ${count}`,
+  },
+  "file-upload.duplicates-skipped": {
+    description:
+      "Announced when files already in the list are skipped on a repeat selection",
+    components: ["FileDropzone", "FileUpload"],
+    et: (files: string, count: string) =>
+      count === "1"
+        ? `Fail ${files} on juba lisatud`
+        : `Failid ${files} on juba lisatud`,
+    en: (files: string, count: string) =>
+      count === "1"
+        ? `File ${files} has already been added`
+        : `Files ${files} have already been added`,
+    ru: (files: string, count: string) =>
+      count === "1"
+        ? `Файл ${files} уже добавлен`
+        : `Файлы ${files} уже добавлены`,
+  },
+  "file-upload.removed": {
+    description: "Announced to assistive technology when a file is removed",
+    components: ["FileDropzone", "FileUpload"],
+    et: (file: string) => `Fail ${file} eemaldatud`,
+    en: (file: string) => `File ${file} removed`,
+    ru: (file: string) => `Файл ${file} удален`,
   },
   "file-dropzone.error": {
     description: "Error label for dropzone",
@@ -311,14 +401,6 @@ export const translationsMap = {
     et: "Üleslaadimine",
     en: "Uploading",
     ru: "Загрузка",
-  },
-  "toast.close": {
-    description:
-      "Accessible label for a toast's close button, naming which toast it closes",
-    components: ["Toast"],
-    et: (title: string) => `Sulge teavitus: ${title}`,
-    en: (title: string) => `Close notification: ${title}`,
-    ru: (title: string) => `Закрыть уведомление: ${title}`,
   },
   "modal.close": {
     description: "Label for modals close button",
@@ -354,6 +436,22 @@ export const translationsMap = {
     et: "Otsi...",
     en: "Search...",
     ru: "Искать...",
+  },
+  "process-timeline.completed": {
+    description:
+      "Label for screen-reader that this process stage is completed (visually hidden)",
+    components: ["ProcessTimeline"],
+    et: "Lõpetatud",
+    en: "Completed",
+    ru: "Завершено",
+  },
+  "process-timeline.upcoming": {
+    description:
+      "Label for screen-reader that this process stage is upcoming (visually hidden)",
+    components: ["ProcessTimeline"],
+    et: "Tulemas",
+    en: "Upcoming",
+    ru: "Предстоит",
   },
   "stepper.completed": {
     description:
@@ -512,40 +610,39 @@ export const translationsMap = {
   "table.select-all": {
     description: "Row selection - Label for check in table header",
     components: ["Table"],
-    et: (isSelected: boolean) => (isSelected ? "Eemalda kõik" : "Vali kõik"),
-    en: (isSelected: boolean) => (isSelected ? "Deselect all" : "Select all"),
-    ru: (isSelected: boolean) =>
-      isSelected ? "Убрать выделение со всего" : "Выбрать все",
+    et: "Vali kõik read",
+    en: "Select all rows",
+    ru: "Выбрать все строки",
   },
   "table.select-row": {
     description: "Row selection - Label for check in table row",
     components: ["Table"],
-    et: (isSelected: boolean) => (isSelected ? "Eemalda rida" : "Vali rida"),
-    en: (isSelected: boolean) => (isSelected ? "Deselect row" : "Select row"),
-    ru: (isSelected: boolean) =>
-      isSelected ? "Отменить выбор строки" : "Выбрать ряд",
+    et: "Vali rida",
+    en: "Select row",
+    ru: "Выбрать строку",
   },
   "table.sort": {
-    description: "Label for sort button",
+    description:
+      "Accessible label for a column sort button. Receives the current sort direction and, optionally, the column label so screen readers announce which column is sorted.",
     components: ["Table"],
-    et: (direction: "asc" | "desc" | false) =>
-      direction === "asc"
-        ? "Sorteeri kahanevalt"
-        : direction === "desc"
-          ? "Eemalda sorteerimine"
-          : "Sorteeri kasvavalt",
-    en: (direction: "asc" | "desc" | false) =>
-      direction === "asc"
-        ? "Sort decending"
-        : direction === "desc"
-          ? "Remove sorting"
-          : "Sort ascending",
-    ru: (direction: "asc" | "desc" | false) =>
-      direction === "asc"
-        ? "Сортировать по убыванию"
-        : direction === "desc"
-          ? "Отменить сортировку"
-          : "Сортировать по возрастанию",
+    et: (direction: "asc" | "desc" | false, columnLabel?: string) => {
+      const col = columnLabel ? ` veergu ${columnLabel}` : "";
+      if (direction === "asc") return `Sorteeri${col} kahanevalt`;
+      if (direction === "desc") return `Eemalda${col} sorteerimine`;
+      return `Sorteeri${col} kasvavalt`;
+    },
+    en: (direction: "asc" | "desc" | false, columnLabel?: string) => {
+      const by = columnLabel ? ` by ${columnLabel}` : "";
+      if (direction === "asc") return `Sort${by} descending`;
+      if (direction === "desc") return `Remove sorting${by}`;
+      return `Sort${by} ascending`;
+    },
+    ru: (direction: "asc" | "desc" | false, columnLabel?: string) => {
+      const col = columnLabel ? ` по столбцу ${columnLabel}` : "";
+      if (direction === "asc") return `Сортировать${col} по убыванию`;
+      if (direction === "desc") return `Отменить сортировку${col}`;
+      return `Сортировать${col} по возрастанию`;
+    },
   },
   "table.no-data": {
     description: "Default placeholder when table data is empty",
@@ -555,11 +652,11 @@ export const translationsMap = {
     ru: "Нет данных",
   },
   "table.row-details": {
-    description: "Accessible label for the expanded row details region",
+    description: "Accessible label of the expand row toggle",
     components: ["Table"],
     et: "Rea üksikasjad",
     en: "Row details",
-    ru: "Подробности строки",
+    ru: "Сведения о строке",
   },
   "table.filter-input": {
     description: "Accessible label for a column filter input",
@@ -585,9 +682,17 @@ export const translationsMap = {
   "table.filter-clear": {
     description: "Clear action in the built-in column filter popover footer",
     components: ["Table"],
-    et: "Tühista",
+    et: "Tühjenda",
     en: "Clear",
     ru: "Сбросить",
+  },
+  "table.filter-cancel": {
+    description:
+      "Cancel action in the built-in column filter popover footer: closes without changing the filter",
+    components: ["Table"],
+    et: "Tühista",
+    en: "Cancel",
+    ru: "Отмена",
   },
   "table.filter-button-aria": {
     description:
@@ -632,20 +737,6 @@ export const translationsMap = {
     en: "Table content",
     ru: "Содержимое таблицы",
   },
-  "table.expand-row": {
-    description: "Label for the expand row toggle (collapsed state)",
-    components: ["Table"],
-    et: "Laienda rida",
-    en: "Expand row",
-    ru: "Развернуть строку",
-  },
-  "table.collapse-row": {
-    description: "Label for the expand row toggle (expanded state)",
-    components: ["Table"],
-    et: "Ahenda rida",
-    en: "Collapse row",
-    ru: "Свернуть строку",
-  },
   "table.drag-column": {
     description: "Accessible label of the column reorder drag handle",
     components: ["Table"],
@@ -664,12 +755,16 @@ export const translationsMap = {
     description:
       "Live region message when a column is picked up for keyboard reordering",
     components: ["Table"],
-    et: (column: string) =>
-      `Veerg ${column} on valitud. Kasuta vasakut/paremat noolt liigutamiseks ja Tühikut või Sisestust kinnitamiseks. Vajuta Escape tühistamiseks.`,
-    en: (column: string) =>
-      `Column ${column} picked up. Use Left/Right arrow to move, Space or Enter to drop. Press Escape to cancel.`,
-    ru: (column: string) =>
-      `Столбец ${column} взят. Используйте стрелки влево/вправо для перемещения, Пробел или Enter для подтверждения. Нажмите Escape для отмены.`,
+    et: (column: string) => `${column} valitud.`,
+    en: (column: string) => `${column} picked up.`,
+    ru: (column: string) => `${column} взят.`,
+  },
+  "table.reorder.instructions": {
+    description: "Description of the column reorder drag handle",
+    components: ["Table"],
+    et: "Tühik või Enter valib ja paigutab, vasak- ja paremnool liigutavad, Escape tühistab.",
+    en: "Space or Enter picks up and drops, Left and Right arrows move, Escape cancels.",
+    ru: "Пробел или Enter берёт и ставит, стрелки влево и вправо перемещают, Escape отменяет.",
   },
   "table.reorder.move": {
     description:
@@ -703,12 +798,16 @@ export const translationsMap = {
     description:
       "Live region message when a row is picked up for keyboard reordering",
     components: ["Table"],
-    et: (position: number) =>
-      `Rida ${position} on valitud. Kasuta üles-/allanoolt liigutamiseks ja Tühikut või Sisestust kinnitamiseks. Vajuta Escape tühistamiseks.`,
-    en: (position: number) =>
-      `Row ${position} picked up. Use Up/Down arrow to move, Space or Enter to drop. Press Escape to cancel.`,
-    ru: (position: number) =>
-      `Строка ${position} взята. Используйте стрелки вверх/вниз для перемещения, Пробел или Enter для подтверждения. Нажмите Escape для отмены.`,
+    et: (position: number) => `Rida ${position} valitud.`,
+    en: (position: number) => `Row ${position} picked up.`,
+    ru: (position: number) => `Строка ${position} взята.`,
+  },
+  "table.row-reorder.instructions": {
+    description: "Description of the row reorder drag handle",
+    components: ["Table"],
+    et: "Tühik või Enter valib ja paigutab, üles- ja allanool liigutavad, Escape tühistab.",
+    en: "Space or Enter picks up and drops, Up and Down arrows move, Escape cancels.",
+    ru: "Пробел или Enter берёт и ставит, стрелки вверх и вниз перемещают, Escape отменяет.",
   },
   "table.row-reorder.move": {
     description:
@@ -756,21 +855,17 @@ export const translationsMap = {
   "pagination.title": {
     description: "Label of the pagination",
     components: ["Table", "Pagination"],
-    et: "Pagineerimine",
-    en: "Pagination",
+    et: "Lehed",
+    en: "Pages",
     ru: "Страницы",
   },
   "pagination.page": {
-    description: "Label of individual page numbers",
+    description:
+      "Label of individual page numbers. The current page is conveyed by `aria-current`, not by the label.",
     components: ["Table", "Pagination"],
-    et: (page: number, isCurrent?: boolean) =>
-      isCurrent ? `Aktiivne leht, leht ${page}` : `Mine lehele ${page}`,
-    en: (page: number, isCurrent?: boolean) =>
-      isCurrent ? `Current page, page ${page}` : `Go to page ${page}`,
-    ru: (page: number, isCurrent?: boolean) =>
-      isCurrent
-        ? `Текущая страница, страница ${page}`
-        : `Перейти на страницу ${page}`,
+    et: (page: number) => `Leht ${page}`,
+    en: (page: number) => `Page ${page}`,
+    ru: (page: number) => `Страница ${page}`,
   },
   "pagination.prev-page": {
     description: "Previous page button label",
@@ -807,8 +902,7 @@ export const translationsMap = {
     description:
       "Status message announced to screen readers via an aria-live region when the page changes.",
     components: ["Pagination"],
-    et: (page?: number, total?: number) =>
-      `Lehekülg ${page ?? 0} / ${total ?? 0}`,
+    et: (page?: number, total?: number) => `Leht ${page ?? 0} / ${total ?? 0}`,
     en: (page?: number, total?: number) => `Page ${page ?? 0} of ${total ?? 0}`,
     ru: (page?: number, total?: number) =>
       `Страница ${page ?? 0} из ${total ?? 0}`,
@@ -860,24 +954,27 @@ export const translationsMap = {
   "numberField.decrement": {
     description: "Label for screen-reader for number field decrease button",
     components: ["NumberField"],
-    et: (count: string | number) => `Vähenda ${count} võrra`,
-    en: (count: string | number) => `Decrease by ${count}`,
-    ru: (count: string | number) => `Уменьшить на ${count}`,
+    et: (_count: string | number) => "Vähenda",
+    en: (_count: string | number) => "Decrease",
+    ru: (_count: string | number) => "Уменьшить",
   },
   "numberField.increment": {
     description: "Label for screen-reader for number field increase button",
     components: ["NumberField"],
-    et: (count: string | number) => `Suurenda ${count} võrra`,
-    en: (count: string | number) => `Increase by ${count}`,
-    ru: (count: string | number) => `Увеличить на ${count}`,
+    et: (_count: string | number) => "Suurenda",
+    en: (_count: string | number) => "Increase",
+    ru: (_count: string | number) => "Увеличить",
   },
   "numberField.quantityUpdated": {
     description:
       "Label for screen-reader when quantity get updated by button click",
     components: ["NumberField"],
-    et: (count: string | number) => `Uuendatud. Uus väärtus ${count}`,
-    en: (count: string | number) => `Updated. New value ${count}`,
-    ru: (count: string | number) => `Ууэндатуд. Уус вяэртус ${count}`,
+    et: (count: string | number, suffix?: string) =>
+      suffix ? `${count} ${suffix}` : `${count}`,
+    en: (count: string | number, suffix?: string) =>
+      suffix ? `${count} ${suffix}` : `${count}`,
+    ru: (count: string | number, suffix?: string) =>
+      suffix ? `${count} ${suffix}` : `${count}`,
   },
   "sidenav.backToMainMenu": {
     description: "Side navigation label",
@@ -896,12 +993,9 @@ export const translationsMap = {
   "sidenav.toggleSubmenu": {
     description: "Label for sidenav submenu toggle",
     components: ["Sidenav"],
-    et: (value: string, isOpen: boolean) =>
-      `${isOpen ? "Sulge" : "Ava"} ${value} alammenüü`,
-    en: (value: string, isOpen: boolean) =>
-      `${isOpen ? "Close" : "Open"} ${value} submenu`,
-    ru: (value: string, isOpen: boolean) =>
-      `${isOpen ? "Закрыть" : "Открыть"} ${value} подменю`,
+    et: (value: string) => `${value} alammenüü`,
+    en: (value: string) => `${value} submenu`,
+    ru: (value: string) => `Подменю ${value}`,
   },
   "buttonGroup.menu": {
     description: "Fallback label for ButtonGroup mobile dropdown trigger",
@@ -911,14 +1005,21 @@ export const translationsMap = {
     ru: "Меню",
   },
   carousel: {
-    description: "Label for carousel",
+    description: "Role description for the carousel region",
+    components: ["CarouselContent"],
+    et: "karussell",
+    en: "carousel",
+    ru: "карусель",
+  },
+  "carousel.label": {
+    description: "Default label for the carousel region",
     components: ["CarouselContent"],
     et: "Karussell",
     en: "Carousel",
     ru: "Карусель",
   },
   "carousel.slide": {
-    description: "Label for carousel slide",
+    description: "Live announcement when the carousel moves to another slide",
     components: ["CarouselContent"],
     et: (slideNumber: number, totalNumber: number) =>
       `Slaid ${slideNumber} / ${totalNumber}`,
@@ -926,6 +1027,30 @@ export const translationsMap = {
       `Slide ${slideNumber} of ${totalNumber}`,
     ru: (slideNumber: number, totalNumber: number) =>
       `Слайд ${slideNumber} из ${totalNumber}`,
+  },
+  "carousel.slideLabel": {
+    description: "Label for carousel slide",
+    components: ["CarouselContent"],
+    et: (slideNumber: number, totalNumber: number) =>
+      `${slideNumber} / ${totalNumber}`,
+    en: (slideNumber: number, totalNumber: number) =>
+      `${slideNumber} of ${totalNumber}`,
+    ru: (slideNumber: number, totalNumber: number) =>
+      `${slideNumber} из ${totalNumber}`,
+  },
+  "carousel.slideRoleDescription": {
+    description: "Role description for carousel slide",
+    components: ["CarouselContent"],
+    et: "slaid",
+    en: "slide",
+    ru: "слайд",
+  },
+  "carousel.slides": {
+    description: "Label for the carousel indicators group",
+    components: ["CarouselIndicators"],
+    et: "Slaidid",
+    en: "Slides",
+    ru: "Слайды",
   },
   "carousel.moveForward": {
     description: "Label for carousel next button",
@@ -944,9 +1069,9 @@ export const translationsMap = {
   "carousel.showSlide": {
     description: "Label for carousel slide indicator",
     components: ["CarouselIndicators"],
-    et: (slideNumber: number) => `Vaata slaidi ${slideNumber}`,
-    en: (slideNumber: number) => `Show slide ${slideNumber}`,
-    ru: (slideNumber: number) => `Показать слайд ${slideNumber}`,
+    et: (slideNumber: number) => `Slaid ${slideNumber}`,
+    en: (slideNumber: number) => `Slide ${slideNumber}`,
+    ru: (slideNumber: number) => `Слайд ${slideNumber}`,
   },
   "date-picker.january": {
     description: "Label for january month",
@@ -1216,7 +1341,7 @@ export const translationsMap = {
   },
   "date-picker.today": {
     description:
-      'Prefix announced by assistive tech before the date when a day cell represents today (e.g., "Today, Friday, 16 May 2026").',
+      'Prefix announced by assistive tech before the date when a day cell represents today (e.g., "Today, Friday, 16 May").',
     components: ["DatePicker"],
     et: "Täna",
     en: "Today",
@@ -1258,14 +1383,6 @@ export const translationsMap = {
     et: (n: number) => `Nädal ${n}`,
     en: (n: number) => `Week ${n}`,
     ru: (n: number) => `Неделя ${n}`,
-  },
-  "date-picker.week-number-header": {
-    description:
-      'ARIA label announced for the week-number column header (e.g., "Week").',
-    components: ["DatePicker"],
-    et: "Nädal",
-    en: "Week",
-    ru: "Неделя",
   },
   "date-picker.go-prev-month": {
     description: "Label for previous month navigation",
@@ -1556,6 +1673,14 @@ export const translationsMap = {
     et: "Lõpetatud",
     en: "Completed",
     ru: "Завершено",
+  },
+  "inline-edit.edit": {
+    description:
+      "Action appended to the inline edit trigger's accessible name, so a screen reader announces the value as editable",
+    components: ["InlineEdit"],
+    et: "Muuda",
+    en: "Edit",
+    ru: "Редактировать",
   },
   "vertical-stepper.error": {
     description:

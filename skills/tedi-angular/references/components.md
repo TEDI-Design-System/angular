@@ -188,6 +188,17 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   `brand-primary` independently.
 - **`[tedi-label-row]` projects your own `<label tedi-label>`** plus trailing affixes as siblings, so
   native label attributes (`for`, `id`, `aria-*`, handlers) keep working.
+- **`tedi-inline-edit` needs an `<ng-template tediInlineEditControl>`.** The control goes in that
+  template, not as plain content — it is instantiated on entering edit mode and destroyed on
+  leaving. Without the template the value never becomes editable. The inline edit does **not** own
+  the value: your control keeps its own binding, and `displayValue` has to be bound to the same
+  source. `(editCancel)` only reports that Escape was pressed; restoring the previous value is
+  yours to do. Set `[closeOnEnter]="false"` when Enter belongs to the control, such as a textarea or
+  select. Give the editor its own accessible label. A projected `tedi-feedback-text` is linked to the
+  trigger, and to the control when it is a text field, textarea, select, date field, time field or
+  file upload; other controls are not linked automatically. Use `updateOn: "change"` or
+  `"blur"` when persisting the bound value in `editCommit`; `"submit"` remains the parent form's
+  responsibility.
 - **`tedi-attachment` has no built-in action buttons.** Project neutral `tedi-button`s inside a single
   `<tedi-attachment-actions>` and wire `(click)` and `disabled` yourself.
 - **`tedi-skeleton-block` belongs inside `tedi-skeleton`.** The wrapper stacks whatever is projected
@@ -200,6 +211,55 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   `icon` input, not from projection, so you cannot swap in your own `tedi-icon` or add trailing
   content. It is decorative and `aria-hidden`, which means the projected text is the whole accessible
   name — if the icon carries meaning the text doesn't, compose a heading and an icon yourself.
+
+### File upload
+
+- **`tedi-file-upload`'s `inputId` names the hidden file input, but the add button is the control.**
+  Bind `<label tedi-label [for]>` to `inputId` as for any other control: clicking the label opens the
+  picker, and the field finds the label by its `for`, gives it an id if it has none, and names the add
+  button by the label *and* its own text. Nothing else can name the button, so a field without a label
+  announces only "Add attachment".
+- **`tedi-file-upload` has no separate "default" input, and owns its hint.** `[files]` seeds the
+  list, `[(files)]` keeps the parent in sync, `[formControl]` hands it to the form — bind a stable
+  reference, an inline literal is written back on every check. Change a file's `isLoading` or
+  `isValid` by setting a new array, as the field does not see an edit in place. The field owns one hint: the allowed
+  types and size (from `accept` / `maxSize`, off with `showRestrictions`) followed by your `hint`
+  text. Put guidance there rather than projecting a `tedi-feedback-text` hint, which would make a
+  second one. It owns one validation message the same way, shown above the hint: pass an error of
+  your own, a server error say, through `error`, where it joins the field's rejection message, or a
+  confirmation through `success`, shown only while there is no error. `error` paints the field but
+  does not change a bound control's validity. A projected error or success
+  text would show below the hint as a second message.
+- **`tedi-file-upload` validates itself.** It registers on `NG_VALIDATORS`, so a bound control fails
+  with a `rejectedFiles` error while any `isValid: false` file is listed. By default a file that
+  fails `accept`, `maxSize` or `validator` is discarded and only the summary under the field remains;
+  `keepRejectedFiles` keeps it in the list, marked invalid, instead. It shows as a danger tag; only a
+  single file in a field without `multiple` shows just its name. Filter on `isValid` before
+  uploading either way. `accept`, `maxSize` and `validator` apply to the next selection; files already
+  listed keep their verdict, so clear them yourself if you tighten a rule.
+- **A `tedi-file-upload` `validator` adds a rule but no hint.** It runs on every selected file, and
+  every rule a file breaks is reported in the one rejection summary, built-in reasons first. The
+  automatic hint cannot describe it, so describe the rule in `hint`.
+- **`maxSize` is in bytes**, the unit `File.size` is in — not megabytes as in React. The hint renders
+  it in whichever unit reads best.
+- **It selects files, it does not upload them.** `fileRemove` emits each file that leaves the list,
+  whether removed, cleared or replaced by the next pick in a single-file field, so an in-flight upload can be aborted without diffing
+  `filesChange`. Set `isLoading` on a file yourself while it uploads: its tag shows a spinner and
+  loses its remove button. The clear button still removes it, so a stuck upload is
+  never stranded; clear `isLoading` and set `isValid: false` on failure or timeout.
+- **Below `md` it stacks**: files above a full-width button row, and the clear button becomes a text
+  button. There is no input for this.
+- **`readOnly` renders the files as a list named by the label**, even a single file, which is a list of
+  one. Keep the `<label tedi-label [for]>`: the hidden file input stays rendered, disabled, so the label
+  still has its target and clicking it opens nothing.
+- **The control turns touched when the file dialog closes**, by picking or cancelling, or when focus
+  leaves the add button within the page. Opening the dialog moves focus out of the page, and that blur
+  is ignored, so a `required` error does not appear behind the open dialog.
+- **It works without `tedi-form-field`**: it paints its own surface, clear button and restrictions
+  hint, and a sibling label still names the add button. `error`, `success` and `hint` work the same
+  either way. For any other
+  describing element, put its id in a static `aria-describedby` on the component, but not one ending
+  in `-hint`, `-error` or `-success` after `inputId`: the field uses those ids for its own messages.
 
 ### Clear buttons
 
@@ -269,9 +329,20 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
 
 ### Accessibility that the types won't get right for you
 
+- **`tedi-label`'s `required` is visual only.** It draws an `aria-hidden` asterisk, so screen readers
+  hear "required" only from the control. Put `required` on a native `<input tedi-text-field>` or
+  `<textarea tedi-textarea>` (or give its form control `Validators.required`, which sets
+  `aria-required`), and bind the `required` input of `tedi-number-field`, `tedi-toggle`,
+  `tedi-select`, `tedi-date-field` and `tedi-time-field`. The label used to append a hidden
+  "Kohustuslik väli", so a field marked required only on its label was announced; it no longer is.
+  Don't add hidden text to the label yourself: it becomes part of the control's name and the field
+  is announced as required twice. `tedi-slider` is the exception: a range input always has a value,
+  and neither HTML `required` nor `aria-required` applies to it, so its `required` is visual only.
+  If the user must set the slider deliberately, say so in its hint (`tedi-feedback-text`).
 - **Give each `tedi-search` on a page a distinct `ariaLabel`.** The host is a `role="search"`
-  landmark whose name falls back to `ariaLabel`, then `label`, then `placeholder`, then the
-  translated default. Two identically named landmarks of the same type fail axe's `landmark-unique`.
+  landmark, unnamed unless `ariaLabel` is set. Two identically named landmarks of the same type fail
+  axe's `landmark-unique`. `ariaLabel` does not name the field; use `label` (with `hideLabel` if it
+  must not show).
 - **Don't hand-roll a suggestion panel around `tedi-search`.** It owns the combobox wiring itself
   (see Search suggestions above), and a second panel bolted on top fights it. The rules below apply
   when you are building a combobox out of some *other* control: the input needs `role="combobox"`,
@@ -305,6 +376,11 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   on itself and hosts the `role="status"` live region, but it is removed the moment content arrives,
   so it cannot report its own completion. Bind `[attr.aria-busy]="loading()"` on the region that
   swaps skeleton for content; without it a screen reader may announce the region mid-update.
+- **Pick the `tedi-alert` `role` by when the alert appears, not by how it looks.** The default
+  `alert` is for urgent messages that appear later (an error, something that needs action). Use
+  `status` for non-urgent messages that appear later (saved, info). Use `none` for an alert that is
+  already on the page when it loads: some screen readers (JAWS, and NVDA in some browsers) read a
+  `role="alert"` present at load immediately.
 - **Icon-only controls need an accessible name**, and don't signal state by colour alone. Sorting,
   pagination, expansion and reordering controls all need labels; those come from
   `TediTranslationService`, so check the translation keys rather than hardcoding Estonian.
@@ -317,6 +393,13 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
 - **`groupRowSpan(rows, keyFn)` needs the currently-rendered rows.** Pass
   `table.getRowModel().rows` so spans are computed after filtering and sorting. Prefer the column's
   `groupBy` where it fits.
+- **Set `meta.label` on a column whose header is blank or not plain text** (an actions column, say).
+  It names the header for screen readers. Without it a blank header has no name, and the sort,
+  filter and column-reorder labels and announcements fall back to the column id, a developer string
+  such as `"actions"` (or to `""` when the header is an empty string).
+- **Set `meta: { rowHeader: true }` on the column that identifies a row** (a name, say). Its cells
+  render as `<th scope="row">`, so screen readers announce that value as row context. Give row
+  action buttons the same context, e.g. `Muuda<span class="sr-only"> {{ row.name }}</span>`.
 - **`tedi-tabs` `overflowMode`** decides what happens when tabs don't fit: `"dropdown"` (default)
   collapses the overflow into a More menu, `"scroll"` gives horizontal scrolling with fade
   indicators.

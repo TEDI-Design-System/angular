@@ -79,28 +79,25 @@ describe("SearchComponent", () => {
     expect(label.textContent?.trim()).toBe("Otsing");
   });
 
-  describe("accessible name", () => {
-    it("should use label when provided", () => {
+  describe("landmark accessible name", () => {
+    it("should leave the landmark unnamed by default", () => {
       fixture.componentRef.setInput("label", "Otsing");
-      fixture.detectChanges();
-      expect(el.getAttribute("aria-label")).toBe("Otsing");
-    });
-
-    it("should fall back to placeholder when no label", () => {
       fixture.componentRef.setInput("placeholder", "Otsi siit");
       fixture.detectChanges();
-      expect(el.getAttribute("aria-label")).toBe("Otsi siit");
+      expect(el.hasAttribute("aria-label")).toBe(false);
     });
 
-    it("should fall back to the translated search label", () => {
-      expect(el.getAttribute("aria-label")).toBe("Otsi");
-    });
-
-    it("should prefer explicit ariaLabel over label", () => {
+    it("should name the landmark with ariaLabel", () => {
       fixture.componentRef.setInput("label", "Otsing");
-      fixture.componentRef.setInput("ariaLabel", "Otsi tooteid");
+      fixture.componentRef.setInput("ariaLabel", "Tooteotsing");
       fixture.detectChanges();
-      expect(el.getAttribute("aria-label")).toBe("Otsi tooteid");
+      expect(el.getAttribute("aria-label")).toBe("Tooteotsing");
+    });
+
+    it("should ignore an empty ariaLabel", () => {
+      fixture.componentRef.setInput("ariaLabel", "");
+      fixture.detectChanges();
+      expect(el.hasAttribute("aria-label")).toBe(false);
     });
   });
 
@@ -109,10 +106,10 @@ describe("SearchComponent", () => {
       expect(getInput().getAttribute("aria-label")).toBe("Otsi");
     });
 
-    it("should use ariaLabel when there is no visible label", () => {
-      fixture.componentRef.setInput("ariaLabel", "Otsi tooteid");
+    it("should not take the landmark's ariaLabel", () => {
+      fixture.componentRef.setInput("ariaLabel", "Tooteotsing");
       fixture.detectChanges();
-      expect(getInput().getAttribute("aria-label")).toBe("Otsi tooteid");
+      expect(getInput().getAttribute("aria-label")).toBe("Otsi");
     });
 
     it("should fall back to the placeholder when that is all there is", () => {
@@ -121,19 +118,50 @@ describe("SearchComponent", () => {
       expect(getInput().getAttribute("aria-label")).toBe("Otsi siit");
     });
 
-    it("should leave naming to the visible label when one is rendered", () => {
+    it("should leave naming to the label when one is rendered", () => {
       fixture.componentRef.setInput("label", "Otsing");
+      fixture.componentRef.setInput("ariaLabel", "Tooteotsing");
       fixture.detectChanges();
       expect(getInput().getAttribute("aria-label")).toBeNull();
     });
 
-    it("should keep the visible label even when ariaLabel is also set", () => {
+    it("should keep a hidden label as the input's name", () => {
       fixture.componentRef.setInput("label", "Otsing");
-      fixture.componentRef.setInput("ariaLabel", "Otsi tooteid");
+      fixture.componentRef.setInput("hideLabel", true);
       fixture.detectChanges();
+
+      const label = el.querySelector("label") as HTMLLabelElement;
+      expect(label.classList).toContain("sr-only");
+      expect(label.getAttribute("for")).toBe("test-id");
       expect(getInput().getAttribute("aria-label")).toBeNull();
-      expect(el.getAttribute("aria-label")).toBe("Otsi tooteid");
     });
+  });
+
+  it("should keep the search button named Otsi", () => {
+    fixture.componentRef.setInput("button", {});
+    fixture.componentRef.setInput("ariaLabel", "Tooteotsing");
+    fixture.detectChanges();
+    const button = el.querySelector(".tedi-search__button") as HTMLElement;
+    expect(button.getAttribute("aria-label")).toBe("Otsi");
+  });
+
+  it("should name both field and button Otsi when there is no label or placeholder", () => {
+    fixture.componentRef.setInput("button", {});
+    fixture.detectChanges();
+    const button = el.querySelector(".tedi-search__button") as HTMLElement;
+    expect(getInput().getAttribute("aria-label")).toBe("Otsi");
+    expect(button.getAttribute("aria-label")).toBe("Otsi");
+  });
+
+  it("should name the field by its hidden label next to an Otsi button", () => {
+    fixture.componentRef.setInput("label", "Otsi tooteid");
+    fixture.componentRef.setInput("hideLabel", true);
+    fixture.componentRef.setInput("button", {});
+    fixture.detectChanges();
+    const button = el.querySelector(".tedi-search__button") as HTMLElement;
+    expect(getInput().getAttribute("aria-label")).toBeNull();
+    expect(getInput().labels?.[0]?.textContent?.trim()).toBe("Otsi tooteid");
+    expect(button.getAttribute("aria-label")).toBe("Otsi");
   });
 
   it("should show the search icon when there is no button", () => {
@@ -246,6 +274,22 @@ describe("SearchComponent", () => {
     const feedback = freshEl.querySelector("tedi-feedback-text");
     expect(feedback?.getAttribute("id")).toBe("test-id-feedback");
     expect(feedback?.textContent?.trim()).toBe("Tagasiside tekst");
+  });
+
+  it("should apply default feedback classes when only text is given", () => {
+    const freshFixture = TestBed.createComponent(SearchComponent);
+    freshFixture.componentRef.setInput("inputId", "test-id");
+    freshFixture.componentRef.setInput("feedbackText", { text: "Vihjetekst" });
+    freshFixture.detectChanges();
+    const feedback = (freshFixture.nativeElement as HTMLElement).querySelector(
+      "tedi-feedback-text",
+    );
+
+    expect(feedback?.className).not.toContain("undefined");
+    expect(feedback?.classList).toContain("tedi-feedback-text--hint");
+    expect(feedback?.classList).toContain("tedi-feedback-text--left");
+    expect(feedback?.getAttribute("role")).toBeNull();
+    expect(feedback?.getAttribute("aria-live")).toBeNull();
   });
 
   it("should not set aria-describedby without feedbackText", () => {

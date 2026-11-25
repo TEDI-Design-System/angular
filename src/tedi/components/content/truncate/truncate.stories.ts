@@ -5,6 +5,10 @@ import {
   StoryObj,
 } from "@storybook/angular";
 import { TruncateComponent } from "./truncate.component";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 
 const LOREM_IPSUM = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras quam sapien, ultrices quis suscipit in, sodales vel justo. Curabitur lobortis quam dolor, vel dapibus dui pellentesque in. Maecenas auctor lacus elit, a vulputate ante cursus vitae. Proin mollis auctor ipsum nec malesuada. Aliquam turpis dui, dictum sit amet eros ac, iaculis mollis diam. Vivamus sed nulla ut justo fermentum ornare. Nam iaculis accumsan euismod. Sed efficitur risus a nisl interdum, placerat tincidunt velit sollicitudin. Donec ac tincidunt lorem, id ornare felis. Vestibulum sed lacinia diam. Donec vehicula mi maximus purus sollicitudin, at pulvinar lacus placerat.`;
 
@@ -25,6 +29,7 @@ export default {
     status: {
       type: ["breakpointSupport"],
     },
+    chromatic: { disableSnapshot: true },
   },
   argTypes: {
     text: {
@@ -117,10 +122,29 @@ export const NotExpandable: Story = {
  * `maxLength` accepts a breakpoint object, so fewer characters can be shown on narrow
  * viewports. Resize the preview to see the collapsed length change.
  */
+const RESPONSIVE_MAX_LENGTH = `<tedi-truncate [text]="text" [maxLength]="{ xs: 80, md: 200, xl: 400 }" />`;
+
 export const ResponsiveMaxLength: Story = {
-  parameters: { controls: { disable: true } },
+  parameters: {
+    controls: { disable: true },
+  },
   render: () => ({
     props: { text: LOREM_IPSUM },
-    template: `<tedi-truncate [text]="text" [maxLength]="{ xs: 80, md: 200, xl: 400 }" />`,
+    template: RESPONSIVE_MAX_LENGTH,
   }),
+};
+
+/** Chromatic snapshot for Truncate: add every new visual variant here too. */
+export const VisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
+  render: () =>
+    visualTest([
+      { label: "Collapsed", story: Default },
+      { label: "Expanded", story: Expanded },
+      { label: "Not expandable", story: NotExpandable },
+      { label: "Responsive max length", story: ResponsiveMaxLength },
+    ]),
 };

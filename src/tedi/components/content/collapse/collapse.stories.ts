@@ -1,6 +1,11 @@
 import { argsToTemplate, type Meta, type StoryObj } from "@storybook/angular";
 
 import { CollapseComponent } from "./collapse.component";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+  VisualTestStory,
+} from "../../../../../.storybook/visual-test-story";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.0.4-(work-in-progress)?node-id=15433-138256&amp;m=dev" target="_BLANK" class="sbdocs sbdocs-a css-ajfpqr">Figma ↗</a><br>
@@ -9,9 +14,10 @@ import { CollapseComponent } from "./collapse.component";
  * <p>Collapse component is used to hide or show content.</p>
  */
 
-export default {
+const meta = {
   title: "TEDI-Ready/Content/Collapse",
   component: CollapseComponent,
+  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     defaultOpen: false,
     hideCollapseText: false,
@@ -91,6 +97,8 @@ export default {
   }),
 } as Meta<CollapseComponent>;
 
+export default meta;
+
 type Story = StoryObj<CollapseComponent>;
 
 export const Default: Story = {
@@ -155,4 +163,38 @@ export const IconOnlyInverted: Story = {
       value: "brand",
     },
   },
+};
+
+/** Renders a docs story that sits on the `brand` background inside `bg bg-primary`. */
+const onBrand = (story: Story): VisualTestStory => ({
+  args: story.args,
+  render: (args: never, context: never) => {
+    const result = (story.render ?? meta.render)!(args, context);
+    return {
+      ...result,
+      template: `<div class="bg bg-primary">${result.template}</div>`,
+    };
+  },
+});
+
+/** Chromatic snapshot for Collapse: add every new visual variant here too. */
+export const VisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+    controls: { disable: true },
+  },
+  render: () =>
+    visualTest(
+      [
+        { label: "Default", story: Default },
+        { label: "Icon neutral button", story: IconNeutralButton },
+        { label: "Icon secondary button", story: IconSecondaryButton },
+        { label: "Initially open", story: InitiallyOpen },
+        { label: "Small", story: Small },
+        { label: "With text inverted", story: onBrand(WithTextInverted) },
+        { label: "Icon only inverted", story: onBrand(IconOnlyInverted) },
+      ],
+      { args: meta.args, render: meta.render },
+    ),
 };

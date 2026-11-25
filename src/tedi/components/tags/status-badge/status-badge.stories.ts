@@ -4,6 +4,10 @@ import {
   moduleMetadata,
   argsToTemplate,
 } from "@storybook/angular";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { IconComponent } from "../../base/icon/icon.component";
 import { TextComponent } from "../../base/text/text.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
@@ -91,6 +95,9 @@ export default {
       ],
     }),
   ],
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
   argTypes: {
     color: {
       control: "select",
@@ -178,7 +185,6 @@ export default {
 } as Meta;
 
 export const Default: StoryObj<StatusBadgeComponent> = {
-  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     color: "neutral",
     variant: "filled",
@@ -335,4 +341,20 @@ export const WithTooltip: StoryObj<StatusBadgeComponent> = {
       </tedi-tooltip>
     `,
   }),
+};
+
+/** Chromatic snapshot for StatusBadge: add every new visual variant here too. */
+export const VisualTest: StoryObj<StatusBadgeComponent> = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
+  render: () =>
+    visualTest([
+      { label: "Default", story: Default },
+      { label: "Size", story: Size },
+      { label: "Colors", story: Colors },
+      { label: "With indicator", story: WithIndicator },
+      { label: "With tooltip", story: WithTooltip },
+    ]),
 };

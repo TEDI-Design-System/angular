@@ -9,6 +9,10 @@ import {
   FloatingButtonComponent,
   type FloatingButtonVariant,
 } from "./floating-button.component";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { IconComponent } from "../../base/icon/icon.component";
 import { TextComponent } from "../../base/text/text.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
@@ -16,8 +20,28 @@ import { ColComponent } from "../../helpers/grid/col/col.component";
 import { TooltipComponent } from "../../overlay/tooltip/tooltip.component";
 import { TooltipTriggerComponent } from "../../overlay/tooltip/tooltip-trigger/tooltip-trigger.component";
 import { TooltipContentComponent } from "../../overlay/tooltip/tooltip-content/tooltip-content.component";
+import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
 
 const PSEUDO_STATE = ["Default", "Hover", "Active", "Focus", "Disabled"];
+
+// The VisualTest helper keeps only templates, so it re-adds these styles itself.
+const VERTICAL_STYLES = `
+  .floating-vertical-example {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--button-md-icon-size);
+    height: 14rem;
+  }
+`;
+
+const PLACEMENT_STYLES = `
+  .floating-placement-side {
+    position: absolute; top: 50%; right: 0; translate: 0 -50%;
+    display: flex; align-items: center; justify-content: center;
+    width: var(--button-md-icon-size); height: 12rem;
+  }
+`;
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.75.90?node-id=4515-65391&m=dev" target="_blank">Figma ↗</a><br/>
@@ -29,6 +53,7 @@ export default {
   decorators: [
     moduleMetadata({
       imports: [
+        VerticalSpacingDirective,
         FloatingButtonComponent,
         IconComponent,
         RowComponent,
@@ -44,6 +69,7 @@ export default {
     status: {
       type: ["mobileViewDifference"],
     },
+    chromatic: { disableSnapshot: true },
   },
   args: {
     variant: "primary",
@@ -238,17 +264,7 @@ export const Vertical: StoryObj<FloatingButtonType> = {
   },
   render: () => ({
     props: { variants: ["primary", "secondary"] as FloatingButtonVariant[] },
-    styles: [
-      `
-      .floating-vertical-example {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: var(--button-md-icon-size);
-        height: 14rem;
-      }
-    `,
-    ],
+    styles: [VERTICAL_STYLES],
     template: `
       <tedi-row [cols]="1" [gapY]="4">
         <tedi-col *ngFor="let variant of variants">
@@ -363,15 +379,7 @@ export const Placement: StoryObj<FloatingButtonType> = {
   },
   render: () => ({
     props: {},
-    styles: [
-      `
-      .floating-placement-side {
-        position: absolute; top: 50%; right: 0; translate: 0 -50%;
-        display: flex; align-items: center; justify-content: center;
-        width: var(--button-md-icon-size); height: 12rem;
-      }
-    `,
-    ],
+    styles: [PLACEMENT_STYLES],
     template: `
       <div style="position: relative; height: 20rem; border: 1px solid var(--general-border-primary);">
         <button
@@ -403,5 +411,30 @@ export const Placement: StoryObj<FloatingButtonType> = {
         </div>
       </div>
     `,
+  }),
+};
+
+/** Chromatic snapshot for FloatingButton: add every new visual variant here too. */
+export const VisualTest: StoryObj = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+    controls: { disable: true },
+    pseudo: {
+      hover: '[data-state="Hover"]',
+      active: '[data-state="Active"]',
+      focusVisible: '[data-state="Focus"]',
+    },
+  },
+  render: () => ({
+    ...visualTest([
+      { label: "Default", story: Default },
+      { label: "Horizontal", story: Horizontal },
+      { label: "Vertical", story: Vertical },
+      { label: "Sizes", story: Sizes },
+      { label: "States", story: States },
+      { label: "Placement", story: Placement },
+    ]),
+    styles: [VERTICAL_STYLES, PLACEMENT_STYLES],
   }),
 };

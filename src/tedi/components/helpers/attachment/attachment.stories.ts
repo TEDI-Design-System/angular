@@ -20,6 +20,13 @@ import { DropdownContentComponent } from "../../overlay/dropdown/dropdown-conten
 import { DropdownItemComponent } from "../../overlay/dropdown/dropdown-item/dropdown-item.component";
 import { ShowAtDirective } from "../../../directives/show-at/show-at.directive";
 import { HideAtDirective } from "../../../directives/hide-at/hide-at.directive";
+import { RowComponent } from "../grid/row/row.component";
+import { ColComponent } from "../grid/col/col.component";
+import { TextComponent } from "../../base/text/text.component";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 
 type StoryArgs = ComponentInputs<AttachmentComponent>;
 
@@ -35,7 +42,7 @@ type StoryArgs = ComponentInputs<AttachmentComponent>;
  * Always give each button an `aria-label`. Wrap a button in a `tedi-tooltip`
  * (put `tedi-attachment-actions` on the `tedi-tooltip`) to surface a tooltip.
  */
-export default {
+const meta = {
   title: "TEDI-Ready/Components/Helpers/Attachment",
   component: AttachmentComponent,
   decorators: [
@@ -56,9 +63,15 @@ export default {
         DropdownItemComponent,
         ShowAtDirective,
         HideAtDirective,
+        RowComponent,
+        ColComponent,
+        TextComponent,
       ],
     }),
   ],
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
   argTypes: {
     name: {
       description: "File name to display.",
@@ -119,6 +132,8 @@ export default {
   },
 } as Meta<AttachmentComponent>;
 
+export default meta;
+
 type Story = StoryObj<AttachmentComponent>;
 
 const action = (icon: string, label: string, size?: "small") => `
@@ -141,33 +156,27 @@ const renderWithDelete = (args: StoryArgs) => ({
 });
 
 export const Default: Story = {
-  parameters: { chromatic: { disableSnapshot: true } },
   render: renderWithDelete,
 };
+
+const READ_ONLY_TEMPLATE = `
+      <div class="flex flex-column gap-2">
+        <tedi-attachment name="Kodukülastusakt_Triin.pdf">${downloadAction}</tedi-attachment>
+        <tedi-attachment name="Lisa_5.pdf">${downloadAction}</tedi-attachment>
+        <tedi-attachment name="Graafik_2025.pdf">${downloadAction}</tedi-attachment>
+      </div>
+    `;
 
 /**
  * Read-only attachments expose only a download action — no delete button.
  */
 export const ReadOnly: Story = {
   render: () => ({
-    template: `
-      <div class="flex flex-column gap-2">
-        <tedi-attachment name="Kodukülastusakt_Triin.pdf">${downloadAction}</tedi-attachment>
-        <tedi-attachment name="Lisa_5.pdf">${downloadAction}</tedi-attachment>
-        <tedi-attachment name="Graafik_2025.pdf">${downloadAction}</tedi-attachment>
-      </div>
-    `,
+    template: READ_ONLY_TEMPLATE,
   }),
 };
 
-/**
- * Project a `<tedi-progress-bar>` to show upload progress. Use a projected
- * `<tedi-feedback-text type="hint">` for the status label; the percentage is
- * rendered automatically.
- */
-export const WithProgress: Story = {
-  render: () => ({
-    template: `
+const WITH_PROGRESS_TEMPLATE = `
       <div class="flex flex-column gap-2">
         <tedi-attachment name="Kodukülastusakt_Triin.pdf">
           <tedi-progress-bar [value]="34" valuePosition="bottom">
@@ -189,7 +198,16 @@ export const WithProgress: Story = {
           </tedi-attachment-actions>
         </tedi-attachment>
       </div>
-    `,
+    `;
+
+/**
+ * Project a `<tedi-progress-bar>` to show upload progress. Use a projected
+ * `<tedi-feedback-text type="hint">` for the status label; the percentage is
+ * rendered automatically.
+ */
+export const WithProgress: Story = {
+  render: () => ({
+    template: WITH_PROGRESS_TEMPLATE,
   }),
 };
 
@@ -200,45 +218,42 @@ export const WithFileSize: Story = {
   },
 };
 
-/**
- * Pass a Material Symbol name to `icon` to show a leading file-type icon
- * before the file name.
- */
-export const WithIcon: Story = {
-  render: () => ({
-    template: `
+const WITH_ICON_TEMPLATE = `
       <div class="flex flex-column gap-2">
         <tedi-attachment name="Kodukülastusakt_Triin.pdf" fileSize="0,9 MB" icon="description">${deleteAction}</tedi-attachment>
         <tedi-attachment name="Kodukülastusakt_Triin.pdf" fileSize="0,9 MB" icon="imagesmode">${deleteAction}</tedi-attachment>
         <tedi-attachment name="Kodukülastusakt_Triin.pdf" fileSize="0,9 MB" icon="imagesmode">${deleteAction}</tedi-attachment>
         <tedi-attachment name="Kodukülastusakt_Triin.pdf" fileSize="0,9 MB" icon="picture_as_pdf">${deleteAction}</tedi-attachment>
       </div>
-    `,
+    `;
+
+/**
+ * Pass a Material Symbol name to `icon` to show a leading file-type icon
+ * before the file name.
+ */
+export const WithIcon: Story = {
+  render: () => ({
+    template: WITH_ICON_TEMPLATE,
   }),
 };
+
+const WITHOUT_DELETE_TEMPLATE = `
+      <div class="flex flex-column gap-2">
+        <tedi-attachment name="Kodukülastusakt_Triin.pdf" fileSize="0,9 MB" />
+        <tedi-attachment name="Kodukülastusakt_Triin.pdf" fileSize="0,9 MB" />
+      </div>
+    `;
 
 /**
  * Leave the actions slot empty to render an attachment with no action buttons.
  */
 export const WithoutDeleteButton: Story = {
   render: () => ({
-    template: `
-      <div class="flex flex-column gap-2">
-        <tedi-attachment name="Kodukülastusakt_Triin.pdf" fileSize="0,9 MB" />
-        <tedi-attachment name="Kodukülastusakt_Triin.pdf" fileSize="0,9 MB" />
-      </div>
-    `,
+    template: WITHOUT_DELETE_TEMPLATE,
   }),
 };
 
-/**
- * Project any combination of neutral icon buttons into the actions slot —
- * view, download, delete, or a mix. The last row uses `size="small"` buttons
- * alongside a progress bar.
- */
-export const WithDifferentActions: Story = {
-  render: () => ({
-    template: `
+const DIFFERENT_ACTIONS_TEMPLATE = `
       <div class="flex flex-column gap-2">
         <tedi-attachment name="Kodukülastusakt_Triin.pdf">
           <tedi-attachment-actions>
@@ -265,19 +280,20 @@ export const WithDifferentActions: Story = {
           </tedi-attachment-actions>
         </tedi-attachment>
       </div>
-    `,
+    `;
+
+/**
+ * Project any combination of neutral icon buttons into the actions slot —
+ * view, download, delete, or a mix. The last row uses `size="small"` buttons
+ * alongside a progress bar.
+ */
+export const WithDifferentActions: Story = {
+  render: () => ({
+    template: DIFFERENT_ACTIONS_TEMPLATE,
   }),
 };
 
-/**
- * Set `direction="vertical"` to stack the name, size and progress in a column
- * with the actions pinned top-right. Useful on mobile or in narrow containers
- * such as a sidebar. Leave `direction` unset to switch automatically below the
- * `verticalBelow` breakpoint (default `sm`).
- */
-export const Vertical: Story = {
-  render: () => ({
-    template: `
+const VERTICAL_TEMPLATE = `
       <div class="flex flex-column gap-3" style="max-width: 350px;">
         <tedi-attachment
           direction="vertical"
@@ -322,13 +338,21 @@ export const Vertical: Story = {
           </tedi-attachment-actions>
         </tedi-attachment>
       </div>
-    `,
+    `;
+
+/**
+ * Set `direction="vertical"` to stack the name, size and progress in a column
+ * with the actions pinned top-right. Useful on mobile or in narrow containers
+ * such as a sidebar. Leave `direction` unset to switch automatically below the
+ * `verticalBelow` breakpoint (default `sm`).
+ */
+export const Vertical: Story = {
+  render: () => ({
+    template: VERTICAL_TEMPLATE,
   }),
 };
 
-export const WithError: Story = {
-  render: () => ({
-    template: `
+const WITH_ERROR_TEMPLATE = `
       <div class="flex flex-column gap-3">
         <tedi-attachment name="Kodukülastusakt_Triin.pdf">${deleteAction}</tedi-attachment>
         <tedi-attachment
@@ -336,24 +360,15 @@ export const WithError: Story = {
           error="Feedback text"
         >${deleteAction}</tedi-attachment>
       </div>
-    `,
+    `;
+
+export const WithError: Story = {
+  render: () => ({
+    template: WITH_ERROR_TEMPLATE,
   }),
 };
 
-/**
- * Labeled neutral buttons (icon + text) on desktop that collapse to icon-only
- * buttons with tooltips on narrow screens. Project two `<tedi-attachment-actions>`
- * containers and toggle them with the `showAt` / `hideAt` directives at the `sm`
- * breakpoint.
- *
- * Add `padded` to the labeled container so it adds a gap between the buttons and
- * inline padding — neutral text buttons have no horizontal padding of their own
- * and would otherwise touch the card edge. Icon-only buttons omit it and sit
- * flush. Resize the preview to see the switch.
- */
-export const LabeledActions: Story = {
-  render: () => ({
-    template: `
+const LABELED_ACTIONS_TEMPLATE = `
       <tedi-attachment name="Kodukülastusakt_Triin.pdf">
         <tedi-attachment-actions padded showAt="sm">
           <button tedi-button variant="neutral">
@@ -370,6 +385,45 @@ export const LabeledActions: Story = {
           ${action("delete", "Kustuta")}
         </tedi-attachment-actions>
       </tedi-attachment>
-    `,
+    `;
+
+/**
+ * Labeled neutral buttons (icon + text) on desktop that collapse to icon-only
+ * buttons with tooltips on narrow screens. Project two `<tedi-attachment-actions>`
+ * containers and toggle them with the `showAt` / `hideAt` directives at the `sm`
+ * breakpoint.
+ *
+ * Add `padded` to the labeled container so it adds a gap between the buttons and
+ * inline padding — neutral text buttons have no horizontal padding of their own
+ * and would otherwise touch the card edge. Icon-only buttons omit it and sit
+ * flush. Resize the preview to see the switch.
+ */
+export const LabeledActions: Story = {
+  render: () => ({
+    template: LABELED_ACTIONS_TEMPLATE,
   }),
+};
+
+/** Chromatic snapshot for Attachment: add every new visual variant here too. */
+export const VisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
+  render: () =>
+    visualTest(
+      [
+        { label: "Default", story: Default },
+        { label: "Read only", story: ReadOnly },
+        { label: "With progress", story: WithProgress },
+        { label: "With file size", story: WithFileSize },
+        { label: "With icon", story: WithIcon },
+        { label: "Without delete button", story: WithoutDeleteButton },
+        { label: "With different actions", story: WithDifferentActions },
+        { label: "Vertical", story: Vertical },
+        { label: "With error", story: WithError },
+        { label: "Labeled actions", story: LabeledActions },
+      ],
+      { args: meta.args },
+    ),
 };

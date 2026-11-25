@@ -10,6 +10,11 @@ import {
   viewChild,
 } from "@angular/core";
 import { Meta, StoryObj, moduleMetadata } from "@storybook/angular";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+  VisualTestStory,
+} from "../../../../../.storybook/visual-test-story";
 
 import { IconComponent } from "../../base/icon/icon.component";
 import { TextComponent } from "../../base/text/text.component";
@@ -26,11 +31,15 @@ import { ButtonComponent } from "../../buttons/button/button.component";
 import { PopoverComponent } from "../../overlay/popover/popover.component";
 import { PopoverTriggerDirective } from "../../overlay/popover/popover-trigger/popover-trigger.directive";
 import { PopoverContentComponent } from "../../overlay/popover/popover-content/popover-content.component";
+import { RowComponent } from "../../helpers/grid/row/row.component";
+import { ColComponent } from "../../helpers/grid/col/col.component";
 
 const LOREM =
   "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor " +
   "incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud " +
   "exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
+
+const CARD_WRAPPER = "max-width: 390px; padding: 1.5rem;";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.108.103?m=dev&node-id=8826-63667" target="_blank">Figma ↗</a><br/>
@@ -59,6 +68,8 @@ const meta = {
         HideAtDirective,
         SeparatorComponent,
         TagComponent,
+        RowComponent,
+        ColComponent,
       ],
     }),
     (story, context) => {
@@ -66,9 +77,7 @@ const meta = {
       // `fullscreen` layout avoids Storybook's padded-layout scrollbar at fixed
       // viewports; add the padding back here for the constrained card stories.
       // Full-width stories manage their own layout/padding.
-      const wrapper = context.parameters["fullWidth"]
-        ? ""
-        : "max-width: 390px; padding: 1.5rem;";
+      const wrapper = context.parameters["fullWidth"] ? "" : CARD_WRAPPER;
       return {
         ...rendered,
         template: `<div style="${wrapper}">${rendered.template}</div>`,
@@ -77,6 +86,7 @@ const meta = {
   ],
   parameters: {
     layout: "fullscreen",
+    chromatic: { disableSnapshot: true },
     design: {
       type: "figma",
       url: "https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.108.103?m=dev&node-id=8826-63667",
@@ -156,7 +166,7 @@ const meta = {
         defaultValue: { summary: "false" },
       },
     },
-    bordered: {
+    divided: {
       description:
         "Draw a divider under each item except the last (sub-items included) so the list reads as separated rows.",
       control: "boolean",
@@ -310,6 +320,25 @@ const controllableNestedItems = `
   </tedi-table-of-contents-item>
 `;
 
+const defaultToc = (args: Story["args"]) => ({
+  props: args,
+  template: `
+      <tedi-table-of-contents
+        [heading]="heading"
+        [headingLevel]="headingLevel"
+        [variant]="variant"
+        [activeId]="activeId"
+        [defaultOpen]="defaultOpen"
+        [numbered]="numbered"
+        [sticky]="sticky"
+        [divided]="divided"
+        [ariaLabel]="ariaLabel"
+      >
+        ${controllableNestedItems}
+      </tedi-table-of-contents>
+    `,
+});
+
 export const Default: Story = {
   args: {
     heading: "Sisukord",
@@ -320,25 +349,9 @@ export const Default: Story = {
     numbered: false,
     sticky: false,
     separator: false,
-    bordered: false,
+    divided: false,
   },
-  render: (args) => ({
-    props: args,
-    template: `
-      <tedi-table-of-contents
-        [heading]="heading"
-        [headingLevel]="headingLevel"
-        [variant]="variant"
-        [activeId]="activeId"
-        [defaultOpen]="defaultOpen"
-        [numbered]="numbered"
-        [sticky]="sticky"
-        [bordered]="bordered"
-      >
-        ${controllableNestedItems}
-      </tedi-table-of-contents>
-    `,
-  }),
+  render: defaultToc,
 };
 
 // The story renders a private styleguide matrix, so surface how each state maps
@@ -387,8 +400,8 @@ const ITEM_STATES_SOURCE = `<!-- Selected: mark the item's id as active. Hover i
   </tedi-table-of-contents-item>
 </tedi-table-of-contents>
 
-<!-- With border: enable bordered for a full-width divider under every row. -->
-<tedi-table-of-contents [heading]="null" [bordered]="true" activeId="selected">
+<!-- Divided: enable divided for a full-width divider under every row. -->
+<tedi-table-of-contents [heading]="null" [divided]="true" activeId="selected">
   <tedi-table-of-contents-item itemId="default">
     <a tedi-link href="#default" [underline]="false">Default</a>
   </tedi-table-of-contents-item>
@@ -397,58 +410,52 @@ const ITEM_STATES_SOURCE = `<!-- Selected: mark the item's id as active. Hover i
   </tedi-table-of-contents-item>
 </tedi-table-of-contents>`;
 
-export const ItemStates: Story = {
-  parameters: {
-    fullWidth: true,
-    pseudo: { hover: ".toc-item-states__hover" },
-    docs: { source: { language: "html", code: ITEM_STATES_SOURCE } },
-  },
-  render: () => ({
-    props: {
-      variants: [
-        {
-          header: "Default",
-          numbered: false,
-          icon: false,
-          separator: false,
-          bordered: false,
-        },
-        {
-          header: "With number",
-          numbered: true,
-          icon: false,
-          separator: false,
-          bordered: false,
-        },
-        {
-          header: "With icon",
-          numbered: false,
-          icon: true,
-          separator: false,
-          bordered: false,
-        },
-        {
-          header: "With separator",
-          numbered: false,
-          icon: false,
-          separator: true,
-          bordered: false,
-        },
-        {
-          header: "With border",
-          numbered: false,
-          icon: false,
-          separator: false,
-          bordered: true,
-        },
-      ],
-      states: [
-        { id: "default", label: "Default", hover: false },
-        { id: "hover", label: "Hover", hover: true },
-        { id: "selected", label: "Selected", hover: false },
-      ],
+const ITEM_STATES_PROPS = {
+  variants: [
+    {
+      header: "Default",
+      numbered: false,
+      icon: false,
+      separator: false,
+      divided: false,
     },
-    template: `
+    {
+      header: "With number",
+      numbered: true,
+      icon: false,
+      separator: false,
+      divided: false,
+    },
+    {
+      header: "With icon",
+      numbered: false,
+      icon: true,
+      separator: false,
+      divided: false,
+    },
+    {
+      header: "With separator",
+      numbered: false,
+      icon: false,
+      separator: true,
+      divided: false,
+    },
+    {
+      header: "Divided",
+      numbered: false,
+      icon: false,
+      separator: false,
+      divided: true,
+    },
+  ],
+  states: [
+    { id: "default", label: "Default", hover: false },
+    { id: "hover", label: "Hover", hover: true },
+    { id: "selected", label: "Selected", hover: false },
+  ],
+};
+
+const ITEM_STATES_TEMPLATE = `
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 1.5rem; padding: 1rem;">
         @for (variant of variants; track variant.header) {
           <div style="display: flex; flex-direction: column; gap: 0.5rem;">
@@ -457,9 +464,9 @@ export const ItemStates: Story = {
               [heading]="null"
               [sticky]="false"
               [numbered]="variant.numbered"
-              [bordered]="variant.bordered"
+              [divided]="variant.divided"
               activeId="selected"
-              [ariaLabel]="variant.header + ' states'"
+              [ariaLabel]="variant.header"
             >
               @for (state of states; track state.id) {
                 <tedi-table-of-contents-item [itemId]="state.id" [separator]="variant.separator">
@@ -471,9 +478,9 @@ export const ItemStates: Story = {
                   </a>
                 </tedi-table-of-contents-item>
               }
-              @if (variant.bordered) {
+              @if (variant.divided) {
                 <!--
-                  'bordered' drops the divider under the last item (the card supplies
+                  'divided' drops the divider under the last item (the card supplies
                   that edge in real use). This inert trailing row keeps the Selected
                   state above it non-last, so it shows its real divider like the design.
                 -->
@@ -483,76 +490,97 @@ export const ItemStates: Story = {
           </div>
         }
       </div>
-    `,
+    `;
+
+export const ItemStates: Story = {
+  parameters: {
+    fullWidth: true,
+    pseudo: { hover: ".toc-item-states__hover" },
+    docs: { source: { language: "html", code: ITEM_STATES_SOURCE } },
+  },
+  render: () => ({
+    props: ITEM_STATES_PROPS,
+    template: ITEM_STATES_TEMPLATE,
   }),
 };
 
 export const Transparent: Story = {
-  render: () => ({
+  render: ({ ariaLabel }) => ({
+    props: { ariaLabel },
     template: `
-      <tedi-table-of-contents heading="Sisukord" variant="transparent" [sticky]="false" activeId="methods">
-        ${items()}
-      </tedi-table-of-contents>
+        <tedi-table-of-contents heading="Sisukord" variant="transparent" [sticky]="false" activeId="methods" [ariaLabel]="ariaLabel">
+          ${items()}
+        </tedi-table-of-contents>
     `,
   }),
 };
 
 export const WithSlot: Story = {
-  render: () => ({
+  render: ({ ariaLabel }) => ({
+    props: { ariaLabel },
     template: `
-      <tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods">
-        ${items({ slot: true })}
-      </tedi-table-of-contents>
+        <tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods" [ariaLabel]="ariaLabel">
+          ${items({ slot: true })}
+        </tedi-table-of-contents>
     `,
   }),
 };
 
 export const Numbered: Story = {
-  render: () => ({
+  render: ({ ariaLabel }) => ({
+    props: { ariaLabel },
     template: `
-      <tedi-table-of-contents heading="Sisukord" [sticky]="false" [numbered]="true" activeId="methods">
-        ${items()}
-      </tedi-table-of-contents>
+        <tedi-table-of-contents heading="Sisukord" [sticky]="false" [numbered]="true" activeId="methods" [ariaLabel]="ariaLabel">
+          ${items()}
+        </tedi-table-of-contents>
     `,
   }),
 };
 
 export const WithIcon: Story = {
-  render: () => ({
+  render: ({ ariaLabel }) => ({
+    props: { ariaLabel },
     template: `
-      <tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods">
-        ${items({ icon: true })}
-      </tedi-table-of-contents>
+        <tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods" [ariaLabel]="ariaLabel">
+          ${items({ icon: true })}
+        </tedi-table-of-contents>
     `,
   }),
 };
 
 export const Headless: Story = {
-  render: () => ({
+  render: ({ ariaLabel }) => ({
+    props: { ariaLabel },
     template: `
-      <tedi-table-of-contents [heading]="null" [sticky]="false" [numbered]="true" activeId="methods">
-        ${items()}
-      </tedi-table-of-contents>
+        <tedi-table-of-contents [heading]="null" [sticky]="false" [numbered]="true" activeId="methods" [ariaLabel]="ariaLabel">
+          ${items()}
+        </tedi-table-of-contents>
     `,
   }),
 };
 
 export const WithSeparator: Story = {
-  render: () => ({
+  render: ({ ariaLabel }) => ({
+    props: { ariaLabel },
     template: `
-      <tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods">
-        ${items({ icon: true, separator: true })}
-      </tedi-table-of-contents>
+        <tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods" [ariaLabel]="ariaLabel">
+          ${items({ icon: true, separator: true })}
+        </tedi-table-of-contents>
     `,
   }),
 };
 
-export const Bordered: Story = {
-  render: () => ({
+/**
+ * `divided` draws a divider between items, sub-items included, so the list reads as
+ * separated rows.
+ */
+export const Divided: Story = {
+  render: ({ ariaLabel }) => ({
+    props: { ariaLabel },
     template: `
-      <tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods" [bordered]="true">
-        ${items({ icon: true })}
-      </tedi-table-of-contents>
+        <tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods" [divided]="true" [ariaLabel]="ariaLabel">
+          ${items({ icon: true })}
+        </tedi-table-of-contents>
     `,
   }),
 };
@@ -979,6 +1007,7 @@ export class DocPageComponent implements OnDestroy {
 export const StickyInLayout: Story = {
   parameters: {
     layout: "fullscreen",
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
     fullWidth: true,
     docs: {
       // Own iframe, so the window scrolls and the default 100dvh max height applies.
@@ -1000,7 +1029,7 @@ export const StickyInLayout: Story = {
  * bottom-sheet overlay. Resize the canvas to switch between the two.
  *
  * `tedi-table-of-contents-collapsible` shares the list-level inputs with the root
- * component — `heading`, `activeId`, `defaultOpen`, `numbered`, `bordered`,
+ * component — `heading`, `activeId`, `defaultOpen`, `numbered`, `divided`,
  * `sticky` and `ariaLabel` — so the controls above apply here too. It leaves out
  * the desktop-card-only inputs (`variant`, `headingLevel`, `stickyOffset`,
  * `stickyMaxHeight`) and adds `hideOnScroll` + `scrollContainer` (see the
@@ -1016,7 +1045,7 @@ export const Collapsible: Story = {
     heading: "Sisukord",
     activeId: "methods",
     numbered: false,
-    bordered: false,
+    divided: false,
     sticky: false,
     hideOnScroll: false,
     separator: false,
@@ -1037,7 +1066,7 @@ export const Collapsible: Story = {
             [sticky]="false"
             [activeId]="activeId"
             [numbered]="numbered"
-            [bordered]="bordered"
+            [divided]="divided"
             [ariaLabel]="ariaLabel"
           >
             ${controllableNestedItems}
@@ -1068,7 +1097,7 @@ export const Collapsible: Story = {
           [heading]="heading"
           [activeId]="activeId"
           [numbered]="numbered"
-          [bordered]="bordered"
+          [divided]="divided"
           [sticky]="sticky"
           [hideOnScroll]="hideOnScroll"
           [ariaLabel]="ariaLabel"
@@ -1090,6 +1119,7 @@ export const CollapsibleHideOnScroll: Story = {
   name: "Collapsible: hide on scroll",
   parameters: {
     layout: "fullscreen",
+    chromatic: { disableSnapshot: false, viewports: [375] },
     fullWidth: true,
     controls: { exclude: ["variant", "itemId", "headingLevel"] },
   },
@@ -1137,4 +1167,75 @@ export const CollapsibleHideOnScroll: Story = {
       </div>
     `,
   }),
+};
+
+/** The meta decorator's card width, which `visualTest` doesn't apply. */
+const card = (story: Story): VisualTestStory => ({
+  args: story.args,
+  render: (args: never, context: never) => {
+    const { props, template } = story.render!(args, context);
+    return {
+      props,
+      template: `<div style="${CARD_WRAPPER}">${template}</div>`,
+    };
+  },
+});
+
+/** Chromatic snapshot for TableOfContents: add every new visual variant here too. */
+export const VisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    fullWidth: true,
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+    pseudo: { hover: ".toc-item-states__hover" },
+  },
+  render: () =>
+    visualTest([
+      {
+        label: "Default",
+        story: card(Default),
+        args: { ariaLabel: "Sisukord (vaikimisi)" },
+      },
+      { label: "Item states", story: ItemStates },
+      {
+        label: "Transparent",
+        story: card(Transparent),
+        args: { ariaLabel: "Sisukord (läbipaistev)" },
+      },
+      {
+        label: "With slot",
+        story: card(WithSlot),
+        args: { ariaLabel: "Sisukord (lisasisuga)" },
+      },
+      {
+        label: "Numbered",
+        story: card(Numbered),
+        args: { ariaLabel: "Sisukord (nummerdatud)" },
+      },
+      {
+        label: "With icon",
+        story: card(WithIcon),
+        args: { ariaLabel: "Sisukord (ikooniga)" },
+      },
+      {
+        label: "Headless",
+        story: card(Headless),
+        args: { ariaLabel: "Sisukord (pealkirjata)" },
+      },
+      {
+        label: "With separator",
+        story: card(WithSeparator),
+        args: { ariaLabel: "Sisukord (eraldajaga)" },
+      },
+      {
+        label: "Divided",
+        story: card(Divided),
+        args: { ariaLabel: "Sisukord (ridadeks jaotatud)" },
+      },
+      {
+        label: "Collapsible",
+        story: Collapsible,
+        args: { ariaLabel: "Sisukord (ahendatav)" },
+      },
+    ]),
 };

@@ -240,12 +240,14 @@ render: (args) => ({
 - [ ] Every public input/model has a corresponding `argTypes` entry with description, control, type summary, and default value
 - [ ] `Default` story has all controls wired up via `args` and they **functionally drive the rendered component** — verified by changing a control and seeing the output update, including for nested/composed components (see section 5)
 - [ ] States story covers all visual states shown in Figma (default, hover, active, focus, disabled)
+- [ ] Example `ariaLabel`/`aria-label`/`label` values name the content only, never the role or the state ("Vaate valik", not "Erineva laiusega nupud"; "Faili üleslaadimine", not "Edenemisriba pealkiri"). Consumers copy them, and the screen reader announces role and state itself
 - [ ] Every icon-only control shown in a story has both an `aria-label` and a `tedi-tooltip` — the label names it for screen readers, the tooltip shows the same wording on hover or keyboard focus
 - [ ] Reactive forms example included if the component implements ControlValueAccessor
 - [ ] Figma link is in the JSDoc comment above `export default` (format: `<a href="..." target="_blank">Figma ↗</a>`),
       and only when it points to the TEDI Figma file
 - [ ] Every `argTypes` description is one sentence; every story docblock either says something invisible in the rendered story or does not exist (see section 8)
 - [ ] No public input is missing an `argTypes` entry — aliased inputs are keyed by their alias (`invalid`, not `invalidInput`)
+- [ ] If the component has a `VisualTest` story, a new visual story also adds its variant to `VisualTest`, unless it keeps its own snapshot (`play` function, open overlay, scrolling, sticky / fixed positioning; see section 9)
 - [ ] No inline `style` in story markup, and no hand-written ARIA, keyboard or overlay code in the stories file (see section 2)
 - [ ] Disabled, loading, error and empty states the component supports have a story, even if Figma omits them; place these after the Figma-ordered stories
 
@@ -311,7 +313,66 @@ Keep in the meta docblock only what a consumer cannot discover from the types: r
 dependencies, a global stylesheet import, and accessibility wiring that silently does nothing if
 done the usual way.
 
-### 9. Verify
+### 9. Chromatic snapshots (`VisualTest`)
+
+Chromatic bills per snapshot, so a simple component keeps its snapshots in one hidden composite
+story instead of one per docs story. When a stories file has a `VisualTest` story:
+
+- The meta sets `parameters: { chromatic: { disableSnapshot: true } }`, so docs stories are not
+  snapshotted.
+- `VisualTest` is the last export, with `tags: ["!dev", "!autodocs"]` (hidden from the sidebar and
+  docs, still run by Chromatic and the test-runner) and
+  `parameters: { chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS } }`.
+  It renders every visual variant, each block under a short bold label. `VISUAL_TEST_VIEWPORTS`
+  (375 and 1200) captures every block at mobile and desktop width, because core changes tokens
+  (text, buttons, form fields, cards) below 48rem as well as layouts at breakpoints.
+- Reuse the docs stories, never copy their markup, so a later change to a docs story reaches
+  Chromatic. Build the render with `visualTest([...blocks], { args: meta.args })` from
+  `.storybook/visual-test-story`, adding `render: meta.render` when docs stories inherit the meta's
+  render. Each block is `{ label, story, args? }`: `args` override the
+  story's own, e.g. a unique `ariaLabel`. Blocks may bind the same prop name to different values:
+  the helper then scopes that prop per block with `@let`, which is read-only, so a two-way binding
+  (`[(x)]`) only works on a prop name no other block binds differently. Where hard-coded ids collide, give the
+  story's markup an `idPrefix` arg (`render: ({ idPrefix }) => fn(idPrefix)`) and pass
+  `args: { idPrefix: "vt-…-" }` on the block. The helper throws when a story renders nothing.
+- A story whose state needs a `play` function, an open overlay, scrolling, or sticky / fixed
+  positioning against the page stays a separate snapshot: it sets `chromatic: { disableSnapshot: false }`
+  itself and is not copied into `VisualTest`. Add `viewports` only for the widths whose rendering
+  actually differs: `[375]` for mobile only, `VISUAL_TEST_VIEWPORTS` for both, so every desktop
+  baseline is captured at 1200. CSS-animated content such as a spinner belongs in `VisualTest`, since Chromatic
+  pauses CSS animations before capturing. JS timers are not paused, so a timer-driven story is a
+  separate snapshot that starts from a fixed value and skips its timer when `isChromatic()` (from
+  `chromatic/isChromatic`) is true.
+- Everything in the composite must be unique within the story: `id`, `for`, `aria-labelledby`,
+  radio `name`, and the accessible name of every landmark or group. Pseudo-state selectors must be
+  unique too: use a list (`hover: ["#vt-hover-primary", "#vt-hover-secondary"]`) or a data attribute
+  (`[data-state="Hover"]`) rather than a repeated `#Hover`.
+- Inverted variants that the docs story puts on the `brand` background go inside
+  `<div class="bg bg-primary">` in the composite.
+
+```ts
+/** Chromatic snapshot for Breadcrumbs: add every new visual variant here too. */
+export const VisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: { chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS } },
+  render: () =>
+    visualTest(
+      [
+        { label: "Default", story: Default },
+        { label: "Responsive variant", story: ResponsiveVariant },
+      ],
+      { args: meta.args },
+    ),
+};
+```
+
+**A new visual story on a component with `VisualTest` must also add its variant to `VisualTest`**,
+otherwise Chromatic never sees it. A story that keeps its own snapshot (see above) is the exception. `.storybook/visual-test-coverage.spec.ts` (run by `npm test`) fails when a docs story has
+no block or `VisualTest` lacks `VISUAL_TEST_VIEWPORTS`. A story that only demonstrates behaviour (form integration, a controlled-state demo, deep
+links) opts out with `parameters: { visualTest: false }`. A story that only seems to look like
+another block still gets its own block, so a later change to it reaches Chromatic.
+
+### 10. Verify
 
 Run Storybook to visually confirm stories render correctly:
 ```bash

@@ -1,12 +1,84 @@
 # TEDI Design System for Angular
 
-[![codecov](https://codecov.io/gh/TEHIK-EE/tedi-design-system/graph/badge.svg?token=NKNNJSG19D)](https://codecov.io/gh/TEHIK-EE/tedi-design-system)
+[![codecov](https://codecov.io/gh/TEDI-Design-System/angular/graph/badge.svg)](https://codecov.io/gh/TEDI-Design-System/angular)
 [![semantic-release](https://img.shields.io/badge/semantic--release-e10079?logo=semantic-release)](https://github.com/semantic-release/semantic-release)
 
-`@tedi-design-system/angular` is a library of Angular components implementing the TEDI Design System.  
+`@tedi-design-system/angular` is a library of Angular components implementing the TEDI Design System.
 It provides reusable, accessible, and consistent UI components to streamline building Angular applications.
 
-Usage instructions and detailed documentation can be found in the [TEDI Design System wiki](https://github.com/TEDI-Design-System/general).
+Component documentation, examples and APIs are in [Storybook](https://storybook.tedi.ee/angular/main/?path=/docs/documentation-get-started--get-started).
+
+---
+
+## Getting Started
+
+### Installation
+
+```
+npm install @tedi-design-system/angular
+```
+
+Peer dependencies: `@angular/core`, `@angular/common`, `@angular/forms`, `@angular/platform-browser` and `@angular/cdk` 20, 21 or 22. The text editor also needs `quill` and the `ngx-quill` major that matches your Angular version: 28 for Angular 20, 30 for 21 and 31 for 22. Design tokens, fonts and icons come from `@tedi-design-system/core`, which is installed with the package.
+
+### Setup
+
+Add the stylesheet (fonts, tokens and component styles) to `angular.json`, next to your app's own global styles:
+
+```jsonc
+// projects.<app>.architect.build.options
+"styles": ["node_modules/@tedi-design-system/angular/index.css", "src/styles.scss"]
+```
+
+To load only one Material Symbols style, use `index-without-icons.css` together with one of `icons/outlined.css`, `icons/rounded.css` or `icons/sharp.css`.
+
+The text editor also needs Quill's stylesheets in your global styles:
+
+```scss
+// src/styles.scss
+@forward "quill/dist/quill.core.css";
+@forward "quill/dist/quill.snow.css";
+```
+
+Provide the theme and language in your application config, and start `ThemeService` with the app:
+
+```ts
+// app.config.ts
+import { ApplicationConfig, inject, provideAppInitializer } from "@angular/core";
+import { provideTedi, ThemeService } from "@tedi-design-system/angular/tedi";
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideTedi({ language: "et", theme: "default" }),
+    provideAppInitializer(() => {
+      inject(ThemeService);
+    }),
+  ],
+};
+```
+
+`ThemeService` sets the theme class on `<html>`. It is created only when something injects it, so without the initializer a theme other than `default`, or one saved in the `tedi-theme` cookie, is not applied on load.
+
+### Usage
+
+Components are standalone. Import them into the component that uses them:
+
+```ts
+import { Component } from "@angular/core";
+import { ButtonComponent } from "@tedi-design-system/angular/tedi";
+
+@Component({
+  selector: "app-root",
+  imports: [ButtonComponent],
+  template: `<button tedi-button variant="primary">Save</button>`,
+})
+export class AppComponent {}
+```
+
+TEDI-Ready components are exported from `@tedi-design-system/angular/tedi`, community components from `@tedi-design-system/angular/community`. The text editor has its own entry point, `@tedi-design-system/angular/community/text-editor`, so apps that don't use it don't need Quill. Prefer a TEDI-Ready component where one exists. Browse all components in [Storybook](https://storybook.tedi.ee/angular/main/?path=/docs/documentation-get-started--get-started).
+
+### Supported versions
+
+The library supports the three latest Angular majors, currently **Angular 20, 21 and 22**. See [Supported versions](https://github.com/TEDI-Design-System/general/wiki/Supported-versions) in the wiki for the policy and the [Angular release schedule](https://angular.dev/reference/releases) for upcoming dates.
 
 ---
 
@@ -18,70 +90,42 @@ The [accessibility page on tedi.ee](https://www.tedi.ee/1ee8444b7/p/33df89-sisse
 
 ---
 
-## Installation
+## AI Tooling
 
-Install the dependencies for your Angular library:
+### For consumers: the `tedi-angular` skill
 
+Helps AI coding agents build UIs with `@tedi-design-system/angular`: component usage, forms integration, theming and translation setup.
+
+Install it into your agent (Claude Code, Cursor, Codex and others) with the [`skills`](https://www.skills.sh) CLI, from your project root:
+
+```bash
+npx skills add https://github.com/TEDI-Design-System/angular --skill tedi-angular
 ```
-npm run i
-```
+
+### For contributors: the `contributing` skill
+
+Guides development inside this repository: creating new components, running tests and lint, WCAG audits, refactoring and Storybook stories. Available as `/contributing` when working in this repository. Skills for contributing across the design system live in [TEDI-Design-System/ai-skills](https://github.com/TEDI-Design-System/ai-skills).
 
 ---
 
-## Development Guide
+## Contributing
 
-### Running Storybook
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for how to report issues, set up the repository and open a pull request, and for adding or dropping an Angular major. Component guidelines and coding standards are in the [wiki](https://github.com/TEDI-Design-System/general/wiki).
 
-To view and develop components in isolation, start Storybook for Angular:
+To work on the library locally:
 
 ```
+npm install
 npm run start
 ```
 
-## Angular Version Support
-
-The library supports the three latest Angular major versions. Angular releases a new major every 6 months and deprecates versions after 18 months. See the [Angular release schedule](https://angular.dev/reference/releases) for upcoming dates.
-
-**Currently supported: Angular 20, 21, 22**
-
-The library is built and tested against the base version pinned in `devDependencies`. In addition, the `compatibility` job in CI installs the built package into a fresh app for every supported Angular major to verify it is consumable.
-
-### Adding a new Angular version
-
-When a new Angular major is released (e.g. v23):
-
-1. **`package.json`** — add `|| ^23.0.0` to every Angular peer dependency
-2. **`.github/workflows/angular-test-and-lint.yml`** — add `23` to the `angular-version` matrix in the `compatibility` job
-
-### Dropping a deprecated Angular version
-
-When an Angular major reaches end-of-life (e.g. v20):
-
-1. **`package.json`** — remove `^20.0.0 ||` from every Angular peer dependency
-2. **`.github/workflows/angular-test-and-lint.yml`** — remove `20` from the `angular-version` matrix in the `compatibility` job
-3. Bump `devDependencies` to the new minimum supported Angular version so the library is always built and developed against a supported release
-
-## Contributing
-
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for how to report issues, set up the repository and open a pull request. Component guidelines and coding standards are in the [wiki](https://github.com/TEDI-Design-System/general/wiki).
-
-## AI Skills
-
-This project ships with AI agent skills to help both contributors and consumers work with TEDI components.
-
-### For consumers — `tedi-angular`
-
-Helps you build UIs with `@tedi-design-system/angular`: component usage, forms integration, theming, and translation setup.
-
-### For contributors — `contributing`
-
-Guides development inside this repo: creating new components, running tests/lint, WCAG audits, refactoring, and Storybook stories. Available as `/contributing` when working in this repository.
+`npm run start` launches Storybook for developing components in isolation.
 
 ---
 
 ## Visual Testing
 
-<a href="https://www.chromatic.com/"><img src="https://user-images.githubusercontent.com/321738/84662277-e3db4f80-af1b-11ea-88f5-91d67a5e59f6.png" width="153" height="30" alt="Chromatic" /></a>
+[![Chromatic](https://img.shields.io/badge/Chromatic-fc521f?logo=chromatic&logoColor=white)](https://www.chromatic.com/)
 
 We use [Chromatic](https://www.chromatic.com/) for visual testing, reviewing UI changes, and preventing visual regressions.
 

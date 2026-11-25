@@ -10,6 +10,9 @@ import {
 import { CardComponent } from "@tedi-design-system/angular/tedi";
 import { _IdGenerator } from "@angular/cdk/a11y";
 
+/**
+ * @deprecated Use AccordionItem from TEDI-ready instead. This component will be removed from future versions.
+ */
 @Component({
   selector: "tedi-accordion-item",
   standalone: true,

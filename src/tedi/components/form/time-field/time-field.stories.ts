@@ -74,6 +74,15 @@ export default {
         type: { summary: "string" },
       },
     },
+    required: {
+      description: "Marks the input as required.",
+      control: { type: "boolean" },
+      table: {
+        category: "Time Field inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
     invalid: {
       description:
         "Manually mark the field as invalid. Sets `aria-invalid` on the input and triggers the form-field's invalid styling. Combines with the form-control validity state from reactive forms.",
@@ -253,6 +262,7 @@ export const Default: StoryObj = {
     formFieldSize: "default",
     value: null,
     placeholder: "tt:mm",
+    required: false,
     invalid: false,
     disabled: false,
     formFieldClearable: true,
@@ -272,11 +282,12 @@ export const Default: StoryObj = {
       <tedi-row cols="1" [md]="{ cols: 3 }">
         <tedi-col>
           <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
-            <label tedi-label for="example-id">Aeg</label>
+            <label tedi-label for="example-id" [required]="required">Aeg</label>
             <tedi-time-field
               [inputId]="inputId"
               [(value)]="value"
               [placeholder]="placeholder"
+              [required]="required"
               [invalid]="invalid"
               [disabled]="disabled"
               [pickerVariant]="pickerVariant"
@@ -667,8 +678,8 @@ export const MobileModal: StoryObj = {
       </tedi-row>
     `,
   }),
+  globals: { viewport: { value: "mobile1" } },
   parameters: {
-    viewport: { defaultViewport: "mobile1" },
     docs: {
       description: {
         story:

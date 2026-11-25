@@ -311,7 +311,7 @@ describe("DateInputComponent", () => {
     const removeBtn = tag.querySelector(
       ".tedi-closing-button",
     ) as HTMLButtonElement;
-    expect(removeBtn.getAttribute("aria-label")).toBeTruthy();
+    expect(removeBtn.getAttribute("title")).toBeTruthy();
 
     // The tag label is the button's *description*, not part of its name:
     // TalkBack does not surface a name computed via aria-labelledby, so the

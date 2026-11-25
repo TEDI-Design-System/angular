@@ -12,6 +12,9 @@ import { TediTranslationService } from "../../../services/translation/translatio
 import { CarouselIndicatorsComponent } from "./carousel-indicators/carousel-indicators.component";
 import { CarouselComponent } from "./carousel.component";
 import { CarouselNavigationComponent } from "./carousel-navigation/carousel-navigation.component";
+import { CarouselSlideDirective } from "./carousel-slide.directive";
+import { CarouselFooterComponent } from "./carousel-footer/carousel-footer.component";
+import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 
 function dispatchPointerLike(
   el: HTMLElement,
@@ -149,21 +152,42 @@ describe("CarouselContentComponent", () => {
     expect(component).toBeTruthy();
   });
 
-  it("should have correct base aria attributes", () => {
+  it("is a region with the default name and no role description when unnamed", () => {
     expect(hostElement.getAttribute("role")).toBe("region");
-    expect(hostElement.getAttribute("aria-roledescription")).toBe("carousel");
+    expect(hostElement.getAttribute("aria-label")).toBe("carousel.label");
+    expect(hostElement.hasAttribute("aria-roledescription")).toBe(false);
+    expect(hostElement.hasAttribute("aria-labelledby")).toBe(false);
     expect(hostElement.getAttribute("aria-live")).toBe("off");
   });
 
-  it("should call translationService.track for aria label", () => {
-    expect(mockTranslationService.track).toHaveBeenCalledWith("carousel");
-  });
-
-  it("should use the custom aria-label when provided", () => {
+  it("is a named region when ariaLabel is set", () => {
     fixture.componentRef.setInput("ariaLabel", "Minu karussell");
     fixture.detectChanges();
 
+    expect(hostElement.getAttribute("role")).toBe("region");
+    expect(hostElement.getAttribute("aria-roledescription")).toBe("carousel");
     expect(hostElement.getAttribute("aria-label")).toBe("Minu karussell");
+  });
+
+  it("is a named region when ariaLabelledby is set", () => {
+    fixture.componentRef.setInput("ariaLabelledby", "carousel-heading");
+    fixture.detectChanges();
+
+    expect(hostElement.getAttribute("role")).toBe("region");
+    expect(hostElement.getAttribute("aria-roledescription")).toBe("carousel");
+    expect(hostElement.getAttribute("aria-labelledby")).toBe(
+      "carousel-heading",
+    );
+    expect(hostElement.hasAttribute("aria-label")).toBe(false);
+  });
+
+  it("falls back to the default name when ariaLabel is blank", () => {
+    fixture.componentRef.setInput("ariaLabel", "   ");
+    fixture.detectChanges();
+
+    expect(hostElement.getAttribute("role")).toBe("region");
+    expect(hostElement.getAttribute("aria-label")).toBe("carousel.label");
+    expect(hostElement.hasAttribute("aria-roledescription")).toBe(false);
   });
 
   it("should compute correct flex style for slides", () => {
@@ -1908,6 +1932,43 @@ describe("CarouselIndicatorsComponent", () => {
 
     expect(dots.length).toBe(3);
     expect(dots[2].classList).toContain("tedi-carousel__indicator--active");
+    expect(dots[2].getAttribute("aria-current")).toBe("true");
+    expect(dots[0].hasAttribute("aria-current")).toBe(false);
+    expect(dots[1].hasAttribute("aria-current")).toBe(false);
+  });
+
+  it("labels the indicators as a group", () => {
+    const host: HTMLElement = fixture.nativeElement.querySelector(
+      "tedi-carousel-indicators",
+    );
+
+    expect(host.getAttribute("role")).toBe("group");
+    expect(host.getAttribute("aria-label")).toBe("carousel.slides");
+  });
+
+  it("is not a group in the numbers variant without arrows", () => {
+    fixture.componentInstance.variant = "numbers";
+    fixture.changeDetectorRef.markForCheck();
+    fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement.querySelector(
+      "tedi-carousel-indicators",
+    );
+
+    expect(host.hasAttribute("role")).toBe(false);
+    expect(host.hasAttribute("aria-label")).toBe(false);
+  });
+
+  it("is a group in the numbers variant with arrows", () => {
+    fixture.componentInstance.variant = "numbers";
+    fixture.componentInstance.withArrows = true;
+    fixture.changeDetectorRef.markForCheck();
+    fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement.querySelector(
+      "tedi-carousel-indicators",
+    );
+
+    expect(host.getAttribute("role")).toBe("group");
+    expect(host.getAttribute("aria-label")).toBe("carousel.slides");
   });
 
   it("counts stop positions in the numbers variant", () => {
@@ -2074,5 +2135,92 @@ describe("CarouselNavigationComponent", () => {
 
     expect(mockCarouselContent.prev).toHaveBeenCalledTimes(1);
     expect(mockCarouselContent.next).toHaveBeenCalledTimes(1);
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [
+    CarouselComponent,
+    CarouselContentComponent,
+    CarouselSlideDirective,
+    CarouselFooterComponent,
+    CarouselIndicatorsComponent,
+  ],
+  template: `
+    <tedi-carousel>
+      <tedi-carousel-content ariaLabel="Uudised">
+        @for (i of [0, 1, 2]; track i) {
+          <ng-template tediCarouselSlide>Slide {{ i }}</ng-template>
+        }
+      </tedi-carousel-content>
+      <tedi-carousel-footer>
+        <tedi-carousel-indicators />
+      </tedi-carousel-footer>
+    </tedi-carousel>
+  `,
+})
+class TestCarouselHostComponent {}
+
+describe("Carousel accessible names (et)", () => {
+  let element: HTMLElement;
+
+  beforeEach(async () => {
+    global.ResizeObserver = class {
+      observe = jest.fn();
+      disconnect = jest.fn();
+    } as unknown as typeof ResizeObserver;
+
+    await TestBed.configureTestingModule({
+      imports: [TestCarouselHostComponent],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(TestCarouselHostComponent);
+    fixture.detectChanges();
+    element = fixture.nativeElement;
+  });
+
+  it("announces the region role once, in Estonian", () => {
+    const region = element.querySelector("tedi-carousel-content")!;
+
+    expect(region.getAttribute("aria-label")).toBe("Uudised");
+    expect(region.getAttribute("aria-roledescription")).toBe("karussell");
+  });
+
+  it("names an unnamed carousel without a role description", () => {
+    const fixture = TestBed.createComponent(CarouselContentComponent);
+    fixture.detectChanges();
+    const region: HTMLElement = fixture.nativeElement;
+
+    expect(region.getAttribute("aria-label")).toBe("Karussell");
+    expect(region.hasAttribute("aria-roledescription")).toBe(false);
+  });
+
+  it("keeps the role name out of the slide label", () => {
+    const slide = element.querySelector('.tedi-carousel__slide[role="group"]')!;
+
+    expect(slide.getAttribute("aria-label")).toBe("1 / 3");
+    expect(slide.getAttribute("aria-roledescription")).toBe("slaid");
+  });
+
+  it("names the indicators by slide and marks the current one", () => {
+    const group = element.querySelector("tedi-carousel-indicators")!;
+    const dots = Array.from(
+      element.querySelectorAll<HTMLButtonElement>(".tedi-carousel__indicator"),
+    );
+
+    expect(group.getAttribute("role")).toBe("group");
+    expect(group.getAttribute("aria-label")).toBe("Slaidid");
+    expect(dots.map((dot) => dot.getAttribute("aria-label"))).toEqual([
+      "Slaid 1",
+      "Slaid 2",
+      "Slaid 3",
+    ]);
+    expect(dots.map((dot) => dot.getAttribute("aria-current"))).toEqual([
+      "true",
+      null,
+      null,
+    ]);
   });
 });

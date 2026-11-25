@@ -38,7 +38,12 @@
         currentProps().showValue &&
         currentProps().valuePosition === "horizontal"
       ) {
-        <span tedi-label size="small" class="tedi-progress-bar__value">
+        <span
+          tedi-label
+          size="small"
+          class="tedi-progress-bar__value"
+          aria-hidden="true"
+        >
           {{ formattedValue() }}
         </span>
       }
@@ -54,6 +59,7 @@
           tedi-label
           size="small"
           class="tedi-progress-bar__value tedi-progress-bar__value--bottom"
+          aria-hidden="true"
         >
           {{ formattedValue() }}
         </span>

@@ -25,13 +25,14 @@ component's `ɵɵComponentDeclaration` carries its real selector; see
 | RadioGroupComponent | `tedi-radio-group` | `string \| null` |
 | ToggleComponent | `tedi-toggle` | `boolean` |
 | DateFieldComponent | `tedi-date-field` | `Date \| Date[] \| DateRange \| null` |
+| FileUploadComponent | `tedi-file-upload` | `FileUploadFile[]` — also registers on `NG_VALIDATORS` |
 | DatePickerComponent | `tedi-date-picker` | `Date \| null` — **deprecated**, use `DateFieldComponent` |
 | TimeFieldComponent | `tedi-time-field` | `string \| null` (HH:mm) |
 | TimePickerComponent | `tedi-time-picker` | `string \| null` (HH:mm) |
 | SelectComponent | `tedi-select` | `T \| T[]` |
 | TextEditorComponent | `tedi-text-editor` | `string` (Quill HTML) — `/community/text-editor` entry point |
 
-`CheckboxComponent` (`input[type=checkbox][tedi-checkbox]`) is **not** a TEDI value accessor — it styles a native checkbox, so `[formControl]` on it is handled by Angular's built-in `CheckboxControlValueAccessor` and yields a `boolean`. Inside a managed `<tedi-checkbox-group>`, its `value` input is a `string` identity instead. `DropdownComponent` (`tedi-dropdown`) lives in `overlay/` and is not a form control — it exposes `[(value)]` but implements no `ControlValueAccessor`.
+`CheckboxComponent` (`input[type=checkbox][tedi-checkbox]`) is **not** a TEDI value accessor — it styles a native checkbox, so `[formControl]` on it is handled by Angular's built-in `CheckboxControlValueAccessor` and yields a `boolean`. Inside a managed `<tedi-checkbox-group>`, its `value` input is a `string` identity instead. `DropdownComponent` (`tedi-dropdown`) lives in `overlay/` and is not a form control — it exposes `[(value)]` but implements no `ControlValueAccessor`. `InlineEditComponent` (`tedi-inline-edit`) lives in `form/` but is likewise not a value accessor — it wraps a control you project into an `<ng-template tediInlineEditControl>`, and that control keeps its own `[formControl]` / `[(ngModel)]` binding.
 
 ## Basic Usage with Reactive Forms
 
@@ -58,7 +59,7 @@ form = new FormGroup({
 
 ## Form Field Structure
 
-Wrap a control with `tedi-form-field` to compose the label, control, and feedback text into one accessible field. `tedi-form-field` wires the feedback text to the control's `aria-describedby` for you. It does **not** associate the label: give the label a `for` and the control a matching `id` yourself.
+Wrap a control with `tedi-form-field` to compose the label, control, and feedback text into one accessible field. `tedi-form-field` wires the feedback text to the control's `aria-describedby` for you. An `aria-describedby` of your own on the control is merged in, but read only once, when the control is created: give it a static value, since a `[attr.aria-describedby]` binding is not picked up. It does **not** associate the label: give the label a `for` and the control a matching `id` yourself.
 
 `TextEditorComponent` is the exception to the `for`/`id` rule: its editing area is a `contenteditable` div, which `for` cannot target. Give the label an `id` and point the control's `ariaLabelledby` at it instead.
 
@@ -109,7 +110,7 @@ A `[disabled]` template input also exists on most controls for non-form usage. D
 <tedi-search inputId="search" label="Otsing" [formControl]="query" (searchEvent)="run($event)" />
 ```
 
-The host is a `role="search"` landmark whose accessible name falls back to `ariaLabel` → `label` → `placeholder` → the translated "search". **When a page renders more than one `tedi-search`, give each a distinct `ariaLabel`** — identically named landmarks of the same type fail axe's `landmark-unique` rule. The visible `<label>` is unaffected; `ariaLabel` names only the landmark.
+The host is a `role="search"` landmark, unnamed unless you set `ariaLabel`. **When a page renders more than one `tedi-search`, give each a distinct `ariaLabel`**: identically named landmarks of the same type fail axe's `landmark-unique` rule. `ariaLabel` names only the landmark. Always give the field a `label`, with `hideLabel` when it must not be visible; without one the field falls back to `placeholder`, then the translated "search", which repeats the icon-only button's name.
 
 ### Suggestions
 

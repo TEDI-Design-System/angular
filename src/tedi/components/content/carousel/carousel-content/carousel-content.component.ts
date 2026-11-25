@@ -54,8 +54,9 @@ const MIN_MOUSE_SWIPE_DISTANCE = 4;
   host: {
     tabindex: "0",
     role: "region",
-    "aria-roledescription": "carousel",
-    "[attr.aria-label]": "resolvedAriaLabel()",
+    "[attr.aria-roledescription]": "named() ? roleDescription() : null",
+    "[attr.aria-label]": "resolvedLabel()",
+    "[attr.aria-labelledby]": "labelledby()",
     "aria-live": "off",
     "[class]": "classes()",
   },
@@ -97,8 +98,11 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
    */
   readonly loop = input(true, { transform: booleanAttribute });
 
-  /** Accessible label for the carousel region. Falls back to the `carousel` translation. */
+  /** Accessible name for the carousel. Without it or `ariaLabelledby`, the name defaults to the `carousel.label` translation. */
   readonly ariaLabel = input<string>();
+
+  /** Id of the element that names the carousel, typically its heading. */
+  readonly ariaLabelledby = input<string>();
 
   readonly translationService = inject(TediTranslationService);
   private readonly breakpointService = inject(BreakpointService);
@@ -109,8 +113,16 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
   readonly slideElements = viewChildren<ElementRef<HTMLDivElement>>("slide");
   readonly slides = contentChildren(CarouselSlideDirective);
 
-  readonly resolvedAriaLabel = computed(
-    () => this.ariaLabel() ?? this.translationService.track("carousel")(),
+  readonly label = computed(() => this.ariaLabel()?.trim() || null);
+  readonly labelledby = computed(() => this.ariaLabelledby()?.trim() || null);
+  readonly named = computed(() => !!(this.label() || this.labelledby()));
+  readonly defaultLabel = this.translationService.track("carousel.label");
+  readonly resolvedLabel = computed(
+    () => this.label() ?? (this.labelledby() ? null : this.defaultLabel()),
+  );
+  readonly roleDescription = this.translationService.track("carousel");
+  readonly slideRoleDescription = this.translationService.track(
+    "carousel.slideRoleDescription",
   );
 
   readonly trackIndex = signal(0);

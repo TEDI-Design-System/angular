@@ -11,6 +11,7 @@ import {
   input,
   linkedSignal,
   model,
+  DoCheck,
   OnInit,
   output,
   Renderer2,
@@ -48,7 +49,10 @@ import {
   TEDI_FIELD_CONTEXT,
 } from "../form-field/field-context.token";
 import { deriveControlState } from "../form-field/derive-control-state";
-import { controlDescribedBy } from "../form-field/control-described-by";
+import {
+  controlDescribedBy,
+  TEDI_DESCRIBABLE_CONTROL,
+} from "../form-field/control-described-by";
 import {
   breakpointInput,
   BreakpointInput,
@@ -109,6 +113,10 @@ export type DateFieldSize = "default" | "small";
       useExisting: forwardRef(() => DateFieldComponent),
     },
     {
+      provide: TEDI_DESCRIBABLE_CONTROL,
+      useExisting: forwardRef(() => DateFieldComponent),
+    },
+    {
       provide: TEDI_FIELD_CONTEXT,
       useFactory: (field: DateFieldComponent) => field.childContext,
       deps: [forwardRef(() => DateFieldComponent)],
@@ -125,7 +133,11 @@ export type DateFieldSize = "default" | "small";
   },
 })
 export class DateFieldComponent
-  implements OnInit, ControlValueAccessor, FormFieldControl<DateFieldValue>
+  implements
+    OnInit,
+    DoCheck,
+    ControlValueAccessor,
+    FormFieldControl<DateFieldValue>
 {
   private readonly fieldContext = inject(TEDI_FIELD_CONTEXT, {
     optional: true,
@@ -334,6 +346,8 @@ export class DateFieldComponent
   readonly modal = input<DateFieldModalInput>(false);
   /** Make the modal fullscreen: `true` always, `false` never, breakpoint name → fullscreen below that breakpoint. Only applies when the calendar actually opens as a modal. */
   readonly fullscreen = input<ModalFullscreen>(false);
+  /** Stretch the calendar across the modal body, scaling its cells (Calendar `fullWidth`). Only applies in modal mode. */
+  readonly calendarFullWidth = input(false);
   /**
    * Custom formatter for the input's display string. Overrides the locale-aware
    * default. Receives the `DateFieldValue` and returns a string.
@@ -644,6 +658,10 @@ export class DateFieldComponent
     });
   }
 
+  ngDoCheck(): void {
+    this.derived.sync();
+  }
+
   writeValue(value: DateFieldValue): void {
     this.typedText.set(null);
     this.value.set(value);
@@ -889,6 +907,7 @@ export class DateFieldComponent
       showOutsideDays: this.showOutsideDays(),
       showWeekNumbers: this.showWeekNumbers(),
       numberOfMonths: this.numberOfMonthsResolved(),
+      calendarFullWidth: this.calendarFullWidth(),
       monthYearSelectType: this.monthYearSelectType(),
       required: this.required(),
       disabledMatchers: this.resolvedDisabledMatchers(),
@@ -913,7 +932,9 @@ export class DateFieldComponent
         // month count so a multi-month calendar fits side by side, and add the
         // modal's two outer borders so the border-box content leaves room for
         // it without a 2px horizontal scroll.
-        maxWidth: `calc(${this.numberOfMonthsResolved()} * var(--tedi-containers-03) + 2 * var(--tedi-borders-01))`,
+        maxWidth: this.calendarFullWidth()
+          ? undefined
+          : `calc(${this.numberOfMonthsResolved()} * var(--tedi-containers-03) + 2 * var(--tedi-borders-01))`,
       },
     );
     this.modalRef = ref;

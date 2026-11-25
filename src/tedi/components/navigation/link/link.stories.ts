@@ -5,6 +5,10 @@ import {
   moduleMetadata,
   StoryFn,
 } from "@storybook/angular";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { LinkComponent } from "./link.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
@@ -37,6 +41,7 @@ export default {
     status: {
       type: ["breakpointSupport"],
     },
+    chromatic: { disableSnapshot: true },
   },
   argTypes: {
     ngContent: {
@@ -88,7 +93,6 @@ export default {
 type LinkType = LinkComponent & { ngContent: string };
 
 export const Default: StoryObj<LinkType> = {
-  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     ngContent: "Link",
   },
@@ -140,10 +144,15 @@ export const Colors: StoryObj<LinkComponent> = {
   }),
 };
 
-type TemplateType = LinkComponent & { titleColor?: TextColor };
+type TemplateType = LinkComponent & {
+  titleColor?: TextColor;
+  stateBinding?: string;
+};
 
-const LinkTemplate: StoryFn<TemplateType> = ({
+/** VisualTest repeats this matrix, so it marks the states with `[attr.data-state]` instead of an id. */
+const linkStates: StoryFn<TemplateType> = ({
   titleColor = "primary",
+  stateBinding = "[id]",
   ...args
 }) => ({
   props: { ...args, titleColor: titleColor, pseudoState: PSEUDO_STATE },
@@ -154,16 +163,16 @@ const LinkTemplate: StoryFn<TemplateType> = ({
         <tedi-row *ngFor="let state of pseudoState;" [cols]="4">
           <p tedi-text [color]="titleColor">{{ state }}</p>
           <tedi-col>
-            <a tedi-link href="#" [id]="state" ${argsToTemplate(args)}>View result</a>
+            <a tedi-link href="#" ${stateBinding}="state" ${argsToTemplate(args)}>View result</a>
           </tedi-col>
           <tedi-col>
-            <a tedi-link href="#" [id]="state" ${argsToTemplate(args)}>
+            <a tedi-link href="#" ${stateBinding}="state" ${argsToTemplate(args)}>
               Continue
               <tedi-icon name="arrow_forward" />
             </a>
           </tedi-col>
           <tedi-col>
-            <a tedi-link href="#" [id]="state" ${argsToTemplate(args)}>
+            <a tedi-link href="#" ${stateBinding}="state" ${argsToTemplate(args)}>
               <tedi-icon name="arrow_back" />
               Back
             </a>
@@ -175,16 +184,16 @@ const LinkTemplate: StoryFn<TemplateType> = ({
         <tedi-row *ngFor="let state of pseudoState;" [cols]="4">
           <p tedi-text [color]="titleColor">{{ state }}</p>
           <tedi-col>
-            <a tedi-link href="#" [id]="state" size="small" ${argsToTemplate(args)}>View result</a>
+            <a tedi-link href="#" ${stateBinding}="state" size="small" ${argsToTemplate(args)}>View result</a>
           </tedi-col>
           <tedi-col>
-            <a tedi-link href="#" [id]="state" size="small" ${argsToTemplate(args)}>
+            <a tedi-link href="#" ${stateBinding}="state" size="small" ${argsToTemplate(args)}>
               Continue
               <tedi-icon name="arrow_forward" />
             </a>
           </tedi-col>
           <tedi-col>
-            <a tedi-link href="#" [id]="state" size="small" ${argsToTemplate(args)}>
+            <a tedi-link href="#" ${stateBinding}="state" size="small" ${argsToTemplate(args)}>
               <tedi-icon name="arrow_back" />
               Back
             </a>
@@ -203,7 +212,7 @@ export const DefaultUnderlined: StoryObj<TemplateType> = {
       focusVisible: "#Focus",
     },
   },
-  render: LinkTemplate,
+  render: linkStates,
 };
 
 export const DefaultNoUnderline: StoryObj<TemplateType> = {
@@ -217,7 +226,7 @@ export const DefaultNoUnderline: StoryObj<TemplateType> = {
   args: {
     underline: false,
   },
-  render: LinkTemplate,
+  render: linkStates,
 };
 
 export const InvertedUnderlined: StoryObj<TemplateType> = {
@@ -234,7 +243,7 @@ export const InvertedUnderlined: StoryObj<TemplateType> = {
     titleColor: "white",
   },
 
-  render: LinkTemplate,
+  render: linkStates,
 
   globals: {
     backgrounds: {
@@ -258,7 +267,7 @@ export const InvertedNoUnderline: StoryObj<TemplateType> = {
     titleColor: "white",
   },
 
-  render: LinkTemplate,
+  render: linkStates,
 
   globals: {
     backgrounds: {
@@ -302,4 +311,60 @@ export const WithIcons: StoryObj<LinkComponent> = {
       </div>
     `,
   }),
+};
+
+const VT_STATES = { stateBinding: "[attr.data-state]" };
+
+const onPrimary = (story: StoryObj<TemplateType>) => ({
+  args: story.args,
+  render: (args: never, context: never) => {
+    const { props, template } = (story.render as StoryFn<TemplateType>)(
+      args,
+      context,
+    );
+    return {
+      props,
+      template: `<div class="bg bg-primary"><div class="w-100">${template}</div></div>`,
+    };
+  },
+});
+
+/** Chromatic snapshot for Link: add every new visual variant here too. */
+export const VisualTest: StoryObj<LinkComponent> = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+    pseudo: {
+      hover: '[data-state="Hover"]',
+      active: '[data-state="Active"]',
+      focusVisible: '[data-state="Focus"]',
+    },
+  },
+  render: () =>
+    visualTest([
+      { label: "Default", story: Default },
+      { label: "Sizes", story: Sizes },
+      { label: "Colors", story: Colors },
+      {
+        label: "Default, underlined",
+        story: DefaultUnderlined,
+        args: VT_STATES,
+      },
+      {
+        label: "Default, no underline",
+        story: DefaultNoUnderline,
+        args: VT_STATES,
+      },
+      {
+        label: "Inverted, underlined",
+        story: onPrimary(InvertedUnderlined),
+        args: VT_STATES,
+      },
+      {
+        label: "Inverted, no underline",
+        story: onPrimary(InvertedNoUnderline),
+        args: VT_STATES,
+      },
+      { label: "With icons", story: WithIcons },
+    ]),
 };

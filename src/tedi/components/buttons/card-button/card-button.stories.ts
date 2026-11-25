@@ -1,4 +1,8 @@
 import { Meta, moduleMetadata, StoryObj } from "@storybook/angular";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { CardButtonComponent } from "./card-button.component";
 import { CardComponent } from "../../content/card/card.component";
 import { CardContentComponent } from "../../content/card/card-content/card-content.component";
@@ -51,12 +55,12 @@ export default {
       ],
     }),
   ],
+  parameters: { chromatic: { disableSnapshot: true } },
 } as Meta<CardButtonComponent>;
 
 type Story = StoryObj<CardButtonComponent>;
 
 export const Default: Story = {
-  parameters: { chromatic: { disableSnapshot: true } },
   render: () => ({
     template: `
       <button tedi-card-button type="button">
@@ -74,9 +78,7 @@ export const Default: Story = {
   }),
 };
 
-export const CardRows: Story = {
-  render: () => ({
-    template: `
+const CARD_ROWS_TEMPLATE = `
       <div [tediVerticalSpacing]="1">
         <button tedi-card-button type="button">
           <tedi-card>
@@ -214,13 +216,15 @@ export const CardRows: Story = {
           </tedi-card>
         </button>
       </div>
-    `,
+    `;
+
+export const CardRows: Story = {
+  render: () => ({
+    template: CARD_ROWS_TEMPLATE,
   }),
 };
 
-export const CardShortcut: Story = {
-  render: () => ({
-    template: `
+const CARD_SHORTCUT_TEMPLATE = `
       <tedi-row [cols]="1" [lg]="{ cols: 2 }" [gap]="3">
         <button tedi-card-button type="button">
           <tedi-card>
@@ -267,13 +271,15 @@ export const CardShortcut: Story = {
           </tedi-card>
         </button>
       </tedi-row>
-    `,
+    `;
+
+export const CardShortcut: Story = {
+  render: () => ({
+    template: CARD_SHORTCUT_TEMPLATE,
   }),
 };
 
-export const WithIconCard: Story = {
-  render: () => ({
-    template: `
+const WITH_ICON_CARD_TEMPLATE = `
       <tedi-row [cols]="1" [lg]="{ cols: 3 }" [gap]="3">
         <button tedi-card-button type="button">
           <tedi-card>
@@ -327,20 +333,15 @@ export const WithIconCard: Story = {
           </tedi-card>
         </button>
       </tedi-row>
-    `,
+    `;
+
+export const WithIconCard: Story = {
+  render: () => ({
+    template: WITH_ICON_CARD_TEMPLATE,
   }),
 };
 
-export const States: Story = {
-  parameters: {
-    pseudo: {
-      hover: "#Hover",
-      active: "#Active",
-      focusVisible: "#Focus",
-    },
-  },
-  render: () => ({
-    template: `
+const STATES_TEMPLATE = `
       <tedi-row [cols]="1" [sm]="{ cols: 6 }" [gapY]="3" alignItems="center">
         <tedi-col width="1">
           <p tedi-text modifiers="bold">Default</p>
@@ -443,21 +444,22 @@ export const States: Story = {
           </button>
         </tedi-col>
       </tedi-row>
-    `,
-  }),
-};
+    `;
 
-export const AsLink: Story = {
+export const States: Story = {
   parameters: {
-    docs: {
-      description: {
-        story:
-          "Use an anchor host when the card navigates to another page or route. The button host is the default; only the button host supports the disabled state.",
-      },
+    pseudo: {
+      hover: "#Hover",
+      active: "#Active",
+      focusVisible: "#Focus",
     },
   },
   render: () => ({
-    template: `
+    template: STATES_TEMPLATE,
+  }),
+};
+
+const AS_LINK_TEMPLATE = `
       <a tedi-card-button href="#">
         <tedi-card>
           <tedi-card-content class="flex align-items-center justify-content-between gap-3">
@@ -469,21 +471,23 @@ export const AsLink: Story = {
           </tedi-card-content>
         </tedi-card>
       </a>
-    `,
-  }),
-};
+    `;
 
-export const ComplexCard: Story = {
+export const AsLink: Story = {
   parameters: {
     docs: {
       description: {
         story:
-          "Any card composition works inside the wrapper — rows, icon cells, separators, text groups and badges. Avoid interactive elements inside.",
+          "Use an anchor host when the card navigates to another page or route. The button host is the default; only the button host supports the disabled state.",
       },
     },
   },
   render: () => ({
-    template: `
+    template: AS_LINK_TEMPLATE,
+  }),
+};
+
+const COMPLEX_CARD_TEMPLATE = `
       <button tedi-card-button type="button">
         <tedi-card>
           <tedi-card-row>
@@ -528,6 +532,37 @@ export const ComplexCard: Story = {
           </tedi-card-content>
         </tedi-card>
       </button>
-    `,
+    `;
+
+export const ComplexCard: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Any card composition works inside the wrapper — rows, icon cells, separators, text groups and badges. Avoid interactive elements inside.",
+      },
+    },
+  },
+  render: () => ({
+    template: COMPLEX_CARD_TEMPLATE,
   }),
+};
+
+/** Chromatic snapshot for CardButton: add every new visual variant here too. */
+export const VisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+    pseudo: States.parameters?.["pseudo"],
+  },
+  render: () =>
+    visualTest([
+      { label: "Default", story: Default },
+      { label: "Card rows", story: CardRows },
+      { label: "Card shortcut", story: CardShortcut },
+      { label: "With icon card", story: WithIconCard },
+      { label: "States", story: States },
+      { label: "As link", story: AsLink },
+      { label: "Complex card", story: ComplexCard },
+    ]),
 };

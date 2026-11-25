@@ -136,6 +136,36 @@ describe("ProgressBarComponent", () => {
     expect(progress.getAttribute("aria-valuetext")).toBe("1/5");
   });
 
+  it("should hide the visible value from assistive technology in both positions", () => {
+    fixture.componentRef.setInput("value", 40);
+    fixture.detectChanges();
+
+    const horizontal = host.querySelector(".tedi-progress-bar__value");
+    expect(horizontal?.textContent).toContain("40%");
+    expect(horizontal?.getAttribute("aria-hidden")).toBe("true");
+
+    fixture.componentRef.setInput("valuePosition", "bottom");
+    fixture.detectChanges();
+
+    const bottom = host.querySelector(".tedi-progress-bar__value--bottom");
+    expect(bottom?.textContent).toContain("40%");
+    expect(bottom?.getAttribute("aria-hidden")).toBe("true");
+  });
+
+  it("should keep a custom value label on aria-valuetext while the visible copy is hidden", () => {
+    fixture.componentRef.setInput("value", 20);
+    fixture.componentRef.setInput("valueLabel", "1/5");
+    fixture.detectChanges();
+
+    const progress = host.querySelector("progress") as HTMLProgressElement;
+    expect(progress.getAttribute("aria-valuetext")).toBe("1/5");
+    expect(
+      host
+        .querySelector(".tedi-progress-bar__value")
+        ?.getAttribute("aria-hidden"),
+    ).toBe("true");
+  });
+
   it("should hide the percentage when showValue=false", () => {
     fixture.componentRef.setInput("value", 75);
     fixture.componentRef.setInput("showValue", false);
@@ -179,6 +209,7 @@ describe("ProgressBarComponent", () => {
     fixture.detectChanges();
 
     expect(host.querySelector(".tedi-label--required")).toBeTruthy();
+    expect(host.querySelector("label")?.textContent?.trim()).toBe("Upload *");
   });
 
   it("should leave the hint-row empty when no feedback is projected and no bottom value", () => {

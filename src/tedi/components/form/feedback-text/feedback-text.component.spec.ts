@@ -35,6 +35,18 @@ describe("FeedbackTextComponent", () => {
     expect(element.classList).toContain("tedi-feedback-text--left");
   });
 
+  it("should fall back to default classes when type and position are undefined", () => {
+    fixture.componentRef.setInput("type", undefined);
+    fixture.componentRef.setInput("position", undefined);
+    fixture.detectChanges();
+
+    expect(element.className).not.toContain("undefined");
+    expect(element.classList).toContain("tedi-feedback-text--hint");
+    expect(element.classList).toContain("tedi-feedback-text--left");
+    expect(element.getAttribute("role")).toBeNull();
+    expect(element.getAttribute("aria-live")).toBeNull();
+  });
+
   it("should apply type classes correctly", () => {
     const types: FeedbackTextType[] = ["hint", "valid", "error"];
 
@@ -57,32 +69,26 @@ describe("FeedbackTextComponent", () => {
     }
   });
 
-  it("should apply role='alert' only for error and valid", () => {
-    fixture.componentRef.setInput("type", "hint");
-    fixture.detectChanges();
-    expect(element.getAttribute("role")).toBeNull();
-
-    fixture.componentRef.setInput("type", "valid");
-    fixture.detectChanges();
-    expect(element.getAttribute("role")).toBe("alert");
-
-    fixture.componentRef.setInput("type", "error");
-    fixture.detectChanges();
-    expect(element.getAttribute("role")).toBe("alert");
+  it("should never apply the alert role", () => {
+    for (const type of ["hint", "valid", "error"] as FeedbackTextType[]) {
+      fixture.componentRef.setInput("type", type);
+      fixture.detectChanges();
+      expect(element.getAttribute("role")).toBeNull();
+    }
   });
 
-  it("should set aria-live to 'assertive' for error and valid", () => {
+  it("should set aria-live to 'polite' for error and valid, and none for hint", () => {
     fixture.componentRef.setInput("type", "hint");
+    fixture.detectChanges();
+    expect(element.getAttribute("aria-live")).toBeNull();
+
+    fixture.componentRef.setInput("type", "valid");
     fixture.detectChanges();
     expect(element.getAttribute("aria-live")).toBe("polite");
 
-    fixture.componentRef.setInput("type", "valid");
-    fixture.detectChanges();
-    expect(element.getAttribute("aria-live")).toBe("assertive");
-
     fixture.componentRef.setInput("type", "error");
     fixture.detectChanges();
-    expect(element.getAttribute("aria-live")).toBe("assertive");
+    expect(element.getAttribute("aria-live")).toBe("polite");
   });
 
   it("should not contain 'undefined' in class list", () => {
