@@ -352,6 +352,31 @@ describe("FileDropzoneComponent", () => {
       ]);
     });
 
+    it("keeps the folder path when renaming a duplicate", () => {
+      fixture.componentRef.setInput("uploadFolder", true);
+      fixture.componentRef.setInput("duplicates", "rename");
+      fixture.detectChanges();
+
+      const inFolder = (folder: string) => {
+        const file = makeFile("report.pdf");
+        Object.defineProperty(file, "webkitRelativePath", {
+          value: `${folder}/report.pdf`,
+        });
+        return file;
+      };
+
+      selectFiles(fixture, [inFolder("a"), inFolder("b")]);
+
+      expect(
+        component
+          .files()
+          .map((file) => [file.name, file.webkitRelativePath ?? ""]),
+      ).toEqual([
+        ["report.pdf", "a/report.pdf"],
+        ["report (1).pdf", "b/report (1).pdf"],
+      ]);
+    });
+
     it("keeps two same-named files from different folders", async () => {
       fixture.componentRef.setInput("uploadFolder", true);
       fixture.detectChanges();

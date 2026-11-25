@@ -118,10 +118,23 @@ const withFreeNames = (
 
     taken.add(name.toLowerCase());
 
-    return new File([file], name, {
+    const renamed = new File([file], name, {
       type: file.type,
       lastModified: file.lastModified,
     });
+
+    // A folder upload's path is read-only and cannot be constructed, so it is
+    // redefined onto the copy — otherwise a renamed file loses the folder it
+    // came from and the tree can no longer be rebuilt. The last segment
+    // follows the new name, so path and name still agree.
+    if (file.webkitRelativePath) {
+      Object.defineProperty(renamed, "webkitRelativePath", {
+        value: file.webkitRelativePath.replace(/[^/]+$/, name),
+        configurable: true,
+      });
+    }
+
+    return renamed;
   });
 };
 
