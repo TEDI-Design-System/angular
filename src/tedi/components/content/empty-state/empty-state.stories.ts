@@ -12,6 +12,10 @@ import {
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { IconComponent } from "../../base/icon/icon.component";
 import { LinkComponent } from "../../navigation/link/link.component";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 
 /**
  * EmptyState communicates that there is nothing to display — empty search
@@ -21,7 +25,7 @@ import { LinkComponent } from "../../navigation/link/link.component";
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.45.70?node-id=5784-114507&m=dev" target="_BLANK">Figma ↗</a><br/>
  * <a href="https://www.tedi.ee/1ee8444b7/p/6792c3-empty-state" target="_BLANK">Zeroheight ↗</a>
  */
-export default {
+const meta = {
   title: "TEDI-Ready/Content/EmptyState",
   component: EmptyStateComponent,
   decorators: [
@@ -39,6 +43,7 @@ export default {
       type: "figma",
       url: "https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.45.70?node-id=5784-114507&m=dev",
     },
+    chromatic: { disableSnapshot: true },
   },
   args: {
     type: "separate" as EmptyStateType,
@@ -92,6 +97,8 @@ export default {
     },
   },
 } satisfies Meta<EmptyStateComponent>;
+
+export default meta;
 
 type Story = StoryObj<EmptyStateComponent>;
 
@@ -199,9 +206,7 @@ export const Separate: Story = {
   }),
 };
 
-export const AttachedToComponent: Story = {
-  render: () => ({
-    template: `
+const ATTACHED_TEMPLATE = `
       <div style="
         padding: 16px;
         background: var(--card-background-primary);
@@ -211,13 +216,15 @@ export const AttachedToComponent: Story = {
         border-top-right-radius: var(--card-radius);
       ">Previous content</div>
       <tedi-empty-state type="attached">You have no data to display</tedi-empty-state>
-    `,
+    `;
+
+export const AttachedToComponent: Story = {
+  render: () => ({
+    template: ATTACHED_TEMPLATE,
   }),
 };
 
-export const InsideComponent: Story = {
-  render: () => ({
-    template: `
+const INSIDE_TEMPLATE = `
       <div style="
         padding: 16px;
         background: var(--card-background-primary);
@@ -226,7 +233,11 @@ export const InsideComponent: Story = {
       ">
         <tedi-empty-state type="inside">You have no data to display</tedi-empty-state>
       </div>
-    `,
+    `;
+
+export const InsideComponent: Story = {
+  render: () => ({
+    template: INSIDE_TEMPLATE,
   }),
 };
 
@@ -236,4 +247,30 @@ export const CustomIcon: Story = {
     props: args,
     template: `<tedi-empty-state ${argsToTemplate(args)}>No products in your cart</tedi-empty-state>`,
   }),
+};
+
+/** Chromatic snapshot for EmptyState: add every new visual variant here too. */
+export const VisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+    controls: { disable: true },
+  },
+  render: () =>
+    visualTest(
+      [
+        { label: "Default", story: Default },
+        { label: "Separate", story: Separate },
+        { label: "With primary action", story: WithPrimaryAction },
+        { label: "With secondary action", story: WithSecondaryAction },
+        { label: "With link", story: WithLink },
+        { label: "With heading", story: WithHeading },
+        { label: "Minimal", story: Minimal },
+        { label: "Small padding", story: SmallPadding },
+        { label: "Attached to component", story: AttachedToComponent },
+        { label: "Inside component", story: InsideComponent },
+        { label: "Custom icon", story: CustomIcon },
+      ],
+      { args: meta.args },
+    ),
 };

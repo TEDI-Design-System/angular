@@ -5,6 +5,11 @@ import {
   argsToTemplate,
   moduleMetadata,
 } from "@storybook/angular";
+import isChromatic from "chromatic/isChromatic";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { ComponentInputs } from "../../../types/inputs.type";
 import { ProgressBarComponent } from "./progress-bar.component";
 import { FeedbackTextComponent } from "../../form/feedback-text/feedback-text.component";
@@ -44,7 +49,7 @@ type StoryArgs = ComponentInputs<ProgressBarComponent>;
  * />
  * ```
  */
-export default {
+const meta = {
   title: "TEDI-Ready/Components/Loader/ProgressBar",
   component: ProgressBarComponent,
   decorators: [
@@ -65,6 +70,7 @@ export default {
     controls: {
       exclude: ["xs", "sm", "md", "lg", "xl", "xxl"],
     },
+    chromatic: { disableSnapshot: true },
   },
   argTypes: {
     progressId: {
@@ -177,6 +183,8 @@ export default {
     ariaLabel: "Faili üleslaadimine",
   },
 } as Meta<ProgressBarComponent>;
+
+export default meta;
 
 type Story = StoryObj<ProgressBarComponent>;
 
@@ -378,9 +386,7 @@ export const ValueHidden: Story = {
  * label moves inline to the left and the value sits next to the bar. Resize the
  * preview to see the switch.
  */
-export const Responsive: Story = {
-  render: () => ({
-    template: `
+const RESPONSIVE_TEMPLATE = `
       <tedi-progress-bar
         [value]="40"
         label="Faili üleslaadimine"
@@ -391,7 +397,11 @@ export const Responsive: Story = {
       >
         <tedi-feedback-text text="Üleslaadimine" type="hint" />
       </tedi-progress-bar>
-    `,
+    `;
+
+export const Responsive: Story = {
+  render: () => ({
+    template: RESPONSIVE_TEMPLATE,
   }),
 };
 
@@ -402,10 +412,13 @@ export const Responsive: Story = {
   template: `<tedi-progress-bar [value]="value()" label="Üleslaadimine..." />`,
 })
 class AnimatedProgressBarDemo implements OnInit, OnDestroy {
-  protected value = signal(0);
+  protected value = signal(isChromatic() ? 40 : 0);
   private intervalId?: ReturnType<typeof setInterval>;
 
   ngOnInit() {
+    if (isChromatic()) {
+      return;
+    }
     this.intervalId = setInterval(() => {
       this.value.update((v) => (v >= 100 ? 0 : v + 5));
     }, 300);
@@ -424,6 +437,7 @@ class AnimatedProgressBarDemo implements OnInit, OnDestroy {
  * but a stateful consumer can drive the bar however it likes.
  */
 export const Animated: Story = {
+  parameters: { chromatic: { disableSnapshot: false } },
   render: () => ({
     moduleMetadata: { imports: [AnimatedProgressBarDemo] },
     template: `<tedi-animated-progress-bar-demo />`,
@@ -484,12 +498,33 @@ class AnnouncedProgressBarDemo implements OnInit, OnDestroy {
  * Use a screen reader to check the announcements. The live region is visually hidden.
  */
 export const Announced: Story = {
-  parameters: {
-    controls: { disable: true },
-    chromatic: { disableSnapshot: true },
-  },
+  parameters: { visualTest: false, controls: { disable: true } },
   render: () => ({
     moduleMetadata: { imports: [AnnouncedProgressBarDemo] },
     template: `<tedi-announced-progress-bar-demo />`,
   }),
+};
+
+/** Chromatic snapshot for ProgressBar: add every new visual variant here too. */
+export const VisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    controls: { disable: true },
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
+  render: () =>
+    visualTest(
+      [
+        { label: "Default", story: Default },
+        { label: "Sizes", story: Sizes },
+        { label: "Position", story: Position },
+        { label: "With label", story: WithLabel },
+        { label: "Regular", story: Regular },
+        { label: "With hint", story: WithHint },
+        { label: "With error", story: WithError },
+        { label: "Value hidden", story: ValueHidden },
+        { label: "Responsive", story: Responsive },
+      ],
+      { args: meta.args },
+    ),
 };

@@ -5,10 +5,15 @@ import {
   moduleMetadata,
 } from "@storybook/angular";
 
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { ClosingButtonComponent } from "./closing-button.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { IconComponent } from "../../base/icon/icon.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
+import { TextComponent } from "../../base/text/text.component";
 import { TooltipComponent } from "../../overlay/tooltip/tooltip.component";
 import { TooltipTriggerComponent } from "../../overlay/tooltip/tooltip-trigger/tooltip-trigger.component";
 import { TooltipContentComponent } from "../../overlay/tooltip/tooltip-content/tooltip-content.component";
@@ -33,6 +38,7 @@ export default {
         IconComponent,
         RowComponent,
         ColComponent,
+        TextComponent,
         TooltipComponent,
         TooltipTriggerComponent,
         TooltipContentComponent,
@@ -85,13 +91,13 @@ export default {
     status: {
       type: ["breakpointSupport"],
     },
+    chromatic: { disableSnapshot: true },
   },
 } as Meta<ClosingButtonComponent>;
 
 type Story = StoryObj<ClosingButtonComponent>;
 
 export const Default: Story = {
-  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     size: "default",
     iconSize: 24,
@@ -225,4 +231,22 @@ export const States: Story = {
       </tedi-row>
     `,
   }),
+};
+
+/** Chromatic snapshot for ClosingButton: add every new visual variant here too. */
+export const VisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+    pseudo: States.parameters?.["pseudo"],
+  },
+  render: () =>
+    visualTest([
+      { label: "Default", story: Default },
+      { label: "Size", story: Size },
+      { label: "Icon size", story: IconSize },
+      { label: "Custom icon", story: CustomIcon },
+      { label: "With tooltip", story: WithTooltip },
+      { label: "States", story: States },
+    ]),
 };

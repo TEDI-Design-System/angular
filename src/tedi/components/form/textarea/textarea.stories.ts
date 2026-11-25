@@ -18,6 +18,10 @@ import { FeedbackTextComponent } from "../feedback-text/feedback-text.component"
 import { TextComponent } from "../../base/text/text.component";
 import { LabelComponent } from "../../content/label/label.component";
 import { AlertComponent } from "../../notifications/alert/alert.component";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 
 const PSEUDO_STATE = ["Default", "Hover", "Active", "Disabled", "Focus"];
 
@@ -46,6 +50,9 @@ export default {
       ],
     }),
   ],
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
   argTypes: {
     size: {
       description:
@@ -202,7 +209,6 @@ export default {
 } as Meta<TextareaComponent>;
 
 export const Default: StoryObj = {
-  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     size: "default",
     clearable: true,
@@ -377,16 +383,18 @@ export const CharacterCount: StoryObj<TextareaComponent> = {
   }),
 };
 
+const LONG_VALUE =
+  "Rebane on väikese koera suurune ja pika koheva sabaga. Joostes hoiab ta saba horisontaalselt. Tema selja karvad on oranžid. Eestis eelistab ta elupaigana metsatukkasid. Rebane toitub peamiselt närilistest. Ta on ettevaatlik ja oskab hästi põgeneda. Rebase urul on alati mitu väljapääsu. Urud on põhiliselt kutsikate kasvatamiseks. Ta kaevab urud ise või kohendab mägra urge.";
+
 export const ClearButtonOnInteraction: StoryObj<TextareaComponent> = {
   render: () => ({
     props: {
-      value:
-        "Rebane on väikese koera suurune ja pika koheva sabaga. Joostes hoiab ta saba horisontaalselt. Tema selja karvad on oranžid. Eestis eelistab ta elupaigana metsatukkasid. Rebane toitub peamiselt närilistest. Ta on ettevaatlik ja oskab hästi põgeneda. Rebase urul on alati mitu väljapääsu. Urud on põhiliselt kutsikate kasvatamiseks. Ta kaevab urud ise või kohendab mägra urge.",
+      longValue: LONG_VALUE,
     },
     template: `
       <tedi-form-field [clearable]="true" [showClearOnInteraction]="true">
         <label tedi-label for="clear-on-interaction">Label</label>
-        <textarea tedi-textarea id="clear-on-interaction" [value]="value"></textarea>
+        <textarea tedi-textarea id="clear-on-interaction" [value]="longValue"></textarea>
       </tedi-form-field>
     `,
   }),
@@ -403,6 +411,53 @@ export const Placeholder: StoryObj<TextareaComponent> = {
   }),
 };
 
+const HEIGHT_EXAMPLES = [
+  {
+    label: "Default (minRows 3)",
+    id: "sizing-default",
+    placeholder: "Rests at three rows, drag to resize",
+  },
+  {
+    label: "Taller (minRows 6)",
+    id: "sizing-tall",
+    minRows: 6,
+    placeholder: "Rests at six rows",
+  },
+  {
+    label: "Bounded drag (minRows 3, maxRows 5)",
+    id: "sizing-bounded",
+    maxRows: 5,
+    placeholder: "The grip stops at five rows",
+  },
+  {
+    label: "Exact height (10rem, not resizable)",
+    id: "sizing-exact",
+    height: "10rem",
+    resizable: false,
+    placeholder: "Rests at 10rem",
+  },
+  {
+    label: "Auto grow (defaults: minRows 3, no row limit)",
+    id: "sizing-auto-grow",
+    autoGrow: true,
+    placeholder: "Type multiple lines to see it grow",
+  },
+  {
+    label: "Auto grow (minRows 3, maxRows 8)",
+    id: "sizing-auto-grow-bounded",
+    autoGrow: true,
+    maxRows: 8,
+    placeholder: "Grows up to eight rows, then scrolls",
+  },
+  {
+    label: "Auto grow, capped at 200px",
+    id: "sizing-auto-grow-capped",
+    autoGrow: true,
+    maxHeight: "200px",
+    placeholder: "Grows until 200px, then scrolls",
+  },
+];
+
 export const HeightExamples: StoryObj<TextareaComponent> = {
   parameters: {
     docs: {
@@ -414,52 +469,7 @@ export const HeightExamples: StoryObj<TextareaComponent> = {
   },
   render: () => ({
     props: {
-      heightExamples: [
-        {
-          label: "Default (minRows 3)",
-          id: "sizing-default",
-          placeholder: "Rests at three rows, drag to resize",
-        },
-        {
-          label: "Taller (minRows 6)",
-          id: "sizing-tall",
-          minRows: 6,
-          placeholder: "Rests at six rows",
-        },
-        {
-          label: "Bounded drag (minRows 3, maxRows 5)",
-          id: "sizing-bounded",
-          maxRows: 5,
-          placeholder: "The grip stops at five rows",
-        },
-        {
-          label: "Exact height (10rem, not resizable)",
-          id: "sizing-exact",
-          height: "10rem",
-          resizable: false,
-          placeholder: "Rests at 10rem",
-        },
-        {
-          label: "Auto grow (defaults: minRows 3, no row limit)",
-          id: "sizing-auto-grow",
-          autoGrow: true,
-          placeholder: "Type multiple lines to see it grow",
-        },
-        {
-          label: "Auto grow (minRows 3, maxRows 8)",
-          id: "sizing-auto-grow-bounded",
-          autoGrow: true,
-          maxRows: 8,
-          placeholder: "Grows up to eight rows, then scrolls",
-        },
-        {
-          label: "Auto grow, capped at 200px",
-          id: "sizing-auto-grow-capped",
-          autoGrow: true,
-          maxHeight: "200px",
-          placeholder: "Grows until 200px, then scrolls",
-        },
-      ],
+      heightExamples: HEIGHT_EXAMPLES,
     },
     template: `
       <tedi-row [cols]="1" [gapY]="3">
@@ -490,7 +500,7 @@ export const HeightExamples: StoryObj<TextareaComponent> = {
 };
 
 export const WithTemplateDrivenForms: StoryObj<TextareaComponent> = {
-  parameters: { chromatic: { disableSnapshot: true } },
+  parameters: { visualTest: false },
   render: () => ({
     props: {
       inputValue: "",
@@ -524,7 +534,7 @@ export const WithTemplateDrivenForms: StoryObj<TextareaComponent> = {
 };
 
 export const WithReactiveForms: StoryObj<TextareaComponent> = {
-  parameters: { chromatic: { disableSnapshot: true } },
+  parameters: { visualTest: false },
   render: () => {
     const control = new FormControl("", {
       nonNullable: true,
@@ -563,4 +573,33 @@ export const Standalone: StoryObj<TextareaComponent> = {
   render: () => ({
     template: `<textarea tedi-textarea placeholder="No wrapper"></textarea>`,
   }),
+};
+
+/** Chromatic snapshot for Textarea: add every new visual variant here too. */
+export const VisualTest: StoryObj<TextareaComponent> = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+    pseudo: {
+      hover: "#Hover",
+      active: "#Active",
+      focusVisible: "#Focus",
+    },
+  },
+  render: () =>
+    visualTest([
+      { label: "Default", story: Default },
+      { label: "Size", story: Size },
+      { label: "States", story: States },
+      { label: "With hint", story: WithHint },
+      {
+        label: "With hint and character count",
+        story: WithHintAndCharacterCount,
+      },
+      { label: "Character count", story: CharacterCount },
+      { label: "Placeholder", story: Placeholder },
+      { label: "With value", story: ClearButtonOnInteraction },
+      { label: "Standalone", story: Standalone },
+      { label: "Height examples", story: HeightExamples },
+    ]),
 };

@@ -5,9 +5,14 @@ import {
   argsToTemplate,
 } from "@storybook/angular";
 
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { AlertComponent } from "./alert.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
+import { ColComponent } from "../../helpers/grid/col/col.component";
 import { IconComponent } from "../../base";
 import { TextComponent } from "../../base/text/text.component";
 
@@ -25,11 +30,15 @@ export default {
         AlertComponent,
         ButtonComponent,
         RowComponent,
+        ColComponent,
         IconComponent,
         TextComponent,
       ],
     }),
   ],
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
   argTypes: {
     title: {
       control: "text",
@@ -302,4 +311,34 @@ export const WithActionButton: Story = {
       </tedi-alert>
     `,
   }),
+};
+
+/** Chromatic snapshot for Alert: add every new visual variant here too. */
+export const VisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    controls: { disable: true },
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
+  render: () =>
+    visualTest([
+      { label: "Default", story: Default },
+      { label: "Size", story: Size },
+      { label: "Headless", story: Headless },
+      { label: "Global", story: Global },
+      { label: "Without side borders", story: WithoutSideBorders },
+      { label: "With icon", story: WithIcon },
+      { label: "With close button", story: WithCloseButton },
+      { label: "Alert types", story: AlertTypes },
+      { label: "Without title, long text", story: WithoutTitleLongText },
+      {
+        label: "Without title, long text and closing button",
+        story: WithoutTitleLongTextAndClosingButton,
+      },
+      {
+        label: "With title, long text and closing button",
+        story: WithTitleLongTextAndClosingButton,
+      },
+      { label: "With action button", story: WithActionButton },
+    ]),
 };

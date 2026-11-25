@@ -5,13 +5,17 @@ import {
   StoryObj,
 } from "@storybook/angular";
 import { ListComponent } from "./list.component";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 
 /**
  * <a href="https://www.figma.com/file/jWiRIXhHRxwVdMSimKX2FF/TEDI-Design-System-(draft)?type=design&node-id=2137-19322&m=dev" target="_BLANK">Figma ↗</a><br/>
  * <a href="https://www.tedi.ee/1ee8444b7/p/37b651-list" target="_BLANK">Zeroheight ↗</a>
  */
 
-export default {
+const meta = {
   title: "TEDI-Ready/Content/List",
   component: ListComponent,
   decorators: [
@@ -19,6 +23,7 @@ export default {
       imports: [ListComponent],
     }),
   ],
+  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     styled: true,
     color: "brand",
@@ -59,8 +64,9 @@ export default {
   },
 } as Meta<ListComponent>;
 
+export default meta;
+
 export const Default: StoryObj<ListComponent> = {
-  parameters: { chromatic: { disableSnapshot: true } },
   render: (args) => ({
     props: args,
     template: `
@@ -165,4 +171,22 @@ export const NoStyleList: StoryObj<ListComponent> = {
       </ul>
     `,
   }),
+};
+
+/** Chromatic snapshot for List: add every new visual variant here too. */
+export const VisualTest: StoryObj<ListComponent> = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
+  render: () =>
+    visualTest(
+      [
+        { label: "Default", story: Default },
+        { label: "Unordered list", story: UnorderedList },
+        { label: "Ordered list", story: OrderedList },
+        { label: "No style", story: NoStyleList },
+      ],
+      { args: meta.args },
+    ),
 };

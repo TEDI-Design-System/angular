@@ -11,6 +11,10 @@ import { TextComponent } from "../../base/text/text.component";
 import { CardComponent } from "../card/card.component";
 import { CardContentComponent } from "../card/card-content/card-content.component";
 import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { HeadingWithIconComponent } from "./heading-with-icon.component";
 
 /**
@@ -26,6 +30,7 @@ export default {
       imports: [HeadingWithIconComponent, VerticalSpacingDirective],
     }),
   ],
+  parameters: { chromatic: { disableSnapshot: true } },
   argTypes: {
     icon: {
       description: "Name of the Material Icon.",
@@ -136,12 +141,7 @@ export const Default: StoryObj<HeadingWithIconComponent> = {
   }),
 };
 
-export const Colors: StoryObj<HeadingWithIconComponent> = {
-  parameters: {
-    controls: { disable: true },
-  },
-  render: () => ({
-    template: `
+const COLORS_TEMPLATE = `
       <div [tediVerticalSpacing]="1">
         <tedi-heading-with-icon icon="assignment_ind" headingColor="brand" iconColor="brand">
           My family physician
@@ -150,28 +150,18 @@ export const Colors: StoryObj<HeadingWithIconComponent> = {
           My family physician
         </tedi-heading-with-icon>
       </div>
-    `,
-  }),
-};
+    `;
 
-export const Examples: StoryObj<HeadingWithIconComponent> = {
+export const Colors: StoryObj<HeadingWithIconComponent> = {
   parameters: {
     controls: { disable: true },
   },
-  decorators: [
-    moduleMetadata({
-      imports: [
-        CardComponent,
-        CardContentComponent,
-        SeparatorComponent,
-        ButtonComponent,
-        IconComponent,
-        TextComponent,
-      ],
-    }),
-  ],
   render: () => ({
-    template: `
+    template: COLORS_TEMPLATE,
+  }),
+};
+
+const EXAMPLES_TEMPLATE = `
       <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-start">
         <tedi-card style="width: 300px">
           <tedi-card-content>
@@ -230,6 +220,40 @@ export const Examples: StoryObj<HeadingWithIconComponent> = {
           </tedi-card-content>
         </tedi-card>
       </div>
-    `,
+    `;
+
+export const Examples: StoryObj<HeadingWithIconComponent> = {
+  parameters: {
+    controls: { disable: true },
+  },
+  decorators: [
+    moduleMetadata({
+      imports: [
+        CardComponent,
+        CardContentComponent,
+        SeparatorComponent,
+        ButtonComponent,
+        IconComponent,
+        TextComponent,
+      ],
+    }),
+  ],
+  render: () => ({
+    template: EXAMPLES_TEMPLATE,
   }),
+};
+
+/** Chromatic snapshot for HeadingWithIcon: add every new visual variant here too. */
+export const VisualTest: StoryObj<HeadingWithIconComponent> = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
+  decorators: Examples.decorators,
+  render: () =>
+    visualTest([
+      { label: "Default", story: Default },
+      { label: "Colors", story: Colors },
+      { label: "Examples", story: Examples },
+    ]),
 };

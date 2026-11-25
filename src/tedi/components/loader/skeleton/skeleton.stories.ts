@@ -5,6 +5,10 @@ import {
   argsToTemplate,
   moduleMetadata,
 } from "@storybook/angular";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { ComponentInputs } from "../../../types/inputs.type";
 import { createBreakpointArgTypes } from "../../../../dev-tools/createBreakpointArgTypes";
 import { SkeletonComponent } from "./skeleton.component";
@@ -166,6 +170,9 @@ export default {
         SkeletonComponent,
         SkeletonBlockComponent,
         AccessibilityDemoComponent,
+        RowComponent,
+        ColComponent,
+        TextComponent,
       ],
     }),
   ],
@@ -173,6 +180,7 @@ export default {
     status: {
       type: ["breakpointSupport"],
     },
+    chromatic: { disableSnapshot: true },
   },
   argTypes: {
     label: {
@@ -305,16 +313,20 @@ export const Width: Story = {
  * Below `md` the blocks are full width; from `md` up they narrow and grow
  * taller.
  */
-export const Responsive: Story = {
-  parameters: { controls: { disable: true } },
-  render: () => ({
-    template: `
+const RESPONSIVE_TEMPLATE = `
       <tedi-skeleton label="Loading something">
         <tedi-skeleton-block [width]="100" height="h3" [md]="{ width: 44, height: 'h1' }" />
         <tedi-skeleton-block [width]="100" height="p" [md]="{ width: 75 }" />
         <tedi-skeleton-block [width]="100" [height]="60" [md]="{ width: 32, height: 100 }" />
       </tedi-skeleton>
-    `,
+    `;
+
+export const Responsive: Story = {
+  parameters: {
+    controls: { disable: true },
+  },
+  render: () => ({
+    template: RESPONSIVE_TEMPLATE,
   }),
 };
 
@@ -327,8 +339,24 @@ export const Responsive: Story = {
  * loading; the third button shows that.
  */
 export const Accessibility: Story = {
-  parameters: { controls: { disable: true } },
+  parameters: { visualTest: false, controls: { disable: true } },
   render: () => ({
     template: `<tedi-skeleton-accessibility-demo />`,
   }),
+};
+
+/** Chromatic snapshot for Skeleton: add every new visual variant here too. */
+export const VisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    controls: { disable: true },
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
+  render: () =>
+    visualTest([
+      { label: "Default", story: Default },
+      { label: "Height", story: Height },
+      { label: "Width", story: Width },
+      { label: "Responsive", story: Responsive },
+    ]),
 };

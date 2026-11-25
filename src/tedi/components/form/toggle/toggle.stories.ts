@@ -9,6 +9,10 @@ import { ToggleComponent } from "./toggle.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { LabelComponent } from "../../content/label/label.component";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 
 const PSEUDO_STATE = ["Default", "Hover", "Active", "Focus"];
 
@@ -25,6 +29,9 @@ export default {
       imports: [ToggleComponent, RowComponent, ColComponent, LabelComponent],
     }),
   ],
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
   argTypes: {
     inputId: {
       description:
@@ -134,7 +141,6 @@ export default {
 } as Meta<ToggleComponent>;
 
 export const Default: StoryObj<ToggleComponent> = {
-  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     inputId: "example-toggle-1",
     variant: "primary",
@@ -183,32 +189,46 @@ export const LabelPosition: StoryObj<ToggleComponent> = {
   }),
 };
 
-const Template: StoryFn<ToggleComponent> = (args) => ({
-  props: { ...args, pseudoState: PSEUDO_STATE },
-  template: `
+type StatesStory = StoryObj<ToggleComponent & { vtId?: string }>;
+
+/**
+ * `vtId` gives every toggle a unique id where the matrix repeats in `VisualTest`; the docs stories
+ * keep the state name as id so `#Hover` etc. match.
+ */
+const pseudoStateTemplate: StoryFn<ToggleComponent & { vtId?: string }> = ({
+  vtId,
+  ...args
+}) => {
+  const id = (n: number) =>
+    vtId ? `'vt-' + state.toLowerCase() + '-${vtId}-${n}'` : "state";
+
+  return {
+    props: { ...args, pseudoState: PSEUDO_STATE },
+    template: `
     <tedi-row [cols]="1" [gapY]="4">
       <tedi-row *ngFor="let state of pseudoState;" cols="4" alignItems="center">
         <b>{{ state }}</b>
         <tedi-col [width]="3" style="display: flex; flex-wrap: wrap; align-items: center; column-gap: 2rem; row-gap: 0.75rem;">
           <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" ariaLabel="E-posti teavitused" />
-            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" ariaLabel="SMS-teavitused" [checked]="true" />
+            <tedi-toggle ${argsToTemplate(args)} [inputId]="${id(1)}" ariaLabel="E-posti teavitused" />
+            <tedi-toggle ${argsToTemplate(args)} [inputId]="${id(2)}" ariaLabel="SMS-teavitused" [checked]="true" />
           </div>
           <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" size="large" ariaLabel="Meeldetuletused" />
-            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" size="large" ariaLabel="Uudiskiri" [checked]="true" />
+            <tedi-toggle ${argsToTemplate(args)} [inputId]="${id(3)}" size="large" ariaLabel="Meeldetuletused" />
+            <tedi-toggle ${argsToTemplate(args)} [inputId]="${id(4)}" size="large" ariaLabel="Uudiskiri" [checked]="true" />
           </div>
           <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" size="large" [icon]="true" ariaLabel="Asukoha jagamine" />
-            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" size="large" [icon]="true" ariaLabel="Andmete jagamine arstiga" [checked]="true" />
+            <tedi-toggle ${argsToTemplate(args)} [inputId]="${id(5)}" size="large" [icon]="true" ariaLabel="Asukoha jagamine" />
+            <tedi-toggle ${argsToTemplate(args)} [inputId]="${id(6)}" size="large" [icon]="true" ariaLabel="Andmete jagamine arstiga" [checked]="true" />
           </div>
         </tedi-col>
       </tedi-row>
     </tedi-row>
   `,
-});
+  };
+};
 
-export const PrimaryFilled: StoryObj<ToggleComponent> = {
+export const PrimaryFilled: StatesStory = {
   parameters: {
     pseudo: {
       hover: "#Hover",
@@ -220,10 +240,10 @@ export const PrimaryFilled: StoryObj<ToggleComponent> = {
     type: "filled",
     variant: "primary",
   },
-  render: Template,
+  render: pseudoStateTemplate,
 };
 
-export const PrimaryOutlined: StoryObj<ToggleComponent> = {
+export const PrimaryOutlined: StatesStory = {
   parameters: {
     pseudo: {
       hover: "#Hover",
@@ -235,10 +255,10 @@ export const PrimaryOutlined: StoryObj<ToggleComponent> = {
     type: "outlined",
     variant: "primary",
   },
-  render: Template,
+  render: pseudoStateTemplate,
 };
 
-export const ColoredFilled: StoryObj<ToggleComponent> = {
+export const ColoredFilled: StatesStory = {
   parameters: {
     pseudo: {
       hover: "#Hover",
@@ -250,10 +270,10 @@ export const ColoredFilled: StoryObj<ToggleComponent> = {
     type: "filled",
     variant: "colored",
   },
-  render: Template,
+  render: pseudoStateTemplate,
 };
 
-export const ColoredOutlined: StoryObj<ToggleComponent> = {
+export const ColoredOutlined: StatesStory = {
   parameters: {
     pseudo: {
       hover: "#Hover",
@@ -265,5 +285,44 @@ export const ColoredOutlined: StoryObj<ToggleComponent> = {
     type: "outlined",
     variant: "colored",
   },
-  render: Template,
+  render: pseudoStateTemplate,
+};
+
+/** Chromatic snapshot for Toggle: add every new visual variant here too. */
+export const VisualTest: StoryObj<ToggleComponent> = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+    pseudo: {
+      hover: '[id^="vt-hover-"]',
+      active: '[id^="vt-active-"]',
+      focusVisible: '[id^="vt-focus-"]',
+    },
+  },
+  render: () =>
+    visualTest([
+      { label: "Default", story: Default },
+      {
+        label: "Primary filled",
+        story: PrimaryFilled,
+        args: { vtId: "primary-filled" },
+      },
+      {
+        label: "Primary outlined",
+        story: PrimaryOutlined,
+        args: { vtId: "primary-outlined" },
+      },
+      {
+        label: "Colored filled",
+        story: ColoredFilled,
+        args: { vtId: "colored-filled" },
+      },
+      {
+        label: "Colored outlined",
+        story: ColoredOutlined,
+        args: { vtId: "colored-outlined" },
+      },
+      { label: "Label position", story: LabelPosition },
+      { label: "Size", story: Size },
+    ]),
 };
