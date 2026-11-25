@@ -56,6 +56,11 @@ import {
   SelectValueContext,
 } from "./select-templates.directive";
 import { InputSize, InputState } from "../form-field/form-field.component";
+import { TEDI_FIELD_CONTEXT } from "../form-field/field-context.token";
+import {
+  controlDescribedBy,
+  TEDI_DESCRIBABLE_CONTROL,
+} from "../form-field/control-described-by";
 export type SelectInputSize = Exclude<InputSize, "large">;
 
 export interface SelectOption<T = unknown> {
@@ -121,6 +126,10 @@ export enum SpecialOptionControls {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => SelectComponent),
       multi: true,
+    },
+    {
+      provide: TEDI_DESCRIBABLE_CONTROL,
+      useExisting: forwardRef(() => SelectComponent),
     },
   ],
 })
@@ -488,11 +497,40 @@ export class SelectComponent<T = unknown>
     return values.map((value) => (value == null ? "" : String(value)));
   });
 
-  readonly isInvalid = computed(() => this.state() === "error");
+  readonly isInvalid = computed(
+    () => this.state() === "error" || (this.fieldContext?.invalid() ?? false),
+  );
 
   readonly feedbackId = computed(() =>
     this.feedbackText() ? `${this.inputId()}-feedback` : null,
   );
+
+  /**
+   * External `aria-describedby` ids: the ones set on the host element plus
+   * those passed to `setDescribedBy`.
+   */
+  readonly describedBy = controlDescribedBy();
+
+  /**
+   * `aria-describedby` value for the combobox: the external ids followed by the
+   * feedback text id.
+   */
+  readonly describedByAttr = computed(() => {
+    const ids = new Set(
+      (this.describedBy.attribute() ?? "").split(/\s+/).filter(Boolean),
+    );
+    const feedbackId = this.feedbackId();
+    if (feedbackId) ids.add(feedbackId);
+    return ids.size ? [...ids].join(" ") : null;
+  });
+
+  /**
+   * Links elements rendered outside the select (for example an application's
+   * own error message) to the combobox through `aria-describedby`.
+   */
+  setDescribedBy(ids: string[]): void {
+    this.describedBy.set(ids);
+  }
 
   hiddenTagsCount = computed(() => {
     const visible = this.visibleTagsCount();
@@ -546,6 +584,9 @@ export class SelectComponent<T = unknown>
   multiselectContainerRef = viewChild<ElementRef>("multiselectContainer");
   tagRefs = viewChildren("tagElement", { read: ElementRef });
   hostRef = inject(ElementRef);
+  private readonly fieldContext = inject(TEDI_FIELD_CONTEXT, {
+    optional: true,
+  });
   private ngZone = inject(NgZone);
   private renderer = inject(Renderer2);
   private document = inject(DOCUMENT);
@@ -947,7 +988,10 @@ export class SelectComponent<T = unknown>
   }
 
   onSearchKeydown(event: KeyboardEvent): void {
-    event.stopPropagation();
+    // Escape bubbles up while the dropdown is closed.
+    if (event.key !== "Escape" || this.isOpen()) {
+      event.stopPropagation();
+    }
 
     switch (event.key) {
       case "ArrowDown":
@@ -1020,6 +1064,10 @@ export class SelectComponent<T = unknown>
         new KeyboardEvent("keydown", { key, keyCode, bubbles: true }),
       );
     }
+  }
+
+  groupHeadingId(groupIndex: number): string {
+    return this.listboxId() + "-group-" + groupIndex;
   }
 
   // ---- Virtual scroll listbox (opt-in, replaces cdkListbox for flat menus) ----

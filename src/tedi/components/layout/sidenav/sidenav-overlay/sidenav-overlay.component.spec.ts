@@ -20,6 +20,7 @@ describe("SideNavOverlayComponent", () => {
     registerToggle: jest.Mock;
     unregisterToggle: jest.Mock;
     handleGoToMainMenu: jest.Mock;
+    closeMobileDrawer: jest.Mock;
     handleCollapse: jest.Mock;
   };
 
@@ -41,6 +42,7 @@ describe("SideNavOverlayComponent", () => {
       registerToggle: jest.fn(),
       unregisterToggle: jest.fn(),
       handleGoToMainMenu: jest.fn(),
+      closeMobileDrawer: jest.fn(() => isMobileOpen.set(false)),
       handleCollapse: jest.fn(),
     };
 
@@ -101,7 +103,7 @@ describe("SideNavOverlayComponent", () => {
     expect(overlayElement.style.top).toBe("56px");
   });
 
-  it("should close mobile on click and call handleGoToMainMenu", () => {
+  it("should close the mobile drawer through closeMobileDrawer on click", () => {
     sidenavService.isMobileOpen.set(true);
     fixture.detectChanges();
     expect(sidenavService.isMobileOpen()).toBe(true);
@@ -109,6 +111,6 @@ describe("SideNavOverlayComponent", () => {
     overlayElement.click();
     fixture.detectChanges();
     expect(sidenavService.isMobileOpen()).toBe(false);
-    expect(sidenavService.handleGoToMainMenu).toHaveBeenCalledTimes(1);
+    expect(sidenavService.closeMobileDrawer).toHaveBeenCalledTimes(1);
   });
 });

@@ -49,7 +49,10 @@ import {
 } from "../form-field/form-field-control";
 import { TEDI_FIELD_CONTEXT } from "../form-field/field-context.token";
 import { deriveControlState } from "../form-field/derive-control-state";
-import { controlDescribedBy } from "../form-field/control-described-by";
+import {
+  controlDescribedBy,
+  TEDI_DESCRIBABLE_CONTROL,
+} from "../form-field/control-described-by";
 import {
   FileUploadFile,
   FileUploadSize,
@@ -109,6 +112,10 @@ const fileIdentity = (file: FileUploadFile): string =>
     },
     {
       provide: TEDI_FORM_FIELD_CONTROL,
+      useExisting: forwardRef(() => FileUploadComponent),
+    },
+    {
+      provide: TEDI_DESCRIBABLE_CONTROL,
       useExisting: forwardRef(() => FileUploadComponent),
     },
   ],

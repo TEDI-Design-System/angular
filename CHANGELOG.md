@@ -1,3 +1,68 @@
+# [10.0.0-rc.28](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.27...angular-10.0.0-rc.28) (2026-11-23)
+
+
+### Features
+
+* **inline-edit:** new TEDI-Ready component [#650](https://github.com/TEDI-Design-System/angular/issues/650) ([#666](https://github.com/TEDI-Design-System/angular/issues/666)) ([22a1f18](https://github.com/TEDI-Design-System/angular/commit/22a1f18b69238f6590fd3e0ae9efc93d3f0cb48f))
+
+# [10.0.0-rc.27](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.26...angular-10.0.0-rc.27) (2026-11-19)
+
+
+### Bug Fixes
+
+* **status-badge:** set vertical-align top on badge to drop baseline offset [#875](https://github.com/TEDI-Design-System/angular/issues/875) ([#930](https://github.com/TEDI-Design-System/angular/issues/930)) ([5908609](https://github.com/TEDI-Design-System/angular/commit/59086090044453c9897a9be288615a14857b9811))
+
+# [10.0.0-rc.26](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.25...angular-10.0.0-rc.26) (2026-11-19)
+
+
+### Bug Fixes
+
+* **scroll-fade:** recompute fade when content changes [#924](https://github.com/TEDI-Design-System/angular/issues/924) ([#929](https://github.com/TEDI-Design-System/angular/issues/929)) ([c4d5259](https://github.com/TEDI-Design-System/angular/commit/c4d5259f132b66d8bb1c2368e112a2be14e7a609))
+* **sidenav:** trap focus and close on Escape in the open mobile menu [#916](https://github.com/TEDI-Design-System/angular/issues/916) ([#917](https://github.com/TEDI-Design-System/angular/issues/917)) ([33c2c2b](https://github.com/TEDI-Design-System/angular/commit/33c2c2bdc7118e729a1e975ccc8f8f7b69690656))
+
+# [10.0.0-rc.25](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.24...angular-10.0.0-rc.25) (2026-11-18)
+
+
+### Features
+
+* **button:** add extra-small size for icon-only buttons [#785](https://github.com/TEDI-Design-System/angular/issues/785) ([#871](https://github.com/TEDI-Design-System/angular/issues/871)) ([380f35c](https://github.com/TEDI-Design-System/angular/commit/380f35c595ee8ee7c29790302b97b7c8ed6fcd8d))
+
+# [10.0.0-rc.24](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.23...angular-10.0.0-rc.24) (2026-11-18)
+
+
+### Features
+
+* **popover,tooltip:** add hover delay and popover hover mode [#879](https://github.com/TEDI-Design-System/angular/issues/879) ([#918](https://github.com/TEDI-Design-System/angular/issues/918)) ([c1baeb9](https://github.com/TEDI-Design-System/angular/commit/c1baeb938bf28ea49e803cd511b844f51e7eb4f7))
+
+# [10.0.0-rc.23](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.22...angular-10.0.0-rc.23) (2026-11-18)
+
+
+### Bug Fixes
+
+* **feedback-text:** use polite live region for valid and error texts [#901](https://github.com/TEDI-Design-System/angular/issues/901) ([#923](https://github.com/TEDI-Design-System/angular/issues/923)) ([3d3027b](https://github.com/TEDI-Design-System/angular/commit/3d3027b2c6a4c6efc73391fd611644024e514058))
+* **select:** accept external aria-describedby ids via setDescribedBy [#885](https://github.com/TEDI-Design-System/angular/issues/885) ([#921](https://github.com/TEDI-Design-System/angular/issues/921)) ([cd13fc6](https://github.com/TEDI-Design-System/angular/commit/cd13fc6ec404a5c9d58e26f5a0b765f04e9065e4))
+
+# [10.0.0-rc.22](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.21...angular-10.0.0-rc.22) (2026-11-18)
+
+
+### Bug Fixes
+
+* **select:** expose option groups to assistive technology [#854](https://github.com/TEDI-Design-System/angular/issues/854) ([#856](https://github.com/TEDI-Design-System/angular/issues/856)) ([c088fcb](https://github.com/TEDI-Design-System/angular/commit/c088fcbac7ed0552427ce7c7397438022118aad6))
+
+# [10.0.0-rc.21](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.20...angular-10.0.0-rc.21) (2026-11-17)
+
+
+### Bug Fixes
+
+* **calendar:** shorten day labels and hide weekday headers [#895](https://github.com/TEDI-Design-System/angular/issues/895) ([#908](https://github.com/TEDI-Design-System/angular/issues/908)) ([34b05ed](https://github.com/TEDI-Design-System/angular/commit/34b05eda897a2e86ab28656a9a03e22725cf3f14))
+
+# [10.0.0-rc.20](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.19...angular-10.0.0-rc.20) (2026-11-17)
+
+
+### Features
+
+* **file-upload:** add new TEDI-Ready component [#752](https://github.com/TEDI-Design-System/angular/issues/752) ([#757](https://github.com/TEDI-Design-System/angular/issues/757)) ([5df412b](https://github.com/TEDI-Design-System/angular/commit/5df412b1321c3b3b03c4b635556e8f35fecc8522))
+
 # [10.0.0-rc.19](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.18...angular-10.0.0-rc.19) (2026-11-17)
 
 

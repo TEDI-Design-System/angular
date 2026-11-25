@@ -10,6 +10,8 @@ class MockTooltipComponent {
   timeoutDelay = jest.fn(() => 100);
   hideTimeout?: ReturnType<typeof setTimeout>;
   showTooltip = jest.fn();
+  showTooltipOnHover = jest.fn();
+  cancelPendingShow = jest.fn();
   hideTooltip = jest.fn();
   toggleTooltip = jest.fn();
   openWith = jest.fn(() => "both" as "hover" | "click" | "both");
@@ -77,19 +79,19 @@ describe("TooltipTriggerComponent", () => {
       it("should call showTooltip when openWith is 'hover'", () => {
         tooltip.openWith = jest.fn(() => "hover");
         hostEl.dispatchEvent(new Event("mouseenter"));
-        expect(tooltip.showTooltip).toHaveBeenCalled();
+        expect(tooltip.showTooltipOnHover).toHaveBeenCalled();
       });
 
       it("should call showTooltip when openWith is 'both'", () => {
         tooltip.openWith = jest.fn(() => "both");
         hostEl.dispatchEvent(new Event("mouseenter"));
-        expect(tooltip.showTooltip).toHaveBeenCalled();
+        expect(tooltip.showTooltipOnHover).toHaveBeenCalled();
       });
 
       it("should not call showTooltip when openWith is 'click'", () => {
         tooltip.openWith = jest.fn(() => "click");
         hostEl.dispatchEvent(new Event("mouseenter"));
-        expect(tooltip.showTooltip).not.toHaveBeenCalled();
+        expect(tooltip.showTooltipOnHover).not.toHaveBeenCalled();
       });
 
       it("should not call showTooltip after recent touchstart", () => {
@@ -98,7 +100,7 @@ describe("TooltipTriggerComponent", () => {
         hostEl.dispatchEvent(new Event("touchstart"));
         hostEl.dispatchEvent(new Event("mouseenter"));
 
-        expect(tooltip.showTooltip).not.toHaveBeenCalled();
+        expect(tooltip.showTooltipOnHover).not.toHaveBeenCalled();
       });
     });
 
@@ -121,7 +123,7 @@ describe("TooltipTriggerComponent", () => {
         hostEl.dispatchEvent(new Event("touchend"));
         hostEl.click();
 
-        expect(tooltip.showTooltip).not.toHaveBeenCalled();
+        expect(tooltip.showTooltipOnHover).not.toHaveBeenCalled();
         expect(tooltip.toggleTooltip).toHaveBeenCalledTimes(1);
       });
 
@@ -135,7 +137,7 @@ describe("TooltipTriggerComponent", () => {
         jest.advanceTimersByTime(300);
 
         hostEl.dispatchEvent(new Event("mouseenter"));
-        expect(tooltip.showTooltip).toHaveBeenCalled();
+        expect(tooltip.showTooltipOnHover).toHaveBeenCalled();
 
         jest.useRealTimers();
       });

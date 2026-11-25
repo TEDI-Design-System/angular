@@ -49,7 +49,10 @@ import {
   TEDI_FIELD_CONTEXT,
 } from "../form-field/field-context.token";
 import { deriveControlState } from "../form-field/derive-control-state";
-import { controlDescribedBy } from "../form-field/control-described-by";
+import {
+  controlDescribedBy,
+  TEDI_DESCRIBABLE_CONTROL,
+} from "../form-field/control-described-by";
 import {
   breakpointInput,
   BreakpointInput,
@@ -107,6 +110,10 @@ export type DateFieldSize = "default" | "small";
     },
     {
       provide: TEDI_FORM_FIELD_CONTROL,
+      useExisting: forwardRef(() => DateFieldComponent),
+    },
+    {
+      provide: TEDI_DESCRIBABLE_CONTROL,
       useExisting: forwardRef(() => DateFieldComponent),
     },
     {
