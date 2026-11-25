@@ -244,7 +244,7 @@ export default {
   argTypes: {
     backgroundColor: {
       description:
-        "Default background color for child content blocks. Child blocks can override it with their own background input.",
+        "Default background color for child content blocks. Child blocks can override it with their own `backgroundColor` input.",
       control: { type: "select" },
       options: CARD_BACKGROUNDS,
       table: {
