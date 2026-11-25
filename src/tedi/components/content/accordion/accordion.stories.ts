@@ -1187,6 +1187,7 @@ export const AccordionBehavior: StoryObj = {
 };
 
 export const BackgroundColors: StoryObj = {
+  parameters: { controls: { disable: true } },
   render: () => ({
     props: { backgroundColors: BACKGROUND_COLOR_EXAMPLES },
     template: `
