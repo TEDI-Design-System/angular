@@ -16,6 +16,7 @@ import {
 } from "../../../buttons/collapse-button/collapse-button.component";
 import { TediTranslationService } from "../../../../services/translation/translation.service";
 import { AccordionItemComponent } from "../accordion-item/accordion-item.component";
+import { CardBackground } from "../../card/card.utils";
 
 @Component({
   selector: "tedi-accordion-item-header",
@@ -37,7 +38,8 @@ import { AccordionItemComponent } from "../accordion-item/accordion-item.compone
     "[class.tedi-accordion-item-header--expanded]": "expanded()",
     "[class.tedi-accordion-item-header--with-icon-card]": "item.showIconCard()",
     "[class.tedi-accordion-item-header--disabled]": "item.disabled()",
-    "[class]": "headerClass() ?? ''",
+    "[class.tedi-accordion-item-header--colored]": "!!backgroundColor()",
+    "[class]": "hostClass()",
   },
 })
 export class AccordionItemHeaderComponent {
@@ -85,6 +87,13 @@ export class AccordionItemHeaderComponent {
    */
   headerClass = input<string | null>(null);
   /**
+   * Background color of the header. Uses the same values as `tedi-card-header`.
+   * `brand-primary` and `brand-secondary` switch the title and expand
+   * indicator to white text. Hover and active backgrounds are not applied
+   * when `backgroundColor` is set.
+   */
+  backgroundColor = input<CardBackground>();
+  /**
    * When set, wraps the header trigger in a semantic `<h1>`–`<h6>` element
    * following the WAI-ARIA Accordion Pattern. Improves accessibility for
    * documents with a heading hierarchy (FAQ pages, docs). The wrapper uses
@@ -117,10 +126,10 @@ export class AccordionItemHeaderComponent {
   /**
    * Use the inverted (light-on-dark) palette for the default expand
    * action, for placement on a dark or brand background. Only effective
-   * when `headerClickable` is `false`.
-   * @default false
+   * when `headerClickable` is `false`. When omitted, it is `true` on
+   * `brand-primary` and `brand-secondary` backgrounds.
    */
-  expandActionInverted = input<boolean>(false);
+  expandActionInverted = input<boolean | undefined>(undefined);
   /**
    * Whether the default expand action's label is underlined. Defaults to
    * `false` so the chevron stays the sole affordance — an underlined
@@ -131,6 +140,24 @@ export class AccordionItemHeaderComponent {
    * @default false
    */
   expandActionUnderline = input<boolean>(false);
+
+  readonly resolvedExpandActionInverted = computed(
+    () =>
+      this.expandActionInverted() ??
+      (this.backgroundColor() === "brand-primary" ||
+        this.backgroundColor() === "brand-secondary"),
+  );
+
+  readonly hostClass = computed(() => {
+    const backgroundColor = this.backgroundColor();
+    return [
+      backgroundColor &&
+        `tedi-accordion-item-header--background--${backgroundColor}`,
+      this.headerClass(),
+    ]
+      .filter(Boolean)
+      .join(" ");
+  });
 
   readonly headerId = this.item.headerId;
   readonly contentId = this.item.contentId;

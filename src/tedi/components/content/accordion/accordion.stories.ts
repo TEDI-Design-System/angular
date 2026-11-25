@@ -17,6 +17,42 @@ import {
   VISUAL_TEST_VIEWPORTS,
   visualTest,
 } from "../../../../../.storybook/visual-test-story";
+import { CardBackground } from "../card/card.utils";
+
+const CARD_BACKGROUNDS: CardBackground[] = [
+  "primary",
+  "secondary",
+  "tertiary",
+  "accent",
+  "brand-primary",
+  "brand-secondary",
+  "brand-tertiary",
+  "brand-quaternary",
+  "danger-primary",
+  "danger-secondary",
+  "success-primary",
+  "success-secondary",
+  "info-primary",
+  "info-secondary",
+  "warning-primary",
+  "warning-secondary",
+  "neutral-primary",
+  "neutral-secondary",
+];
+
+const BACKGROUND_COLOR_EXAMPLES: { color: CardBackground; label: string }[] = [
+  { color: "primary", label: "Primary" },
+  { color: "secondary", label: "Secondary" },
+  { color: "tertiary", label: "Tertiary" },
+  { color: "brand-primary", label: "Brand primary" },
+  { color: "brand-secondary", label: "Brand secondary" },
+  { color: "brand-tertiary", label: "Brand tertiary" },
+  { color: "brand-quaternary", label: "Brand quaternary" },
+  { color: "accent", label: "Accent" },
+  { color: "success-primary", label: "Success" },
+  { color: "warning-primary", label: "Warning" },
+  { color: "danger-primary", label: "Danger" },
+];
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.30.43?node-id=8048-69789&t=aqojgjkZcOYAN35p-0" target="_blank">Figma ↗</a><br />
@@ -270,11 +306,11 @@ export default {
       description:
         "Use the inverted (light-on-dark) palette for the default expand " +
         "action, for placement on a dark or brand background. Only " +
-        "effective when `headerClickable` is `false`.",
+        "effective when `headerClickable` is `false`. When omitted, it is " +
+        "`true` on `brand-primary` and `brand-secondary` backgrounds.",
       table: {
         category: "Accordion Item Header",
-        type: { summary: "boolean" },
-        defaultValue: { summary: "false" },
+        type: { summary: "boolean | undefined" },
       },
     },
     expandActionUnderline: {
@@ -298,6 +334,19 @@ export default {
         type: { summary: "string" },
       },
     },
+    headerBackgroundColor: {
+      control: "select",
+      options: [undefined, ...CARD_BACKGROUNDS],
+      description:
+        "Background color of the header. Same values as `tedi-card-header`. " +
+        "`brand-primary` and `brand-secondary` switch the title and expand " +
+        "indicator to white. Hover and active backgrounds are not applied " +
+        "when set.",
+      table: {
+        category: "Accordion Item Header",
+        type: { summary: "CardBackground" },
+      },
+    },
     headingLevel: {
       control: "select",
       options: [undefined, 1, 2, 3, 4, 5, 6],
@@ -316,6 +365,16 @@ export default {
       table: {
         category: "Accordion Item Content",
         type: { summary: "string" },
+      },
+    },
+    contentBackgroundColor: {
+      control: "select",
+      options: [undefined, ...CARD_BACKGROUNDS],
+      description:
+        "Background color of the content. Same values as `tedi-card-content`.",
+      table: {
+        category: "Accordion Item Content",
+        type: { summary: "CardBackground" },
       },
     },
   },
@@ -383,7 +442,7 @@ The accordion item is composed of three parts, each owning its own configuration
     expandActionPosition: "end",
     expandActionArrowType: "default",
     expandActionSize: undefined,
-    expandActionInverted: false,
+    expandActionInverted: undefined,
     expandActionUnderline: false,
     defaultExpanded: false,
     showIconCard: false,
@@ -425,6 +484,7 @@ The accordion item is composed of three parts, each owning its own configuration
             [expandActionInverted]="expandActionInverted"
             [expandActionUnderline]="expandActionUnderline"
             [headerClass]="headerClass"
+            [backgroundColor]="headerBackgroundColor"
             [headingLevel]="headingLevel"
           >
             <span tedi-accordion-title>Pealkiri</span>
@@ -435,7 +495,7 @@ The accordion item is composed of three parts, each owning its own configuration
             `}
             <tedi-status-badge tedi-accordion-after-title color="success" text="Kinnitatud" />
           </tedi-accordion-item-header>
-          <tedi-accordion-item-content [contentClass]="contentClass">
+          <tedi-accordion-item-content [contentClass]="contentClass" [backgroundColor]="contentBackgroundColor">
             ${contentExample}
           </tedi-accordion-item-content>
         </tedi-accordion-item>
@@ -1126,6 +1186,24 @@ export const AccordionBehavior: StoryObj = {
   }),
 };
 
+export const BackgroundColors: StoryObj = {
+  render: () => ({
+    props: { backgroundColors: BACKGROUND_COLOR_EXAMPLES },
+    template: `
+      <tedi-accordion [allowMultiple]="true" [defaultExpanded]="true">
+        @for (example of backgroundColors; track example.color) {
+          <tedi-accordion-item>
+            <tedi-accordion-item-header [backgroundColor]="example.color">
+              <span tedi-accordion-title>{{ example.label }}</span>
+            </tedi-accordion-item-header>
+            <tedi-accordion-item-content [backgroundColor]="example.color">${contentExample}</tedi-accordion-item-content>
+          </tedi-accordion-item>
+        }
+      </tedi-accordion>
+    `,
+  }),
+};
+
 const DISABLED_TEMPLATE = `
       <style>
         .step-number {
@@ -1379,6 +1457,7 @@ export const VisualTest: StoryObj = {
       { label: "With icon card", story: WithIconCard },
       { label: "Customized", story: Customized },
       { label: "Accordion behavior", story: AccordionBehavior },
+      { label: "Background colors", story: BackgroundColors },
       { label: "Disabled", story: Disabled },
     ]),
 };

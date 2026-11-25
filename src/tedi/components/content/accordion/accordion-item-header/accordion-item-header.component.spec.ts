@@ -5,6 +5,7 @@ import { AccordionItemComponent } from "../accordion-item/accordion-item.compone
 import { AccordionItemHeaderComponent } from "./accordion-item-header.component";
 import { AccordionItemContentComponent } from "../accordion-item-content/accordion-item-content.component";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../../tokens/translation.token";
+import { CardBackground } from "../../card/card.utils";
 
 @Component({
   standalone: true,
@@ -19,6 +20,8 @@ import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../../tokens/translation.t
         [showExpandLabel]="showExpandLabel"
         [headerClickable]="headerClickable"
         [headerClass]="headerClass"
+        [backgroundColor]="backgroundColor"
+        [expandActionInverted]="expandActionInverted"
         [openText]="openText"
         [closeText]="closeText"
       >
@@ -37,6 +40,8 @@ class TestHostComponent {
   showExpandLabel = true;
   headerClickable = true;
   headerClass: string | null = null;
+  backgroundColor: CardBackground | undefined = undefined;
+  expandActionInverted: boolean | undefined = undefined;
   openText: string | undefined = undefined;
   closeText: string | undefined = undefined;
 }
@@ -191,5 +196,50 @@ describe("AccordionItemHeaderComponent", () => {
       "tedi-accordion-item-header--hoverable",
     );
     expect(headerEl.classList).toContain("custom-header");
+  });
+
+  it("should apply backgroundColor modifier alongside headerClass", () => {
+    const headerEl = fixture.debugElement.query(
+      By.directive(AccordionItemHeaderComponent),
+    ).nativeElement as HTMLElement;
+
+    expect(headerEl.classList).not.toContain(
+      "tedi-accordion-item-header--colored",
+    );
+
+    host.backgroundColor = "brand-primary";
+    host.headerClass = "custom-header";
+    fixture.detectChanges();
+
+    expect(headerEl.classList).toContain(
+      "tedi-accordion-item-header--background--brand-primary",
+    );
+    expect(headerEl.classList).toContain("tedi-accordion-item-header--colored");
+    expect(headerEl.classList).toContain("custom-header");
+  });
+
+  it("should invert the collapse button on brand backgrounds unless set explicitly", () => {
+    const collapseButton = () =>
+      fixture.debugElement.query(By.css("[tedi-collapse-button]"))
+        .nativeElement as HTMLElement;
+
+    host.headerClickable = false;
+    host.backgroundColor = "secondary";
+    fixture.detectChanges();
+    expect(collapseButton().classList).not.toContain(
+      "tedi-collapse-button--inverted",
+    );
+
+    host.backgroundColor = "brand-primary";
+    fixture.detectChanges();
+    expect(collapseButton().classList).toContain(
+      "tedi-collapse-button--inverted",
+    );
+
+    host.expandActionInverted = false;
+    fixture.detectChanges();
+    expect(collapseButton().classList).not.toContain(
+      "tedi-collapse-button--inverted",
+    );
   });
 });
