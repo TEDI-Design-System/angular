@@ -1,3 +1,10 @@
+# [10.0.0-rc.31](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.30...angular-10.0.0-rc.31) (2026-11-25)
+
+
+### Bug Fixes
+
+* **inline-edit:** leave Enter to buttons, textareas and selects in the editor [#942](https://github.com/TEDI-Design-System/angular/issues/942) ([#943](https://github.com/TEDI-Design-System/angular/issues/943)) ([887f8b4](https://github.com/TEDI-Design-System/angular/commit/887f8b421096ad5e13ecfe8a4946659b1592d126))
+
 # [10.0.0-rc.30](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.29...angular-10.0.0-rc.30) (2026-11-25)
 
 
