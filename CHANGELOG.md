@@ -1,3 +1,10 @@
+# [10.0.0-rc.34](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.33...angular-10.0.0-rc.34) (2026-11-25)
+
+
+### Features
+
+* **table-card:** new TEDI-Ready component [#529](https://github.com/TEDI-Design-System/angular/issues/529) ([#685](https://github.com/TEDI-Design-System/angular/issues/685)) ([ea20cec](https://github.com/TEDI-Design-System/angular/commit/ea20cec7190cceaf964e8713c7899db28bad5f8b))
+
 # [10.0.0-rc.33](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.32...angular-10.0.0-rc.33) (2026-11-25)
 
 
