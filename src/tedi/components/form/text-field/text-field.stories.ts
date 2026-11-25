@@ -20,6 +20,10 @@ import { TextComponent } from "../../base/text/text.component";
 import { LabelComponent } from "../../content/label/label.component";
 import { LabelRowComponent } from "../label-row/label-row.component";
 import { InfoTooltipComponent } from "../../overlay/info-tooltip/info-tooltip.component";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 
 const PSEUDO_STATE = ["Default", "Hover", "Active", "Disabled", "Focus"];
 
@@ -49,6 +53,9 @@ export default {
       ],
     }),
   ],
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
   argTypes: {
     size: {
       description:
@@ -143,7 +150,6 @@ export default {
 } as Meta<TextFieldComponent>;
 
 export const Default: StoryObj = {
-  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     size: "default",
     clearable: true,
@@ -287,7 +293,7 @@ export const Placeholder: StoryObj<TextFieldComponent> = {
 };
 
 export const WithTemplateDrivenForms: StoryObj<TextFieldComponent> = {
-  parameters: { chromatic: { disableSnapshot: true } },
+  parameters: { visualTest: false },
   render: () => ({
     props: {
       inputValue: "",
@@ -320,7 +326,7 @@ export const WithTemplateDrivenForms: StoryObj<TextFieldComponent> = {
 };
 
 export const WithReactiveForms: StoryObj<TextFieldComponent> = {
-  parameters: { chromatic: { disableSnapshot: true } },
+  parameters: { visualTest: false },
   render: () => {
     const control = new FormControl("", {
       nonNullable: true,
@@ -402,4 +408,29 @@ export const WithLabelTooltip: StoryObj<TextFieldComponent> = {
       </tedi-row>
     `,
   }),
+};
+
+/** Chromatic snapshot for TextField: add every new visual variant here too. */
+export const VisualTest: StoryObj<TextFieldComponent> = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+    pseudo: {
+      hover: "#Hover",
+      active: "#Active",
+      focusVisible: "#Focus",
+    },
+  },
+  render: () =>
+    visualTest([
+      { label: "Default", story: Default },
+      { label: "Size", story: Size },
+      { label: "States", story: States },
+      { label: "With hint", story: WithHint },
+      { label: "Password", story: Password },
+      { label: "Placeholder", story: Placeholder },
+      { label: "Standalone", story: Standalone },
+      { label: "With value", story: ClearButtonOnInteraction },
+      { label: "With label tooltip", story: WithLabelTooltip },
+    ]),
 };

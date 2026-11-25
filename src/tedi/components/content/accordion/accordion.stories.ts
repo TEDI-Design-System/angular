@@ -13,6 +13,10 @@ import { FormFieldComponent } from "../../form/form-field/form-field.component";
 import { TextFieldComponent } from "../../form/text-field/text-field.component";
 import { SeparatorComponent } from "../../helpers/separator/separator.component";
 import { ShowAtDirective } from "../../../directives/show-at/show-at.directive";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.30.43?node-id=8048-69789&t=aqojgjkZcOYAN35p-0" target="_blank">Figma ↗</a><br />
@@ -45,6 +49,7 @@ export default {
     status: {
       type: ["breakpointSupport"],
     },
+    chromatic: { disableSnapshot: true },
   },
   argTypes: {
     allowMultiple: {
@@ -354,7 +359,6 @@ The accordion item is composed of three parts, each owning its own configuration
 - \`<tedi-accordion-item-header>\`: owns header appearance and interaction (\`titleLayout\`, \`headerClickable\`, expand labels, \`headerClass\`, etc.). Put the title and any extras (action buttons, badges, descriptions) inside this element using the corresponding slot attributes.
 - \`<tedi-accordion-item-content>\`: owns content styling (\`contentClass\`). Wraps the collapsible content.
 
-
 | Selector | Description |
 |----------|------------|
 | \`[tedi-accordion-title]\` | The accordion title. |
@@ -448,9 +452,7 @@ The accordion item is composed of three parts, each owning its own configuration
   }),
 };
 
-export const Variants: StoryObj = {
-  render: () => ({
-    template: `
+const VARIANTS_TEMPLATE = `
       <div style="display: flex; flex-direction: column; gap: var(--layout-grid-gutters-16);">
         <tedi-accordion>
           <tedi-accordion-item>
@@ -576,7 +578,11 @@ export const Variants: StoryObj = {
           </tedi-accordion-item>
         </tedi-accordion>
       </div>
-    `,
+    `;
+
+export const Variants: StoryObj = {
+  render: () => ({
+    template: VARIANTS_TEMPLATE,
     props: {
       selectedA: false,
       selectedB: true,
@@ -590,9 +596,7 @@ export const Variants: StoryObj = {
   }),
 };
 
-export const ActionTypes: StoryObj = {
-  render: () => ({
-    template: `
+const ACTION_TYPES_TEMPLATE = `
       <style>
         .story-row {
           display: flex;
@@ -758,7 +762,11 @@ export const ActionTypes: StoryObj = {
           </tedi-accordion>
         </div>
       </div>
-    `,
+    `;
+
+export const ActionTypes: StoryObj = {
+  render: () => ({
+    template: ACTION_TYPES_TEMPLATE,
     props: {
       selectedA: false,
       selectedB: false,
@@ -781,9 +789,7 @@ export const ActionTypes: StoryObj = {
   }),
 };
 
-export const WithIconCard: StoryObj = {
-  render: () => ({
-    template: `
+const WITH_ICON_CARD_TEMPLATE = `
       <div style="display: flex; flex-direction: column; gap: var(--layout-grid-gutters-16);">
         <div style="display: flex; flex-direction: column; gap: var(--layout-grid-gutters-08);">
           <tedi-accordion>
@@ -891,7 +897,11 @@ export const WithIconCard: StoryObj = {
           </tedi-accordion>
         </div>
       </div>
-    `,
+    `;
+
+export const WithIconCard: StoryObj = {
+  render: () => ({
+    template: WITH_ICON_CARD_TEMPLATE,
     props: {
       selectedA: false,
       selectedB: false,
@@ -914,16 +924,7 @@ export const WithIconCard: StoryObj = {
   }),
 };
 
-export const Customized: StoryObj = {
-  render: () => ({
-    props: {
-      selectedState: false,
-      toggleSelect(event: Event) {
-        const checkbox = event.target as HTMLInputElement;
-        this["selectedState"] = checkbox.checked;
-      },
-    },
-    template: `
+const CUSTOMIZED_TEMPLATE = `
       <style>
         ::ng-deep .tedi-accordion-item-header.custom-header,
         ::ng-deep .tedi-accordion-item-content.custom-content {
@@ -982,7 +983,6 @@ export const Customized: StoryObj = {
             <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
           </tedi-accordion-item>
         </tedi-accordion>
-
 
         <tedi-accordion>
           <tedi-accordion-item [selected]="selectedState">
@@ -1071,7 +1071,18 @@ export const Customized: StoryObj = {
           </tedi-accordion-item>
         </tedi-accordion>
       </div>
-    `,
+    `;
+
+export const Customized: StoryObj = {
+  render: () => ({
+    props: {
+      selectedState: false,
+      toggleSelect(event: Event) {
+        const checkbox = event.target as HTMLInputElement;
+        this["selectedState"] = checkbox.checked;
+      },
+    },
+    template: CUSTOMIZED_TEMPLATE,
   }),
 };
 
@@ -1115,24 +1126,7 @@ export const AccordionBehavior: StoryObj = {
   }),
 };
 
-export const Disabled: StoryObj = {
-  parameters: {
-    docs: {
-      description: {
-        story: `
-Disabled items keep their current expanded state but reject user interaction.
-The header trigger renders as a native \`<button disabled>\` (or with
-\`aria-disabled\` for the non-clickable-header variant), so browsers handle
-focus, keyboard, and screen-reader announcements for free.
-
-Use \`disabled\` for items whose content is locked behind a state the user
-hasn't met yet (incomplete prerequisites, missing permissions, etc.).
-        `,
-      },
-    },
-  },
-  render: () => ({
-    template: `
+const DISABLED_TEMPLATE = `
       <style>
         .step-number {
           display: flex;
@@ -1228,12 +1222,32 @@ hasn't met yet (incomplete prerequisites, missing permissions, etc.).
           <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
         </tedi-accordion-item>
       </tedi-accordion>
-    `,
+    `;
+
+export const Disabled: StoryObj = {
+  parameters: {
+    docs: {
+      description: {
+        story: `
+Disabled items keep their current expanded state but reject user interaction.
+The header trigger renders as a native \`<button disabled>\` (or with
+\`aria-disabled\` for the non-clickable-header variant), so browsers handle
+focus, keyboard, and screen-reader announcements for free.
+
+Use \`disabled\` for items whose content is locked behind a state the user
+hasn't met yet (incomplete prerequisites, missing permissions, etc.).
+        `,
+      },
+    },
+  },
+  render: () => ({
+    template: DISABLED_TEMPLATE,
   }),
 };
 
 export const HashDeepLinking: StoryObj = {
   parameters: {
+    visualTest: false,
     docs: {
       description: {
         story: `
@@ -1292,6 +1306,7 @@ no-op for items relying on the auto-generated header/content IDs.
 
 export const SemanticHeadings: StoryObj = {
   parameters: {
+    visualTest: false,
     docs: {
       description: {
         story: `
@@ -1348,4 +1363,22 @@ but the rendered look matches the surrounding accordion items exactly.
       </section>
     `,
   }),
+};
+
+/** Chromatic snapshot for Accordion: add every new visual variant here too. */
+export const VisualTest: StoryObj = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
+  render: () =>
+    visualTest([
+      { label: "Default", story: Default },
+      { label: "Variants", story: Variants },
+      { label: "Action types", story: ActionTypes },
+      { label: "With icon card", story: WithIconCard },
+      { label: "Customized", story: Customized },
+      { label: "Accordion behavior", story: AccordionBehavior },
+      { label: "Disabled", story: Disabled },
+    ]),
 };

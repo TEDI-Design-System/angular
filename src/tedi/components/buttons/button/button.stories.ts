@@ -5,6 +5,10 @@ import {
   StoryFn,
   StoryObj,
 } from "@storybook/angular";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { ButtonComponent } from "./button.component";
 import { TextColor, TextComponent } from "../../base/text/text.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
@@ -14,6 +18,7 @@ import { BaseButtonDirective } from "./base-button.directive";
 import { TooltipComponent } from "../../overlay/tooltip/tooltip.component";
 import { TooltipTriggerComponent } from "../../overlay/tooltip/tooltip-trigger/tooltip-trigger.component";
 import { TooltipContentComponent } from "../../overlay/tooltip/tooltip-content/tooltip-content.component";
+import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
 
 const PSEUDO_STATE = ["Default", "Hover", "Active", "Focus", "Disabled"];
 
@@ -22,12 +27,13 @@ const PSEUDO_STATE = ["Default", "Hover", "Active", "Focus", "Disabled"];
  * <a href="https://www.tedi.ee/1ee8444b7/p/10984a-button" target="_blank">Zeroheight ↗</a>
  */
 
-export default {
+const meta: Meta<ButtonType> = {
   title: "TEDI-Ready/Components/Buttons/Button",
   component: ButtonComponent,
   decorators: [
     moduleMetadata({
       imports: [
+        VerticalSpacingDirective,
         ButtonComponent,
         RowComponent,
         ColComponent,
@@ -39,6 +45,7 @@ export default {
       ],
     }),
   ],
+  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     size: "default",
     variant: "primary",
@@ -88,12 +95,13 @@ export default {
       },
     },
   },
-} as Meta<ButtonType>;
+};
+
+export default meta;
 
 type ButtonType = ButtonComponent & { ngContent: string };
 
 export const Default: StoryObj<ButtonType> = {
-  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     ngContent: "Button",
   },
@@ -104,10 +112,12 @@ export const Default: StoryObj<ButtonType> = {
 };
 
 type TemplateType = ButtonType &
-  BaseButtonDirective & { titleColor?: TextColor };
+  BaseButtonDirective & { titleColor?: TextColor; stateAttr?: string };
 
-const ButtonTemplate: StoryFn<TemplateType> = ({
+// VisualTest passes stateAttr "attr.data-state": the docs stories repeat the same ids in every variant.
+const buttonTemplate: StoryFn<TemplateType> = ({
   titleColor = "primary",
+  stateAttr = "id",
   ...args
 }) => ({
   props: { ...args, titleColor: titleColor, pseudoState: PSEUDO_STATE },
@@ -118,18 +128,18 @@ const ButtonTemplate: StoryFn<TemplateType> = ({
         <tedi-row *ngFor="let state of pseudoState;" [cols]="5" alignItems="center" [gapX]="2">
           <p tedi-text [color]="titleColor">{{ state }}</p>
           <tedi-col [width]="4" style="display: flex; gap: 1rem;">
-            <button tedi-button ${argsToTemplate(args)} [id]="state" [disabled]="state === 'Disabled'">Create</button>
-            <button tedi-button ${argsToTemplate(args)} [id]="state" [disabled]="state === 'Disabled'">
+            <button tedi-button ${argsToTemplate(args)} [${stateAttr}]="state" [disabled]="state === 'Disabled'">Create</button>
+            <button tedi-button ${argsToTemplate(args)} [${stateAttr}]="state" [disabled]="state === 'Disabled'">
               Continue
               <tedi-icon name="arrow_right_alt" />
             </button>
-            <button tedi-button ${argsToTemplate(args)} [id]="state" [disabled]="state === 'Disabled'">
+            <button tedi-button ${argsToTemplate(args)} [${stateAttr}]="state" [disabled]="state === 'Disabled'">
               <tedi-icon name="edit" />
               Edit
             </button>
             <tedi-tooltip>
               <tedi-tooltip-trigger>
-                <button tedi-button ${argsToTemplate(args)} [id]="state" [disabled]="state === 'Disabled'" aria-label="Edasi">
+                <button tedi-button ${argsToTemplate(args)} [${stateAttr}]="state" [disabled]="state === 'Disabled'" aria-label="Edasi">
                   <tedi-icon name="arrow_forward" />
                 </button>
               </tedi-tooltip-trigger>
@@ -145,18 +155,18 @@ const ButtonTemplate: StoryFn<TemplateType> = ({
             <p tedi-text [color]="titleColor">{{ state }}</p>
           </tedi-col>
           <tedi-col [width]="4" style="display: flex; gap: 1rem;">
-            <button tedi-button ${argsToTemplate(args)} [id]="state" [disabled]="state === 'Disabled'" [size]="'small'">Create</button>
-            <button tedi-button ${argsToTemplate(args)} [id]="state" [disabled]="state === 'Disabled'" [size]="'small'">
+            <button tedi-button ${argsToTemplate(args)} [${stateAttr}]="state" [disabled]="state === 'Disabled'" [size]="'small'">Create</button>
+            <button tedi-button ${argsToTemplate(args)} [${stateAttr}]="state" [disabled]="state === 'Disabled'" [size]="'small'">
               Continue
               <tedi-icon name="arrow_right_alt" />
             </button>
-            <button tedi-button ${argsToTemplate(args)} [id]="state" [disabled]="state === 'Disabled'" [size]="'small'">
+            <button tedi-button ${argsToTemplate(args)} [${stateAttr}]="state" [disabled]="state === 'Disabled'" [size]="'small'">
               <tedi-icon name="edit" />
               Edit
             </button>
             <tedi-tooltip>
               <tedi-tooltip-trigger>
-                <button tedi-button ${argsToTemplate(args)} [id]="state" [disabled]="state === 'Disabled'" [size]="'small'" aria-label="Edasi">
+                <button tedi-button ${argsToTemplate(args)} [${stateAttr}]="state" [disabled]="state === 'Disabled'" [size]="'small'" aria-label="Edasi">
                   <tedi-icon name="arrow_forward" />
                 </button>
               </tedi-tooltip-trigger>
@@ -182,7 +192,7 @@ export const Primary: StoryObj<TemplateType> = {
   args: {
     variant: "primary",
   },
-  render: ButtonTemplate,
+  render: buttonTemplate,
 };
 
 export const PrimaryInverted: StoryObj<TemplateType> = {
@@ -199,7 +209,7 @@ export const PrimaryInverted: StoryObj<TemplateType> = {
     variant: "primary-inverted",
   },
 
-  render: ButtonTemplate,
+  render: buttonTemplate,
 
   globals: {
     backgrounds: {
@@ -219,7 +229,7 @@ export const Secondary: StoryObj<TemplateType> = {
   args: {
     variant: "secondary",
   },
-  render: ButtonTemplate,
+  render: buttonTemplate,
 };
 
 export const SecondaryInverted: StoryObj<TemplateType> = {
@@ -236,7 +246,7 @@ export const SecondaryInverted: StoryObj<TemplateType> = {
     variant: "secondary-inverted",
   },
 
-  render: ButtonTemplate,
+  render: buttonTemplate,
 
   globals: {
     backgrounds: {
@@ -256,7 +266,7 @@ export const Neutral: StoryObj<TemplateType> = {
   args: {
     variant: "neutral",
   },
-  render: ButtonTemplate,
+  render: buttonTemplate,
 };
 
 export const NeutralInverted: StoryObj<TemplateType> = {
@@ -273,7 +283,7 @@ export const NeutralInverted: StoryObj<TemplateType> = {
     variant: "neutral-inverted",
   },
 
-  render: ButtonTemplate,
+  render: buttonTemplate,
 
   globals: {
     backgrounds: {
@@ -293,7 +303,7 @@ export const Success: StoryObj<TemplateType> = {
   args: {
     variant: "success",
   },
-  render: ButtonTemplate,
+  render: buttonTemplate,
 };
 
 export const Danger: StoryObj<TemplateType> = {
@@ -307,7 +317,7 @@ export const Danger: StoryObj<TemplateType> = {
   args: {
     variant: "danger",
   },
-  render: ButtonTemplate,
+  render: buttonTemplate,
 };
 
 export const DangerNeutral: StoryObj<TemplateType> = {
@@ -321,7 +331,7 @@ export const DangerNeutral: StoryObj<TemplateType> = {
   args: {
     variant: "danger-neutral",
   },
-  render: ButtonTemplate,
+  render: buttonTemplate,
 };
 
 /**
@@ -354,4 +364,62 @@ export const LinkAsButton: ButtonStory = {
         <a tedi-button>Link</a>
       `,
   }),
+};
+
+const VT_STATES = { stateAttr: "attr.data-state" };
+
+const onBrand = (story: StoryObj<TemplateType>) => ({
+  args: story.args,
+  render: (args: never, context: never) => {
+    const result = (story.render as StoryFn<TemplateType>)(args, context);
+    return {
+      ...result,
+      template: `<div class="bg bg-primary"><div class="w-100">${result.template}</div></div>`,
+    };
+  },
+});
+
+/** Chromatic snapshot for Button: add every new visual variant here too. */
+export const VisualTest: StoryObj<ButtonType> = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+    controls: { disable: true },
+    pseudo: {
+      hover: '[data-state="Hover"]',
+      active: '[data-state="Active"]',
+      focusVisible: '[data-state="Focus"]',
+    },
+  },
+  render: () =>
+    visualTest(
+      [
+        { label: "Default", story: Default },
+        { label: "Primary", story: Primary, args: VT_STATES },
+        {
+          label: "Primary inverted",
+          story: onBrand(PrimaryInverted),
+          args: VT_STATES,
+        },
+        { label: "Secondary", story: Secondary, args: VT_STATES },
+        {
+          label: "Secondary inverted",
+          story: onBrand(SecondaryInverted),
+          args: VT_STATES,
+        },
+        { label: "Neutral", story: Neutral, args: VT_STATES },
+        {
+          label: "Neutral inverted",
+          story: onBrand(NeutralInverted),
+          args: VT_STATES,
+        },
+        { label: "Success", story: Success, args: VT_STATES },
+        { label: "Danger", story: Danger, args: VT_STATES },
+        { label: "Danger neutral", story: DangerNeutral, args: VT_STATES },
+        { label: "Extra small icon only", story: ExtraSmallIconOnly },
+        { label: "Full width", story: FullWidth },
+        { label: "Link as button", story: LinkAsButton },
+      ],
+      { args: meta.args },
+    ),
 };

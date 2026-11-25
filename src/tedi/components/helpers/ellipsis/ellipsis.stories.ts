@@ -1,23 +1,31 @@
 import { Meta, StoryObj } from "@storybook/angular";
 import { moduleMetadata } from "@storybook/angular";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 
 import { EllipsisComponent } from "./index";
+import { RowComponent } from "../grid/row/row.component";
+import { ColComponent } from "../grid/col/col.component";
+import { TextComponent } from "../../base/text/text.component";
 
 /**
  * <a href="https://www.tedi.ee/1ee8444b7/p/87ef9b-ellipsis" target="_BLANK">Zeroheight ↗</a>
  */
-export default {
+const meta = {
   title: "TEDI-Ready/Components/Helpers/Ellipsis",
   component: EllipsisComponent,
   decorators: [
     moduleMetadata({
-      imports: [EllipsisComponent],
+      imports: [EllipsisComponent, RowComponent, ColComponent, TextComponent],
     }),
   ],
   parameters: {
     status: {
       type: ["devComponent"],
     },
+    chromatic: { disableSnapshot: true },
   },
   argTypes: {
     lineClamp: {
@@ -58,6 +66,8 @@ export default {
     position: "end",
   },
 } as Meta<EllipsisComponent>;
+
+export default meta;
 
 const CONTENT =
   "Any inline <b>content (even bold)</b>, that is too long for the wrapper and dont fit in x number of rows";
@@ -109,7 +119,6 @@ export const LeadingStart: StoryObj<EllipsisComponent> = {
 };
 
 export const NoTooltip: StoryObj<EllipsisComponent> = {
-  parameters: { chromatic: { disableSnapshot: true } },
   render: (args) => ({
     props: args,
     template: `
@@ -123,4 +132,22 @@ export const NoTooltip: StoryObj<EllipsisComponent> = {
   args: {
     tooltip: false,
   },
+};
+
+/** Chromatic snapshot for Ellipsis: add every new visual variant here too. */
+export const VisualTest: StoryObj<EllipsisComponent> = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
+  render: () =>
+    visualTest(
+      [
+        { label: "End", story: Default },
+        { label: "Leading start", story: LeadingStart },
+        { label: "No tooltip", story: NoTooltip },
+        { label: "Fits, no ellipsis", story: ResponsiveEnd },
+      ],
+      { args: meta.args },
+    ),
 };

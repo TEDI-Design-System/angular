@@ -4,6 +4,10 @@ import {
   moduleMetadata,
   StoryObj,
 } from "@storybook/angular";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { LinkComponent } from "../link/link.component";
 import { IconComponent } from "../../base/icon/icon.component";
 import { createBreakpointArgTypes } from "../../../../dev-tools/createBreakpointArgTypes";
@@ -21,7 +25,7 @@ import { BreadcrumbSeparatorDirective } from "./breadcrumb-separator.directive";
  * - `long` shows the full trail; `short` shows only the parent crumb as a back-link (mobile).
  * - Set `maxItems` to collapse the middle of a long trail into an ellipsis dropdown.
  */
-export default {
+const meta = {
   title: "TEDI-Ready/Components/Navigation/Breadcrumbs",
   component: BreadcrumbsComponent,
   decorators: [
@@ -38,6 +42,7 @@ export default {
     status: {
       type: ["breakpointSupport"],
     },
+    chromatic: { disableSnapshot: true },
   },
   argTypes: {
     variant: {
@@ -98,6 +103,8 @@ export default {
     ...createBreakpointArgTypes("BreadcrumbsInputs"),
   },
 } as Meta<BreadcrumbsComponent>;
+
+export default meta;
 
 type Story = StoryObj<BreadcrumbsComponent>;
 
@@ -226,4 +233,45 @@ export const ButtonCrumbs: Story = {
       </tedi-breadcrumbs>
     `,
   }),
+};
+
+/** Chromatic snapshot for Breadcrumbs: add every new visual variant here too. */
+export const VisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    controls: { disable: true },
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
+  render: () =>
+    visualTest(
+      [
+        {
+          label: "Default",
+          story: Default,
+          args: { ariaLabel: "Liikumistee (vaikimisi)" },
+        },
+        {
+          label: "Short",
+          story: Short,
+          args: { ariaLabel: "Liikumistee (lühike)" },
+        },
+        {
+          label: "Collapsed",
+          story: Collapsed,
+          args: { ariaLabel: "Liikumistee (kokku volditud)" },
+        },
+        { label: "Custom separator", story: CustomSeparator },
+        {
+          label: "Button crumbs",
+          story: ButtonCrumbs,
+          args: { ariaLabel: "Liikumistee (nupud)" },
+        },
+        {
+          label: "Responsive variant",
+          story: ResponsiveVariant,
+          args: { ariaLabel: "Liikumistee (kohanduv)" },
+        },
+      ],
+      { args: meta.args },
+    ),
 };

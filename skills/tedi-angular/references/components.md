@@ -212,6 +212,10 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   `icon` input, not from projection, so you cannot swap in your own `tedi-icon` or add trailing
   content. It is decorative and `aria-hidden`, which means the projected text is the whole accessible
   name — if the icon carries meaning the text doesn't, compose a heading and an icon yourself.
+- **`tedi-sheet` content goes in `<ng-template tediSheetContent>`.** The sheet renders it into an
+  overlay only while open, so content placed directly in `<tedi-sheet>` stays on the page. The
+  header, body, footer, `tediSheetTrigger` and `tediSheetClose` find the sheet through DI and must be
+  inside it.
 - **`tedi-file-dropzone`'s `files` has no separate "default" input** — unlike the React version, which
   needs `defaultFiles` alongside `files` to distinguish uncontrolled from controlled. The binding
   picks the mode: `[files]` seeds the list and leaves the dropzone owning it, `[(files)]` keeps the
@@ -233,14 +237,15 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   progresses, is yours. A `validator` input adds a rule of your own on top, run on every selected file;
   the reason it returns lands on that file's `error` after the built-in ones and joins the summary,
   with the files it rejected named after it. Describe the rule in `hint`, which follows the allowed
-  types and size in the one hint. `keepRejectedFiles` decides what happens to a file that
-  fails `accept`, `maxSize` or `validator`: off (the default) discards it and summarises every rejection in one message under the
-  dropzone, which paints the border red. On keeps it in the list with its reason in that file's
-  `error` and writes no summary of its own — so the form value holds it with `isValid: false` and
-  you must drop the files marked `isValid: false` before uploading. Filter on that, not on a truthy
-  `isValid`: a preloaded file leaves it unset, and such a file is eligible. The dropzone's own border stays neutral, but a
-  bound control fails on that file, so the border turns red once the control is touched or dirty. `error` is writable, so a failure the upload
-  came back with lands on the file it belongs to.
+  types and size in the one hint. `keepRejectedFiles` decides what happens to a file that fails
+  `accept`, `maxSize` or `validator`: off (the default) discards it and summarises every rejection in
+  one message under the dropzone, which paints the border red. On keeps it in the list with its
+  reason in that file's `error` and writes no summary of its own — so the form value holds it with
+  `isValid: false`, and you must drop the files marked `isValid: false` before uploading. Filter on
+  that, not on a truthy `isValid`: a preloaded file leaves it unset, and such a file is eligible. The
+  dropzone's own border stays neutral, but a bound control fails on that file, so the border turns
+  red once the control is touched or dirty. `error` is writable, so a failure the upload came back
+  with lands on the file it belongs to.
 - **`tedi-file-dropzone` shows at most one hint and one validation message, error first.** Pass your
   own text through `hint`, `error` and `success`, not projected `tedi-feedback-text`. `error` joins
   the dropzone's own rejection summary in one error, and `success` takes the error's place while
@@ -391,6 +396,10 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   can wrap: it centres the icon on the *first line* rather than the middle of the block. A heading
   value in `modifiers` overrides `element`'s typography and the icon follows it, so
   `element="h2" modifiers="h4"` is an `<h2>` that looks like an `h4` throughout.
+- **`tedi-sheet` for mobile bottom sheets, not `ModalService` with `position: 'bottom'`.** The sheet
+  adds drag to close, snap points and a collapsed state, and with `showOverlay`, `trapFocus` and
+  `lockScroll` off (plus `closeOnBackdropClick` off) it stays docked while the page behind remains
+  usable.
 
 ### Responsive behaviour that isn't an input
 
