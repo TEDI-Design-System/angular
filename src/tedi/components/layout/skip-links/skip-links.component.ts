@@ -11,7 +11,7 @@ import { TediTranslationPipe } from "../../../services/translation/translation.p
 import { SideNavService } from "../../../services/sidenav/sidenav.service";
 import { SkipLinkDirective } from "./skip-link.directive";
 
-// Like the browser's own fragment navigation, so `#%C3%B5ige` finds `id="õige"`.
+// Like the browser's own fragment navigation, which tries the id as written first: `#%C3%B5ige` finds `id="õige"`.
 const decodeId = (id: string) => {
   try {
     return decodeURIComponent(id);
@@ -19,6 +19,14 @@ const decodeId = (id: string) => {
     return id;
   }
 };
+
+// A modifier click asks the browser for a new tab or window.
+const hasModifierKey = (event: MouseEvent) =>
+  event.metaKey || event.ctrlKey || event.shiftKey || event.altKey;
+
+// A link that opens elsewhere (e.g. `target="_blank"`) keeps the behaviour its label announces.
+const opensInCurrentTab = (link: Element) =>
+  (link.getAttribute("target") || "_self").toLowerCase() === "_self";
 
 /**
  * Links that let keyboard users bypass repeated content (WCAG 2.4.1). Hidden until a link receives focus.
@@ -46,15 +54,21 @@ export class SkipLinksComponent {
 
   // Focuses the target directly: an app's <base href="/"> would turn `#id` into a link to the home page.
   handleClick(event: MouseEvent): void {
-    if (event.defaultPrevented) {
+    if (event.defaultPrevented || hasModifierKey(event)) {
       return;
     }
 
-    const href = (event.target as Element)
-      .closest("a[href^='#']")
-      ?.getAttribute("href");
+    const link = (event.target as Element).closest("a[href^='#']");
+    const href = link?.getAttribute("href");
+
+    if (!link || !href || !opensInCurrentTab(link)) {
+      return;
+    }
+
+    const id = href.slice(1);
     const target =
-      href && this.document.getElementById(decodeId(href.slice(1)));
+      this.document.getElementById(id) ??
+      this.document.getElementById(decodeId(id));
 
     if (!target) {
       return;

@@ -37,6 +37,14 @@ class TranslationMock {
         </a>
         <a tedi-link *tediSkipLink href="#100%">Skip to malformed id</a>
         <a tedi-link *tediSkipLink href="#menu-item">Skip to the menu</a>
+        <a tedi-link *tediSkipLink href="#main-content" target="_blank">
+          Opens in a new tab
+        </a>
+        <a tedi-link *tediSkipLink href="#main-content" target="_SELF">
+          Current tab
+        </a>
+        <a tedi-link *tediSkipLink href="#a%41">Skip to literal id</a>
+        <a tedi-link *tediSkipLink href="#50%">Skip to nothing</a>
       }
     </tedi-skip-links>
     <main id="main-content">Main</main>
@@ -45,6 +53,8 @@ class TranslationMock {
     <div id="põhisisu">Encoded</div>
     <div id="100%" tabindex="0">Malformed</div>
     <nav class="tedi-sidenav"><a id="menu-item" href="#">Menu item</a></nav>
+    <section id="a%41" tabindex="-1">As written</section>
+    <section id="aA" tabindex="-1">Decoded</section>
   `,
 })
 class HostComponent {
@@ -90,7 +100,7 @@ describe("SkipLinksComponent", () => {
     fixture.componentRef.setInput("withLinks", true);
     fixture.detectChanges();
 
-    expect(host.querySelectorAll("ul > li")).toHaveLength(8);
+    expect(host.querySelectorAll("ul > li")).toHaveLength(12);
     expect(links().map((a) => a.getAttribute("href"))).toEqual([
       "#main-content",
       "#footer",
@@ -100,11 +110,19 @@ describe("SkipLinksComponent", () => {
       "#main-content",
       "#100%",
       "#menu-item",
+      "#main-content",
+      "#main-content",
+      "#a%41",
+      "#50%",
     ]);
   });
 
-  const click = (link: HTMLAnchorElement) => {
-    const event = new MouseEvent("click", { bubbles: true, cancelable: true });
+  const click = (link: HTMLAnchorElement, init: MouseEventInit = {}) => {
+    const event = new MouseEvent("click", {
+      bubbles: true,
+      cancelable: true,
+      ...init,
+    });
     link.dispatchEvent(event);
     return event;
   };
@@ -200,5 +218,52 @@ describe("SkipLinksComponent", () => {
 
     expect(sidenav.isMobileOpen()).toBe(true);
     expect(document.activeElement?.id).toBe("menu-item");
+  });
+
+  it("leaves a link that opens in another tab to the browser", () => {
+    fixture.componentRef.setInput("withLinks", true);
+    fixture.detectChanges();
+
+    expect(click(links()[8]).defaultPrevented).toBe(false);
+    expect(document.activeElement).not.toBe(
+      fixture.nativeElement.querySelector("main"),
+    );
+  });
+
+  it("handles a link whose target is the current tab, in any letter case", () => {
+    fixture.componentRef.setInput("withLinks", true);
+    fixture.detectChanges();
+
+    expect(click(links()[9]).defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(
+      fixture.nativeElement.querySelector("main"),
+    );
+  });
+
+  it.each(["metaKey", "ctrlKey", "shiftKey", "altKey"])(
+    "leaves a click with %s to the browser",
+    (modifier) => {
+      expect(click(links()[0], { [modifier]: true }).defaultPrevented).toBe(
+        false,
+      );
+      expect(document.activeElement).not.toBe(
+        fixture.nativeElement.querySelector("main"),
+      );
+    },
+  );
+
+  it("prefers an id that matches the href as written over the decoded one", () => {
+    fixture.componentRef.setInput("withLinks", true);
+    fixture.detectChanges();
+
+    click(links()[10]);
+    expect(document.activeElement?.textContent).toBe("As written");
+  });
+
+  it("leaves a link alone when its id is not valid percent-encoding and nothing matches it", () => {
+    fixture.componentRef.setInput("withLinks", true);
+    fixture.detectChanges();
+
+    expect(click(links()[11]).defaultPrevented).toBe(false);
   });
 });
