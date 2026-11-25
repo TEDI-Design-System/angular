@@ -1,3 +1,10 @@
+# [10.0.0-rc.29](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.28...angular-10.0.0-rc.29) (2026-11-25)
+
+
+### Features
+
+* **table-of-contents:** scroll whole sticky card [#758](https://github.com/TEDI-Design-System/angular/issues/758) ([#763](https://github.com/TEDI-Design-System/angular/issues/763)) ([2d08b47](https://github.com/TEDI-Design-System/angular/commit/2d08b476df2add14f03756d3385473dce726bdde))
+
 # [10.0.0-rc.28](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.27...angular-10.0.0-rc.28) (2026-11-23)
 
 
