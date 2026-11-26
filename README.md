@@ -102,6 +102,18 @@ Install it into your agent (Claude Code, Cursor, Codex and others) with the [`sk
 npx skills add https://github.com/TEDI-Design-System/angular --skill tedi-angular
 ```
 
+### For consumers: the `tedi-angular-migrate` skill
+
+Upgrades your app to a newer `@tedi-design-system/angular` version. It finds the version you use, reads every release note up to the latest version, writes a migration plan to `.tedi-migrate/migration-plan.md`, applies the changes it can, and checks them with your typecheck, build and tests. Whatever it can't migrate is listed for you to decide. It also updates your overrides of core CSS variables that were renamed or removed.
+
+```bash
+npx skills add https://github.com/TEDI-Design-System/angular --skill tedi-angular-migrate
+```
+
+Then ask your agent to "upgrade TEDI to the latest version".
+
+npm projects are fully supported. With pnpm, Yarn or Bun the skill reads the lockfile where it can and asks you for any version it can't determine.
+
 ### For contributors: the `contributing` skill
 
 Guides development inside this repository: creating new components, running tests and lint, WCAG audits, refactoring and Storybook stories. Available as `/contributing` when working in this repository. Skills for contributing across the design system live in [TEDI-Design-System/ai-skills](https://github.com/TEDI-Design-System/ai-skills).
