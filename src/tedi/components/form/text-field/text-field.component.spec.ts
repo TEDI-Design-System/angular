@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { TextFieldComponent } from "./text-field.component";
-import { FormControl, ReactiveFormsModule } from "@angular/forms";
+import { FormControl, ReactiveFormsModule, Validators } from "@angular/forms";
 import { Component } from "@angular/core";
 import { By } from "@angular/platform-browser";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
@@ -219,6 +219,26 @@ describe("TextFieldComponent", () => {
       fcFixture.detectChanges();
       expect(fcTextField.disabled()).toBe(false);
       expect(fcInput.disabled).toBe(false);
+    });
+
+    it("sets aria-required while the control has Validators.required", () => {
+      expect(fcInput.hasAttribute("aria-required")).toBe(false);
+
+      control.addValidators(Validators.required);
+      control.updateValueAndValidity();
+      fcFixture.detectChanges();
+
+      expect(fcInput.getAttribute("aria-required")).toBe("true");
+    });
+
+    it("updates aria-required when the bound FormControl is replaced", () => {
+      fcFixture.componentInstance.control = new FormControl("", {
+        nonNullable: true,
+        validators: Validators.required,
+      });
+      fcFixture.detectChanges();
+
+      expect(fcInput.getAttribute("aria-required")).toBe("true");
     });
 
     it("reset() should not clear when control is disabled", () => {

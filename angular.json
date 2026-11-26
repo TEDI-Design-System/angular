@@ -68,7 +68,8 @@
               "./src/tedi/**/*.ts",
               "./src/tedi/**/*.html",
               "./src/community/**/*.ts",
-              "./src/community/**/*.html"
+              "./src/community/**/*.html",
+              "./skills/**/*.mjs"
             ]
           }
         }

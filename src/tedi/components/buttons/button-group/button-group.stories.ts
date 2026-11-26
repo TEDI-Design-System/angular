@@ -1,5 +1,9 @@
 import { signal } from "@angular/core";
 import { Meta, moduleMetadata, StoryObj } from "@storybook/angular";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { ButtonGroupComponent } from "./button-group.component";
 import { ButtonGroupButtonDirective } from "./button-group-button/button-group-button.directive";
 import { RowComponent } from "../../helpers/grid/row/row.component";
@@ -10,7 +14,7 @@ import { TooltipTriggerComponent } from "../../overlay/tooltip/tooltip-trigger/t
 import { TooltipContentComponent } from "../../overlay/tooltip/tooltip-content/tooltip-content.component";
 
 /**
- * <a href="https://www.figma.com/design/ze9LXyoxEdGV8vpEdat7Oi/Button-group-buttons?node-id=136-19706&m=dev" target="_blank">Figma ↗</a><br>
+ * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.107.103?node-id=3506-29547&m=dev" target="_blank">Figma ↗</a><br>
  * <a href="https://www.tedi.ee/1ee8444b7/p/82e9cf-button-group" target="_blank">Zeroheight ↗</a><br>
  *
  * Group of toggle buttons used as a view switcher (an alternative to tabs).
@@ -18,7 +22,7 @@ import { TooltipContentComponent } from "../../overlay/tooltip/tooltip-content/t
  * values at once. Below the `mobileBreakpoint` (when `enableMobileDropdown` is
  * true) the group collapses into a dropdown menu.
  */
-export default {
+const meta: Meta<ButtonGroupComponent> = {
   title: "TEDI-Ready/Components/Buttons/ButtonGroup",
   component: ButtonGroupComponent,
   decorators: [
@@ -39,6 +43,7 @@ export default {
     status: {
       type: ["breakpointSupport"],
     },
+    chromatic: { disableSnapshot: true },
   },
   args: {
     variant: "primary-button-group",
@@ -156,7 +161,9 @@ export default {
       },
     },
   },
-} as Meta<ButtonGroupComponent>;
+};
+
+export default meta;
 
 type Story = StoryObj<ButtonGroupComponent>;
 
@@ -304,10 +311,46 @@ export const IconOnly: Story = {
 
 const STATES = ["Default", "Hover", "Selected", "Focus", "Disabled"];
 
+// VisualTest repeats these rows in one story, so it sets labelPerState to append each group's state to its name.
+type StatesStory = StoryObj<ButtonGroupComponent & { labelPerState?: boolean }>;
+
+const statesStory = (
+  variant: "primary" | "secondary",
+  ariaLabel: string,
+  labelPerState = false,
+) => {
+  const groupLabel = labelPerState
+    ? `[ariaLabel]="'${ariaLabel} ' + state"`
+    : `ariaLabel="${ariaLabel}"`;
+  return {
+    props: { states: STATES },
+    template: `
+      <tedi-row [cols]="1" [gapY]="2">
+        @for (state of states; track state) {
+          <tedi-col>
+            <tedi-row cols="1" [md]="{ cols: 12 }" [gapY]="1" alignItems="center">
+              <tedi-col [width]="2"><p tedi-text modifiers="bold">{{ state }}</p></tedi-col>
+              <tedi-col [width]="10">
+                <tedi-button-group variant="${variant}-button-group" ${groupLabel}
+                  [value]="state === 'Selected' ? '1' : undefined">
+                  <button tedi-button-group-button [attr.id]="state.toLowerCase() + '-${variant}'"
+                    value="1" label="Tabel" [disabled]="state === 'Disabled'">Tabel</button>
+                  <button tedi-button-group-button value="2" label="Loend">Loend</button>
+                  <button tedi-button-group-button value="3" label="Kalender">Kalender</button>
+                </tedi-button-group>
+              </tedi-col>
+            </tedi-row>
+          </tedi-col>
+        }
+      </tedi-row>
+    `,
+  };
+};
+
 /**
  * Primary states. Showcase — controls are disabled.
  */
-export const Primary: Story = {
+export const Primary: StatesStory = {
   parameters: {
     controls: { disable: true },
     pseudo: {
@@ -315,35 +358,14 @@ export const Primary: Story = {
       focusVisible: ["#focus-primary"],
     },
   },
-  render: () => ({
-    props: { states: STATES },
-    template: `
-      <tedi-row [cols]="1" [gapY]="2">
-        @for (state of states; track state) {
-          <tedi-col>
-            <tedi-row cols="1" [md]="{ cols: 12 }" [gapY]="1" alignItems="center">
-              <tedi-col [width]="2"><p tedi-text modifiers="bold">{{ state }}</p></tedi-col>
-              <tedi-col [width]="10">
-                <tedi-button-group variant="primary-button-group" [ariaLabel]="'Esmane ' + state"
-                  [value]="state === 'Selected' ? '1' : undefined">
-                  <button tedi-button-group-button [attr.id]="state.toLowerCase() + '-primary'"
-                    value="1" label="Tabel" [disabled]="state === 'Disabled'">Tabel</button>
-                  <button tedi-button-group-button value="2" label="Loend">Loend</button>
-                  <button tedi-button-group-button value="3" label="Kalender">Kalender</button>
-                </tedi-button-group>
-              </tedi-col>
-            </tedi-row>
-          </tedi-col>
-        }
-      </tedi-row>
-    `,
-  }),
+  render: ({ labelPerState }) =>
+    statesStory("primary", "Esmane vaate valik", labelPerState),
 };
 
 /**
  * Secondary states. Showcase — controls are disabled.
  */
-export const Secondary: Story = {
+export const Secondary: StatesStory = {
   parameters: {
     controls: { disable: true },
     pseudo: {
@@ -351,43 +373,25 @@ export const Secondary: Story = {
       focusVisible: ["#focus-secondary"],
     },
   },
-  render: () => ({
-    props: { states: STATES },
-    template: `
-      <tedi-row [cols]="1" [gapY]="2">
-        @for (state of states; track state) {
-          <tedi-col>
-            <tedi-row cols="1" [md]="{ cols: 12 }" [gapY]="1" alignItems="center">
-              <tedi-col [width]="2"><p tedi-text modifiers="bold">{{ state }}</p></tedi-col>
-              <tedi-col [width]="10">
-                <tedi-button-group variant="secondary-button-group" [ariaLabel]="'Teisene ' + state"
-                  [value]="state === 'Selected' ? '1' : undefined">
-                  <button tedi-button-group-button [attr.id]="state.toLowerCase() + '-secondary'"
-                    value="1" label="Tabel" [disabled]="state === 'Disabled'">Tabel</button>
-                  <button tedi-button-group-button value="2" label="Loend">Loend</button>
-                  <button tedi-button-group-button value="3" label="Kalender">Kalender</button>
-                </tedi-button-group>
-              </tedi-col>
-            </tedi-row>
-          </tedi-col>
-        }
-      </tedi-row>
-    `,
-  }),
+  render: ({ labelPerState }) =>
+    statesStory("secondary", "Teisene vaate valik", labelPerState),
 };
 
-export const DifferentWidthButtons: Story = {
-  render: () => ({
-    props: { value: signal<string>("1") },
-    template: `
-      <tedi-button-group ariaLabel="Erineva laiusega nupud"
+/** Markup of the `DifferentWidthButtons` story; `ariaLabel` keeps the group name unique where it repeats. */
+const differentWidthButtons = (ariaLabel = "Vaate valik") => ({
+  props: { value: signal<string>("1") },
+  template: `
+      <tedi-button-group ariaLabel="${ariaLabel}"
         [value]="value()" (valueChange)="value.set($event)">
         <button tedi-button-group-button value="1" label="Tabel">Tabel</button>
         <button tedi-button-group-button value="2" label="Loend">Loend</button>
         <button tedi-button-group-button value="3" label="Kalender">Kalender</button>
       </tedi-button-group>
     `,
-  }),
+});
+
+export const DifferentWidthButtons: Story = {
+  render: ({ ariaLabel }) => differentWidthButtons(ariaLabel),
 };
 
 export const Stretched: Story = {
@@ -406,10 +410,10 @@ export const Stretched: Story = {
 
 export const MobileDropdown: Story = {
   args: {
-    ariaLabel: "Mobiilis koondub rippmenüüks",
+    ariaLabel: "Vaate valik",
     enableMobileDropdown: true,
     mobileBreakpoint: "xxl",
-    dropdownLabel: "Alammenüü",
+    dropdownLabel: "Vaade",
     dropdownLabelMode: "static",
   },
   render: (args) => ({
@@ -443,7 +447,7 @@ export const MobileDropdown: Story = {
  * Bind `[(value)]` to a string in single mode and read it back.
  */
 export const Controlled: Story = {
-  parameters: { chromatic: { disableSnapshot: true } },
+  parameters: { visualTest: false },
   render: (args) => ({
     props: { ...args, selected: signal<string>("2") },
     template: `
@@ -460,4 +464,53 @@ export const Controlled: Story = {
       <p style="margin-top: 8px;">Valitud: {{ selected() }}</p>
     `,
   }),
+};
+
+/** Chromatic snapshot for ButtonGroup: add every new visual variant here too. */
+export const VisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+    controls: { disable: true },
+    pseudo: {
+      hover: ["#hover-primary", "#hover-secondary"],
+      focusVisible: ["#focus-primary", "#focus-secondary"],
+    },
+  },
+  render: () =>
+    visualTest(
+      [
+        {
+          label: "Default",
+          story: Default,
+          args: { ariaLabel: "Vaate valik, vaikimisi" },
+        },
+        { label: "Sizes", story: Sizes },
+        { label: "Types", story: Types },
+        {
+          label: "Different width buttons",
+          story: DifferentWidthButtons,
+          args: { ariaLabel: "Vaate valik, eri laiusega" },
+        },
+        { label: "With icon", story: WithIcon },
+        { label: "Icon only", story: IconOnly },
+        {
+          label: "Primary states",
+          story: Primary,
+          args: { labelPerState: true },
+        },
+        {
+          label: "Secondary states",
+          story: Secondary,
+          args: { labelPerState: true },
+        },
+        { label: "Stretched", story: Stretched },
+        {
+          label: "Mobile dropdown",
+          story: MobileDropdown,
+          args: { ariaLabel: "Mobiilne vaate valik" },
+        },
+      ],
+      { args: meta.args },
+    ),
 };

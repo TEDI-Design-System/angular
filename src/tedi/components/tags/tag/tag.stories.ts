@@ -1,16 +1,21 @@
 import { Meta, StoryObj, moduleMetadata } from "@storybook/angular";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { TagComponent } from "./tag.component";
 import { SeparatorComponent } from "../../helpers/separator/separator.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
+import { TextComponent } from "../../base/text/text.component";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.30.44?node-id=5784-114505&m=dev" target="_blank">Figma ↗</a><br>
  * <a href="https://www.tedi.ee/1ee8444b7/p/6524c4-tag" target="_blank">Zeroheight ↗</a>
  * The Tag component is used to label, categorize, or organize items using keywords.
  */
-export default {
+const meta = {
   title: "TEDI-Ready/Components/Tags/Tag",
   component: TagComponent,
   decorators: [
@@ -21,9 +26,13 @@ export default {
         RowComponent,
         ColComponent,
         VerticalSpacingDirective,
+        TextComponent,
       ],
     }),
   ],
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
   render: (props) => ({
     props,
     template: `
@@ -89,11 +98,11 @@ export default {
   },
 } as Meta<TagComponent & { content: string }>;
 
+export default meta;
+
 type Story = StoryObj<TagComponent & { content: string }>;
 
-export const Default: Story = {
-  parameters: { chromatic: { disableSnapshot: true } },
-};
+export const Default: Story = {};
 
 export const Ellipsis: Story = {
   render: () => ({
@@ -227,4 +236,23 @@ export const Danger: Story = {
   args: {
     type: "danger",
   },
+};
+
+/** Chromatic snapshot for Tag: add every new visual variant here too. */
+export const VisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
+  render: () =>
+    visualTest(
+      [
+        { label: "Default", story: Default },
+        { label: "Primary", story: Primary },
+        { label: "Secondary", story: Secondary },
+        { label: "Danger", story: Danger },
+        { label: "Ellipsis", story: Ellipsis },
+      ],
+      { args: meta.args, render: meta.render },
+    ),
 };

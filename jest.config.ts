@@ -9,7 +9,7 @@ export default {
     prefix: "<rootDir>",
   }),
   setupFilesAfterEnv: ["<rootDir>/setup-jest.ts"],
-  testPathIgnorePatterns: ["/node_modules/", "/dist/"],
+  testPathIgnorePatterns: ["/node_modules/", "/dist/", "/\\.claude/worktrees/"],
   moduleFileExtensions: ["ts", "html", "js", "json"],
   resolver: "jest-preset-angular/build/resolvers/ng-jest-resolver.js",
   testEnvironment: "<rootDir>/jest-jsdom-env.ts",
@@ -18,7 +18,10 @@ export default {
   workerIdleMemoryLimit: "1GB",
   collectCoverage: true,
   collectCoverageFrom: ["./src/tedi/components/**/*.{js,ts,tsx}"],
-  coveragePathIgnorePatterns: ["\\.stories\\.ts$"],
+  coveragePathIgnorePatterns: [
+    "\\.stories\\.ts$",
+    "-demo(-data|\\.constants)\\.ts$",
+  ],
   coverageThreshold: {
     global: {
       branches: 80,

@@ -1,0 +1,387 @@
+# Create TEDI Angular Storybook Stories
+
+Target: the component given in the task.
+
+## Workflow
+
+### 1. Understand the Component
+
+1. Read the component's `.component.ts` to understand all inputs, outputs, types, and variants.
+2. Read the component's `.component.html` for content projection slots.
+3. **Figma is the source of truth for stories.** If the component or its stories file contains a Figma link, use the Figma MCP server to fetch the design. If no link exists, ask the user for one.
+4. Check if TEDI React (`../react/src/tedi/components/`) has stories for the equivalent component — use as reference for story coverage.
+
+### 2. Map Figma Sections to Stories
+
+**Stories must match Figma 1:1 in order and naming.** Each distinct section/example in the Figma component page becomes a named story export:
+
+| Figma section | Story export name |
+|---|---|
+| "Default" | `Default` |
+| "With icon" | `WithIcon` |
+| "With dropdown" | `WithDropdown` |
+| "With status" | `WithStatus` |
+| States showcase (default, hover, active, focus, disabled) | `States` |
+
+Rules:
+- **Same order** — export stories in the same top-to-bottom order as they appear in Figma.
+- **Same examples** — reproduce the exact content/data shown in Figma (labels, placeholder text, number of items). Do not invent different example data.
+- **Same variants** — if Figma shows 3 tabs with specific labels, use those exact labels.
+- **States story** — every component that can be activated or has visual states (hover, active, focus, disabled, selected, error, etc.) **must** have a `States` story. Use a table-like layout with `tedi-row`/`tedi-col` grid components, one row per state. Each row has a bold label in the first column and the component in the second column. Use `storybook-addon-pseudo-states` parameters for hover/active/focus. If the component has multiple variants, show them **side by side in columns** (not stacked vertically) — one column per variant with a bold header row, like a comparison table.
+
+  Required imports: `RowComponent`, `ColComponent`, `TextComponent` from `@tedi-design-system/angular/tedi`.
+
+  Define states as a constant and iterate with `@for`:
+  ```typescript
+  const PSEUDO_STATE = ['Default', 'Hover', 'Active', 'Focus', 'Disabled'];
+
+  export const States: StoryObj<ComponentName> = {
+    parameters: {
+      pseudo: {
+        hover: '#Hover',
+        active: '#Active',
+        focusVisible: '#Focus',
+      },
+    },
+    render: () => ({
+      props: { PSEUDO_STATE },
+      template: `
+        <tedi-row [cols]="1" [gapY]="3">
+          @for (state of PSEUDO_STATE; track state) {
+            <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+              <tedi-col width="1">
+                <p tedi-text modifiers="bold">{{ state }}</p>
+              </tedi-col>
+              <tedi-col width="5">
+                <tedi-component
+                  [id]="state"
+                  [disabled]="state === 'Disabled'"
+                />
+              </tedi-col>
+            </tedi-row>
+          }
+        </tedi-row>
+      `,
+    }),
+  };
+  ```
+
+  Key rules:
+  - Each state's component must have `[id]="state"` so pseudo-state selectors (`#Hover`, `#Active`, `#Focus`) can target it.
+  - Include all relevant states for the component (e.g., `Selected`, `Error`, `Success` where applicable).
+  - Reference `text-field.stories.ts` as the canonical example.
+
+- **Variant comparison layout** — when a component has multiple variants (e.g., primary/secondary), always show them **side by side** in a `tedi-row` grid, not stacked vertically. Use a header row with bold labels for each variant column:
+  ```html
+  <tedi-row [cols]="2" [gapY]="3">
+    <tedi-col><p tedi-text modifiers="bold">Primary</p></tedi-col>
+    <tedi-col><p tedi-text modifiers="bold">Secondary</p></tedi-col>
+    <tedi-col><!-- primary content --></tedi-col>
+    <tedi-col><!-- secondary content --></tedi-col>
+  </tedi-row>
+  ```
+  For states with variants, use a 3-column layout (State | Primary | Secondary):
+  ```html
+  <tedi-row [cols]="3" [gapY]="3" alignItems="center">
+    <tedi-col><p tedi-text modifiers="bold">State</p></tedi-col>
+    <tedi-col><p tedi-text modifiers="bold">Primary</p></tedi-col>
+    <tedi-col><p tedi-text modifiers="bold">Secondary</p></tedi-col>
+    <!-- one row per state -->
+  </tedi-row>
+  ```
+
+- **Composition, not inline styles.** Lay out examples with core utility classes (`flex`,
+  `align-items-center`, `gap-3`), `tedi-row`/`tedi-col` or `[tediVerticalSpacing]`, never
+  `style="..."`. Compose with the TEDI components the Figma example instances (a label/value pair is
+  `tedi-text-group`). If the same layout keeps coming back, the component is missing a sub-component.
+  Wide responsive content (tabs, tables) goes in a flex `div`, not a `tedi-col`: a grid track can't
+  shrink below its content, so the component never gets a narrow width to collapse into.
+- **No component machinery in a stories file.** If a story needs hand-written ARIA wiring, keyboard
+  handling, overlay positioning or focus management, the component is missing that behaviour. Raise
+  it instead of building it in the story: stories have no tests or API review. Never put a code
+  snippet in `docs.source` that you haven't run.
+- **Reactive forms state.** Show `value` / `touched` / `dirty` in a `<tedi-alert type="info">` with a
+  `<pre tedi-text modifiers="small">` and the `json` pipe, laid out with `tedi-row`/`tedi-col`. Import
+  `RowComponent`, `ColComponent`, `AlertComponent` and `TextComponent` in
+  `moduleMetadata`.
+
+### 3. Determine the Story Category
+
+Find where the component lives under `src/tedi/components/` and map to the Storybook title:
+
+| Component path | Story title prefix |
+|---|---|
+| `src/tedi/components/form/` | `TEDI-Ready/Components/Form/` |
+| `src/tedi/components/buttons/` | `TEDI-Ready/Components/Buttons/` |
+| `src/tedi/components/overlay/` | `TEDI-Ready/Components/Overlay/` |
+| `src/tedi/components/navigation/` | `TEDI-Ready/Components/Navigation/` |
+| `src/tedi/components/content/` | `TEDI-Ready/Content/` (no `Components/` segment) |
+| `src/tedi/components/layout/` | `TEDI-Ready/Layout/` (no `Components/` segment) |
+| `src/tedi/components/base/` | `TEDI-Ready/Base/` (no `Components/` segment) |
+| Other category | `TEDI-Ready/Components/<Category>/` |
+
+**Note:** the `Content`, `Layout`, and `Base` groups sit directly under `TEDI-Ready/` — they skip the `Components/` segment. Check sibling stories in the same folder before picking a title.
+
+### 4. Create the Stories File
+
+Follow this structure:
+
+```typescript
+import { Meta, StoryObj } from '@storybook/angular';
+import { moduleMetadata } from '@storybook/angular';
+import { ComponentName } from './index';
+
+/**
+ * <a href="https://www.figma.com/design/..." target="_blank">Figma ↗</a>
+ */
+export default {
+  title: 'TEDI-Ready/Components/Category/ComponentName', // or 'TEDI-Ready/<Content|Layout|Base>/ComponentName' for those groups
+  component: ComponentName,
+  decorators: [
+    moduleMetadata({
+      imports: [ComponentName, /* required dependencies */],
+    }),
+  ],
+  argTypes: {
+    // One entry per public input
+  },
+} as Meta<ComponentName>;
+```
+
+**Status badges** (`parameters.status.type`, registered in `.storybook/preview.tsx`): TEDI-Ready
+stories get no readiness badge. Add `breakpointSupport` for breakpoint-aware inputs,
+`mobileViewDifference` when the mobile layout differs, `devComponent` for dev-only components,
+`partiallyTediReady` when a dependency isn't built yet, and `deprecated` when deprecating
+([deprecation.md](deprecation.md)). `existsInTediReady` marks community stories that have a
+TEDI-Ready replacement, and `internalComponent` components not exported to consumers.
+
+**Figma link (TEDI file only).** Add it only when the design is in the TEDI Figma file
+(`figma.com/design/jWiRIXhHRxwVdMSimKX2FF/...`). A design in another team's or project's Figma file
+can't be opened by readers of the docs, so that story gets no Figma link. Place the link as a JSDoc
+anchor directly above `export default`; Storybook renders it at the top of the Docs page. Format:
+
+```typescript
+/**
+ * <a href="https://www.figma.com/design/<file-id>/<file-name>?node-id=<node>&m=dev" target="_blank">Figma ↗</a>
+ */
+```
+
+If the component also has a Zeroheight page, add it on the next line with `<br>`:
+
+```typescript
+/**
+ * <a href="https://www.figma.com/design/..." target="_blank">Figma ↗</a><br>
+ * <a href="https://www.tedi.ee/..." target="_blank">Zeroheight ↗</a>
+ */
+```
+
+If an existing story's design is in the TEDI Figma file and the story lacks a link, add it.
+
+### 5. Make the `Default` Story's Controls Functional
+
+**The `Default` story's controls must actually drive the rendered component — always, including when the component is nested or composed of sub-components.** Changing a control in the panel must visibly change the rendered output. A `Default` story whose template ignores `args` (so the controls do nothing) is wrong, even if it looks correct at a glance.
+
+**Bind args directly as template props in `render` — never build a host-wrapper component.** Storybook passes args into the `props` object and re-renders on every control change; template expressions reference the arg names directly.
+
+```typescript
+export const Default: StoryObj<ComponentName> = {
+  args: { variant: 'primary', size: 'medium', disabled: false },
+  render: (args) => ({
+    props: { ...args },
+    template: `<tedi-component [variant]="variant" [size]="size" [disabled]="disabled" />`,
+  }),
+};
+```
+
+Prefer `argsToTemplate(args)` to forward every arg as a binding without restating each one — this keeps the story functional as inputs are added:
+
+```typescript
+import { argsToTemplate } from '@storybook/angular';
+
+render: (args) => ({
+  props: { ...args },
+  template: `<tedi-component ${argsToTemplate(args)} />`,
+}),
+```
+
+**Nested / composed components.** The args belong to the **outer component under test** (`component:` in the default export). Bind them to that component's element and let it pass them down to its sub-components internally — do **not** redirect the controls to a child.
+
+- If the rendered example wraps the component or projects content, still bind the args to the component being documented, and bind any arg-dependent projected content too:
+
+  ```typescript
+  // Component under test is <tedi-card>, which composes header/body sub-components.
+  render: (args) => ({
+    props: { ...args },
+    template: `
+      <tedi-card ${argsToTemplate(args)}>
+        <tedi-card-content>
+          <p tedi-text [modifiers]="textModifier">{{ label }}</p>
+        </tedi-card-content>
+      </tedi-card>
+    `,
+  }),
+  ```
+
+- For two-way / local state (e.g. selection, open/close), keep a local `signal` in `props` and bind it via `[value]`/`(valueChange)` — leave the rest of the args spread in:
+
+  ```typescript
+  render: (args) => ({
+    props: { ...args, value: signal('2') },
+    template: `<tedi-select ${argsToTemplate(args)} [value]="value()" (valueChange)="value.set($event)" />`,
+  }),
+  ```
+
+**Showcase stories are the exception.** Stories that render several fixed configurations at once (all variants/sizes/states) should **disable** the panel rather than fake controls: `parameters: { controls: { disable: true } }`. Only the `Default` (single-instance) story must have working controls.
+
+### 6. Story Checklist
+
+- [ ] Every Figma section has a corresponding story export, in the same order
+- [ ] Example content (labels, data, item count) matches Figma exactly
+- [ ] Every public input/model has a corresponding `argTypes` entry with description, control, type summary, and default value
+- [ ] `Default` story has all controls wired up via `args` and they **functionally drive the rendered component** — verified by changing a control and seeing the output update, including for nested/composed components (see section 5)
+- [ ] States story covers all visual states shown in Figma (default, hover, active, focus, disabled)
+- [ ] Example `ariaLabel`/`aria-label`/`label` values name the content only, never the role or the state ("Vaate valik", not "Erineva laiusega nupud"; "Faili üleslaadimine", not "Edenemisriba pealkiri"). Consumers copy them, and the screen reader announces role and state itself
+- [ ] Every icon-only control shown in a story has both an `aria-label` and a `tedi-tooltip` — the label names it for screen readers, the tooltip shows the same wording on hover or keyboard focus
+- [ ] Reactive forms example included if the component implements ControlValueAccessor
+- [ ] Figma link is in the JSDoc comment above `export default` (format: `<a href="..." target="_blank">Figma ↗</a>`),
+      and only when it points to the TEDI Figma file
+- [ ] Every `argTypes` description is one sentence; every story docblock either says something invisible in the rendered story or does not exist (see section 8)
+- [ ] No public input is missing an `argTypes` entry — aliased inputs are keyed by their alias (`invalid`, not `invalidInput`)
+- [ ] If the component has a `VisualTest` story, a new visual story also adds its variant to `VisualTest`, unless it keeps its own snapshot (`play` function, open overlay, scrolling, sticky / fixed positioning; see section 9)
+- [ ] No inline `style` in story markup, and no hand-written ARIA, keyboard or overlay code in the stories file (see section 2)
+- [ ] Disabled, loading, error and empty states the component supports have a story, even if Figma omits them; place these after the Figma-ordered stories
+
+### 7. argTypes Convention
+
+**Every public input/model must have an argTypes entry.** Do not skip any — all props must appear in the Storybook controls panel with correct typing and descriptions.
+
+Each entry must include:
+- `description` — **one sentence.** What the input does, nothing else. See section 8.
+- `control` — appropriate control type (`'radio'`, `'select'`, `'boolean'`, `'text'`, `'number'`, `'object'`)
+- `options` — for enum/union type inputs, list all possible values
+- `table.category` — always `'inputs'`
+- `table.type.summary` — the TypeScript type name (e.g., `'boolean'`, `'string'`, `'FilterVariant'`, `'FilterOption[]'`)
+- `table.defaultValue.summary` — the default value
+
+```typescript
+argTypes: {
+  inputName: {
+    description: 'Brief description of what this input controls',
+    control: { type: 'radio' },  // or 'select', 'boolean', 'text', 'number', 'object'
+    options: ['value1', 'value2'],
+    table: {
+      category: 'inputs',
+      type: { summary: 'TypeName' },
+      defaultValue: { summary: 'defaultValue' },
+    },
+  },
+}
+```
+
+### 8. Prose: default to none
+
+Prose — story docblocks and the meta docblock — is the most consistently over-written part of a
+stories file. The bar is not "is this true and useful?" — almost anything is. The bar is
+**"is this invisible in the rendered story?"**
+
+This section is about prose, not about `argTypes`. Every public input still keeps its one-sentence
+description (section 7): there is no compodoc fallback wired in this repo, so an omitted description
+renders as a blank cell in the controls table rather than picking up the input's JSDoc.
+
+**Story docblocks: write none unless the story has a catch.** A story that looks like what its name
+says needs no prose — `Disabled`, `Default`, `WithCharacterCount` and `Standalone` all explain
+themselves on screen. Add a docblock only for behaviour the reader cannot see: a state that only
+appears after an interaction, a value that replaces rather than extends, a required input with no
+visible consequence. One sentence, two at the absolute most.
+
+Apply the deletion test ([best-practices.md → Comments and JSDoc](best-practices.md#comments-and-jsdoc))
+before writing any docblock. It also decides how long an `argTypes` description is, never whether
+it exists.
+
+Specific things not to write, all of which have shipped and been sent back:
+
+| Don't | Why |
+|---|---|
+| "Works like `tedi-textarea`, except…" | Comparisons to other components age badly and help nobody reading this page. |
+| "Counts the visible text, not the HTML." | Logically necessary behaviour. Stating it implies the opposite was plausible. |
+| "The feedback element's id is pushed into `aria-describedby`." | Internal plumbing. Document the contract, never the wiring. |
+| "It paints its own surface, so you only give up the label, feedback text and counter." | Enumerating what a story is *not* doing. |
+| A numbered "### 1. Install … ### 2. Import …" setup guide in the meta docblock | Setup is at most a short paragraph plus one code block. |
+| "Shows the disabled state." above `export const Disabled` | Restates the story name. |
+
+Keep in the meta docblock only what a consumer cannot discover from the types: required peer
+dependencies, a global stylesheet import, and accessibility wiring that silently does nothing if
+done the usual way.
+
+### 9. Chromatic snapshots (`VisualTest`)
+
+Chromatic bills per snapshot, so a simple component keeps its snapshots in one hidden composite
+story instead of one per docs story. When a stories file has a `VisualTest` story:
+
+- The meta sets `parameters: { chromatic: { disableSnapshot: true } }`, so docs stories are not
+  snapshotted.
+- `VisualTest` is the last export, with `tags: ["!dev", "!autodocs"]` (hidden from the sidebar and
+  docs, still run by Chromatic and the test-runner) and
+  `parameters: { chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS } }`.
+  It renders every visual variant, each block under a short bold label. `VISUAL_TEST_VIEWPORTS`
+  (375 and 1200) captures every block at mobile and desktop width, because core changes tokens
+  (text, buttons, form fields, cards) below 48rem as well as layouts at breakpoints.
+- Reuse the docs stories, never copy their markup, so a later change to a docs story reaches
+  Chromatic. Build the render with `visualTest([...blocks], { args: meta.args })` from
+  `.storybook/visual-test-story`, adding `render: meta.render` when docs stories inherit the meta's
+  render. Each block is `{ label, story, args? }`: `args` override the
+  story's own, e.g. a unique `ariaLabel`. Blocks may bind the same prop name to different values:
+  the helper then scopes that prop per block with `@let`, which is read-only, so a two-way binding
+  (`[(x)]`) only works on a prop name no other block binds differently. Where hard-coded ids collide, give the
+  story's markup an `idPrefix` arg (`render: ({ idPrefix }) => fn(idPrefix)`) and pass
+  `args: { idPrefix: "vt-…-" }` on the block. The helper throws when a story renders nothing.
+- A story whose state needs a `play` function, an open overlay, scrolling, or sticky / fixed
+  positioning against the page stays a separate snapshot: it sets `chromatic: { disableSnapshot: false }`
+  itself and is not copied into `VisualTest`. Add `viewports` only for the widths whose rendering
+  actually differs: `[375]` for mobile only, `VISUAL_TEST_VIEWPORTS` for both, so every desktop
+  baseline is captured at 1200. CSS-animated content such as a spinner belongs in `VisualTest`, since Chromatic
+  pauses CSS animations before capturing. JS timers are not paused, so a timer-driven story is a
+  separate snapshot that starts from a fixed value and skips its timer when `isChromatic()` (from
+  `chromatic/isChromatic`) is true.
+- Everything in the composite must be unique within the story: `id`, `for`, `aria-labelledby`,
+  radio `name`, and the accessible name of every landmark or group. Pseudo-state selectors must be
+  unique too: use a list (`hover: ["#vt-hover-primary", "#vt-hover-secondary"]`) or a data attribute
+  (`[data-state="Hover"]`) rather than a repeated `#Hover`.
+- Inverted variants that the docs story puts on the `brand` background go inside
+  `<div class="bg bg-primary">` in the composite.
+
+```ts
+/** Chromatic snapshot for Breadcrumbs: add every new visual variant here too. */
+export const VisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: { chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS } },
+  render: () =>
+    visualTest(
+      [
+        { label: "Default", story: Default },
+        { label: "Responsive variant", story: ResponsiveVariant },
+      ],
+      { args: meta.args },
+    ),
+};
+```
+
+**A new visual story on a component with `VisualTest` must also add its variant to `VisualTest`**,
+otherwise Chromatic never sees it. A story that keeps its own snapshot (see above) is the exception. `.storybook/visual-test-coverage.spec.ts` (run by `npm test`) fails when a docs story has
+no block or `VisualTest` lacks `VISUAL_TEST_VIEWPORTS`. A story that only demonstrates behaviour (form integration, a controlled-state demo, deep
+links) opts out with `parameters: { visualTest: false }`. A story that only seems to look like
+another block still gets its own block, so a later change to it reaches Chromatic.
+
+### 10. Verify
+
+Run Storybook to visually confirm stories render correctly:
+```bash
+npm start
+```
+
+Check that:
+- All stories appear in the correct category
+- Story order matches Figma section order
+- Example content matches Figma
+- Controls work interactively — change a control in the `Default` story and confirm the rendered component updates (including nested/composed components)
+- No console errors

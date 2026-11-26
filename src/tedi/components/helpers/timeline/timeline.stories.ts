@@ -10,9 +10,15 @@ import { TextComponent } from "../../base/text/text.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { InfoButtonComponent } from "../../buttons/info-button/info-button.component";
 import { IconComponent } from "../../base/icon/icon.component";
+import { RowComponent } from "../grid/row/row.component";
+import { ColComponent } from "../grid/col/col.component";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 
 /**
- * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.17.25?node-id=136-14995&m=dev&focus-id=25945-119670" target="_BLANK">Figma ↗</a><br />
+ * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.108.103?m=dev&node-id=25945-119670" target="_BLANK">Figma ↗</a><br />
  * <a href="https://www.tedi.ee/1ee8444b7/p/27208b-timeline" target="_BLANK">Zeroheight ↗</a>
  *
  * This component is responsive and adapts to mobile layout when below LG (992px) breakpoint.<br />
@@ -40,9 +46,14 @@ export default {
         ButtonComponent,
         InfoButtonComponent,
         IconComponent,
+        RowComponent,
+        ColComponent,
       ],
     }),
   ],
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
   argTypes: {
     activeIndex: {
       description: "Index of active item",
@@ -87,14 +98,7 @@ export default {
 
 type Story = StoryObj<TimelineComponent>;
 
-export const Default: Story = {
-  args: {
-    activeIndex: 2,
-    variant: "default",
-  },
-  render: (args) => ({
-    props: args,
-    template: `
+const DEFAULT_TEMPLATE = `
       <tedi-timeline [activeIndex]="activeIndex" [variant]="variant" [cardPadding]="cardPadding">
         <tedi-timeline-item [timings]="['1990', '14. detsember']">
           <tedi-timeline-title>Staaži kogumise algus (I sammas)</tedi-timeline-title>
@@ -124,17 +128,20 @@ export const Default: Story = {
           <tedi-timeline-title>Vanaduspensioniiga</tedi-timeline-title>
         </tedi-timeline-item>
       </tedi-timeline>
-    `,
-  }),
-};
+    `;
 
-export const TitleOnly: Story = {
+export const Default: Story = {
   args: {
-    activeIndex: 1,
+    activeIndex: 2,
+    variant: "default",
   },
   render: (args) => ({
     props: args,
-    template: `
+    template: DEFAULT_TEMPLATE,
+  }),
+};
+
+const TITLE_ONLY_TEMPLATE = `
       <tedi-timeline [activeIndex]="activeIndex">
         <tedi-timeline-item>
           <tedi-timeline-title>Taotluse esitamine</tedi-timeline-title>
@@ -146,17 +153,19 @@ export const TitleOnly: Story = {
           <tedi-timeline-title>Otsus</tedi-timeline-title>
         </tedi-timeline-item>
       </tedi-timeline>
-    `,
-  }),
-};
+    `;
 
-export const WithDescription: Story = {
+export const TitleOnly: Story = {
   args: {
     activeIndex: 1,
   },
   render: (args) => ({
     props: args,
-    template: `
+    template: TITLE_ONLY_TEMPLATE,
+  }),
+};
+
+const WITH_DESCRIPTION_TEMPLATE = `
       <tedi-timeline [activeIndex]="activeIndex">
         <tedi-timeline-item>
           <tedi-timeline-title>Taotluse esitamine</tedi-timeline-title>
@@ -171,17 +180,19 @@ export const WithDescription: Story = {
           <tedi-timeline-description>Otsus tehakse teatavaks.</tedi-timeline-description>
         </tedi-timeline-item>
       </tedi-timeline>
-    `,
-  }),
-};
+    `;
 
-export const WithInfoButton: Story = {
+export const WithDescription: Story = {
   args: {
     activeIndex: 1,
   },
   render: (args) => ({
     props: args,
-    template: `
+    template: WITH_DESCRIPTION_TEMPLATE,
+  }),
+};
+
+const WITH_INFO_BUTTON_TEMPLATE = `
       <tedi-timeline [activeIndex]="activeIndex">
         <tedi-timeline-item>
           <tedi-timeline-title>
@@ -205,17 +216,19 @@ export const WithInfoButton: Story = {
           <tedi-timeline-description>Otsus tehakse teatavaks.</tedi-timeline-description>
         </tedi-timeline-item>
       </tedi-timeline>
-    `,
-  }),
-};
+    `;
 
-export const WithoutTitle: Story = {
+export const WithInfoButton: Story = {
   args: {
     activeIndex: 1,
   },
   render: (args) => ({
     props: args,
-    template: `
+    template: WITH_INFO_BUTTON_TEMPLATE,
+  }),
+};
+
+const WITHOUT_TITLE_TEMPLATE = `
       <tedi-timeline [activeIndex]="activeIndex">
         <tedi-timeline-item>
           <tedi-timeline-description>Pärast taotluse esitamist võetakse see menetlusse.</tedi-timeline-description>
@@ -227,17 +240,19 @@ export const WithoutTitle: Story = {
           <tedi-timeline-description>Otsus tehakse teatavaks.</tedi-timeline-description>
         </tedi-timeline-item>
       </tedi-timeline>
-    `,
-  }),
-};
+    `;
 
-export const WithAction: Story = {
+export const WithoutTitle: Story = {
   args: {
-    activeIndex: 3,
+    activeIndex: 1,
   },
   render: (args) => ({
     props: args,
-    template: `
+    template: WITHOUT_TITLE_TEMPLATE,
+  }),
+};
+
+const WITH_ACTION_TEMPLATE = `
       <tedi-timeline [activeIndex]="activeIndex">
         <tedi-timeline-item>
           <tedi-timeline-title>Taotluse esitamine</tedi-timeline-title>
@@ -260,17 +275,19 @@ export const WithAction: Story = {
           </tedi-collapse>
         </tedi-timeline-item>
       </tedi-timeline>
-    `,
-  }),
-};
+    `;
 
-export const WithSingleDate: Story = {
+export const WithAction: Story = {
   args: {
-    activeIndex: 1,
+    activeIndex: 3,
   },
   render: (args) => ({
     props: args,
-    template: `
+    template: WITH_ACTION_TEMPLATE,
+  }),
+};
+
+const WITH_SINGLE_DATE_TEMPLATE = `
       <tedi-timeline [activeIndex]="activeIndex">
         <tedi-timeline-item [timings]="['1990']">
           <tedi-timeline-title>Taotluse esitamine</tedi-timeline-title>
@@ -285,17 +302,19 @@ export const WithSingleDate: Story = {
           <tedi-timeline-description>Otsus tehakse teatavaks.</tedi-timeline-description>
         </tedi-timeline-item>
       </tedi-timeline>
-    `,
-  }),
-};
+    `;
 
-export const WithMultipleDates: Story = {
+export const WithSingleDate: Story = {
   args: {
     activeIndex: 1,
   },
   render: (args) => ({
     props: args,
-    template: `
+    template: WITH_SINGLE_DATE_TEMPLATE,
+  }),
+};
+
+const WITH_MULTIPLE_DATES_TEMPLATE = `
       <tedi-timeline [activeIndex]="activeIndex">
         <tedi-timeline-item [timings]="['1990', '14. detsember']">
           <tedi-timeline-title>Taotluse esitamine</tedi-timeline-title>
@@ -310,18 +329,19 @@ export const WithMultipleDates: Story = {
           <tedi-timeline-description>Otsus tehakse teatavaks.</tedi-timeline-description>
         </tedi-timeline-item>
       </tedi-timeline>
-    `,
-  }),
-};
+    `;
 
-export const TimelineCard: Story = {
+export const WithMultipleDates: Story = {
   args: {
     activeIndex: 1,
-    variant: "card",
   },
   render: (args) => ({
     props: args,
-    template: `
+    template: WITH_MULTIPLE_DATES_TEMPLATE,
+  }),
+};
+
+const TIMELINE_CARD_TEMPLATE = `
       <tedi-timeline [activeIndex]="activeIndex" [variant]="variant" [cardPadding]="cardPadding">
         <tedi-timeline-item [timings]="['11.01.2024 12:23', 'Kersti Ööviul']">
           <p *tediTimelineTimingsBottom tedi-text modifiers="small" color="tertiary">
@@ -348,6 +368,35 @@ export const TimelineCard: Story = {
           </tedi-collapse>
         </tedi-timeline-item>
       </tedi-timeline>
-    `,
+    `;
+
+export const TimelineCard: Story = {
+  args: {
+    activeIndex: 1,
+    variant: "card",
+  },
+  render: (args) => ({
+    props: args,
+    template: TIMELINE_CARD_TEMPLATE,
   }),
+};
+
+/** Chromatic snapshot for Timeline: add every new visual variant here too. */
+export const VisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
+  render: () =>
+    visualTest([
+      { label: "Default", story: Default },
+      { label: "Title only", story: TitleOnly },
+      { label: "With description", story: WithDescription },
+      { label: "With info button", story: WithInfoButton },
+      { label: "Without title", story: WithoutTitle },
+      { label: "With action", story: WithAction },
+      { label: "With single date", story: WithSingleDate },
+      { label: "With multiple dates", story: WithMultipleDates },
+      { label: "Timeline card", story: TimelineCard },
+    ]),
 };

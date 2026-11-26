@@ -8,6 +8,9 @@ import {
   ComponentInputs,
 } from "@tedi-design-system/angular/tedi";
 
+/**
+ * @deprecated Use ModalHeader from TEDI-ready instead. This component will be removed from future versions.
+ */
 @Component({
   selector: "tedi-modal-header",
   templateUrl: "./modal-header.component.html",

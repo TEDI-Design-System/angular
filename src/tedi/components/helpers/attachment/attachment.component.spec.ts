@@ -192,6 +192,32 @@ describe("AttachmentComponent", () => {
     );
   });
 
+  it("should keep the error icon out of the accessibility tree", () => {
+    host.error = "File too large";
+    fixture.detectChanges();
+
+    const icon = element.querySelector(".tedi-attachment__error-icon")!;
+
+    expect(icon.getAttribute("aria-hidden")).toBe("true");
+    expect(icon.getAttribute("aria-label")).toBeNull();
+    expect(icon.hasAttribute("tabindex")).toBe(false);
+    // Announced once, by the feedback text, not twice.
+    expect(element.textContent?.match(/File too large/g)?.length).toBe(1);
+  });
+
+  it("should name the error icon when nothing else reports the failure", () => {
+    host.invalid = true;
+    fixture.detectChanges();
+
+    const icon = element.querySelector(".tedi-attachment__error-icon")!;
+
+    // `invalid` renders no message, so an unnamed icon would leave the failure
+    // conveyed by colour alone.
+    expect(element.querySelector("tedi-feedback-text")).toBeNull();
+    expect(icon.getAttribute("aria-label")).toBe("file-attachment.invalid");
+    expect(icon.getAttribute("aria-hidden")).toBe("false");
+  });
+
   it("should not render the feedback line when there is no error", () => {
     expect(element.querySelector("tedi-feedback-text")).toBeNull();
   });

@@ -18,6 +18,10 @@ import {
   type CollapseButtonArrowType,
   type CollapseButtonSize,
 } from "./collapse-button.component";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { type TextColor, TextComponent } from "../../base/text/text.component";
@@ -63,10 +67,13 @@ type StatesArgs = {
   inverted?: boolean;
   ariaLabel?: string;
   titleColor?: TextColor;
+  stateAttr?: string;
 };
 
-const StatesTemplate: StoryFn<StatesArgs> = ({
+// VisualTest passes stateAttr "attr.data-state": the docs stories repeat the same ids in every variant.
+const statesTemplate: StoryFn<StatesArgs> = ({
   titleColor = "primary",
+  stateAttr = "id",
   ...args
 }) => ({
   props: { ...args, titleColor, pseudoState: PSEUDO_STATE },
@@ -81,7 +88,7 @@ const StatesTemplate: StoryFn<StatesArgs> = ({
               <tedi-col [width]="4" style="display: flex; gap: 1rem; align-items: center;">
                 <button
                   tedi-collapse-button
-                  [id]="state"
+                  [${stateAttr}]="state"
                   [openText]="openText"
                   [closeText]="closeText"
                   [hideText]="hideText"
@@ -91,7 +98,7 @@ const StatesTemplate: StoryFn<StatesArgs> = ({
                 ></button>
                 <button
                   tedi-collapse-button
-                  [id]="state"
+                  [${stateAttr}]="state"
                   [open]="true"
                   [openText]="openText"
                   [closeText]="closeText"
@@ -114,7 +121,7 @@ const StatesTemplate: StoryFn<StatesArgs> = ({
               <tedi-col [width]="4" style="display: flex; gap: 1rem; align-items: center;">
                 <button
                   tedi-collapse-button
-                  [id]="state"
+                  [${stateAttr}]="state"
                   size="small"
                   [openText]="openText"
                   [closeText]="closeText"
@@ -125,7 +132,7 @@ const StatesTemplate: StoryFn<StatesArgs> = ({
                 ></button>
                 <button
                   tedi-collapse-button
-                  [id]="state"
+                  [${stateAttr}]="state"
                   [open]="true"
                   size="small"
                   [openText]="openText"
@@ -162,7 +169,7 @@ const PSEUDO_PARAMS = {
  *   <code>openChange</code>.
  * </p>
  */
-export default {
+const meta: Meta<CollapseButtonDemoComponent> = {
   title: "TEDI-Ready/Components/Buttons/CollapseButton",
   component: CollapseButtonComponent,
   decorators: [
@@ -180,6 +187,7 @@ export default {
     status: {
       type: ["devComponent"],
     },
+    chromatic: { disableSnapshot: true },
   },
   args: {
     openText: "Open",
@@ -255,7 +263,9 @@ export default {
       },
     },
   },
-} as Meta<CollapseButtonDemoComponent>;
+};
+
+export default meta;
 
 type DemoStory = StoryObj<CollapseButtonDemoComponent>;
 
@@ -274,7 +284,7 @@ export const States: StoryObj<StatesArgs> = {
     openText: "Open",
     closeText: "Close",
   },
-  render: StatesTemplate,
+  render: statesTemplate,
 };
 
 export const IconOnly: StoryObj<StatesArgs> = {
@@ -284,7 +294,7 @@ export const IconOnly: StoryObj<StatesArgs> = {
     arrowType: "default",
     ariaLabel: "Toggle details",
   },
-  render: StatesTemplate,
+  render: statesTemplate,
 };
 
 export const SecondaryButton: StoryObj<StatesArgs> = {
@@ -294,7 +304,7 @@ export const SecondaryButton: StoryObj<StatesArgs> = {
     arrowType: "secondary",
     ariaLabel: "Toggle details",
   },
-  render: StatesTemplate,
+  render: statesTemplate,
 };
 
 export const WithTextInverted: StoryObj<StatesArgs> = {
@@ -310,7 +320,7 @@ export const WithTextInverted: StoryObj<StatesArgs> = {
     openText: "Open",
     closeText: "Close",
   },
-  render: StatesTemplate,
+  render: statesTemplate,
 };
 
 export const IconOnlyInverted: StoryObj<StatesArgs> = {
@@ -325,5 +335,52 @@ export const IconOnlyInverted: StoryObj<StatesArgs> = {
     titleColor: "white",
     ariaLabel: "Toggle details",
   },
-  render: StatesTemplate,
+  render: statesTemplate,
+};
+
+const VT_STATES = { stateAttr: "attr.data-state" };
+
+const onBrand = (story: StoryObj<StatesArgs>) => ({
+  args: story.args,
+  render: (args: never, context: never) => {
+    const result = (story.render as StoryFn<StatesArgs>)(args, context);
+    return {
+      ...result,
+      template: `<div class="bg bg-primary"><div class="w-100">${result.template}</div></div>`,
+    };
+  },
+});
+
+/** Chromatic snapshot for CollapseButton: add every new visual variant here too. */
+export const VisualTest: StoryObj<StatesArgs> = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+    controls: { disable: true },
+    pseudo: {
+      hover: '[data-state="Hover"]',
+      active: '[data-state="Active"]',
+      focusVisible: '[data-state="Focus"]',
+    },
+  },
+  render: () =>
+    visualTest(
+      [
+        { label: "Default", story: Default },
+        { label: "With text", story: States, args: VT_STATES },
+        { label: "Icon only", story: IconOnly, args: VT_STATES },
+        { label: "Secondary button", story: SecondaryButton, args: VT_STATES },
+        {
+          label: "With text inverted",
+          story: onBrand(WithTextInverted),
+          args: VT_STATES,
+        },
+        {
+          label: "Icon only inverted",
+          story: onBrand(IconOnlyInverted),
+          args: VT_STATES,
+        },
+      ],
+      { args: meta.args },
+    ),
 };

@@ -1,7 +1,12 @@
 import { Meta, StoryObj, moduleMetadata } from "@storybook/angular";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { StatusIndicatorComponent } from "./status-indicator.component";
 import { TextComponent } from "../../base/text/text.component";
-import { RowComponent, ColComponent } from "@tedi-design-system/angular/tedi";
+import { RowComponent } from "../../helpers/grid/row/row.component";
+import { ColComponent } from "../../helpers/grid/col/col.component";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.45.68?node-id=2405-53326&m=dev" target="_blank">Figma ↗</a>
@@ -19,6 +24,9 @@ export default {
       ],
     }),
   ],
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
   argTypes: {
     type: {
       description: "The status type, which determines the indicator color",
@@ -73,7 +81,6 @@ export default {
 } as Meta<StatusIndicatorComponent>;
 
 export const Default: StoryObj<StatusIndicatorComponent> = {
-  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     type: "success",
     size: "sm",
@@ -140,4 +147,18 @@ export const Examples: StoryObj<StatusIndicatorComponent> = {
       </span>
     `,
   }),
+};
+
+/** Chromatic snapshot for StatusIndicator: add every new visual variant here too. */
+export const VisualTest: StoryObj<StatusIndicatorComponent> = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
+  render: () =>
+    visualTest([
+      { label: "Default", story: Default },
+      { label: "All variants", story: AllVariants },
+      { label: "Examples", story: Examples },
+    ]),
 };

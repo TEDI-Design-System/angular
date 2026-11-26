@@ -294,4 +294,77 @@ describe("ScrollFadeComponent", () => {
       ).toBe(true);
     });
   });
+  describe("content resize observation", () => {
+    const originalResizeObserver = global.ResizeObserver;
+    let resizeCallback: () => void;
+    let observed: Element[];
+
+    beforeEach(() => {
+      observed = [];
+      global.ResizeObserver = class {
+        constructor(callback: () => void) {
+          resizeCallback = callback;
+        }
+        observe(target: Element) {
+          observed.push(target);
+        }
+        disconnect() {}
+        unobserve() {}
+      } as unknown as typeof ResizeObserver;
+
+      fixture = TestBed.createComponent(TestHostComponent);
+      host = fixture.componentInstance;
+      fixture.detectChanges();
+      scrollFadeEl = fixture.nativeElement.querySelector("tedi-scroll-fade");
+    });
+
+    afterEach(() => {
+      global.ResizeObserver = originalResizeObserver;
+    });
+
+    it("should observe both the scroller and the content wrapper", () => {
+      const innerEl = scrollFadeEl.querySelector(".tedi-scroll-fade__inner");
+      const contentEl = scrollFadeEl.querySelector(
+        ".tedi-scroll-fade__content",
+      );
+
+      expect(contentEl).not.toBeNull();
+      expect(observed).toEqual([innerEl, contentEl]);
+    });
+
+    it("should show the bottom fade when content grows while scrolled to the bottom", () => {
+      const innerEl = scrollFadeEl.querySelector(
+        ".tedi-scroll-fade__inner",
+      ) as HTMLElement;
+      Object.defineProperty(innerEl, "clientHeight", {
+        value: 200,
+        configurable: true,
+      });
+      Object.defineProperty(innerEl, "scrollTop", {
+        value: 300,
+        configurable: true,
+      });
+      Object.defineProperty(innerEl, "scrollHeight", {
+        value: 500,
+        configurable: true,
+      });
+      resizeCallback();
+      fixture.detectChanges();
+
+      expect(
+        scrollFadeEl.classList.contains("tedi-scroll-fade--bottom-20"),
+      ).toBe(false);
+
+      Object.defineProperty(innerEl, "scrollHeight", {
+        value: 700,
+        configurable: true,
+      });
+      resizeCallback();
+      fixture.detectChanges();
+
+      expect(
+        scrollFadeEl.classList.contains("tedi-scroll-fade--bottom-20"),
+      ).toBe(true);
+    });
+  });
 });

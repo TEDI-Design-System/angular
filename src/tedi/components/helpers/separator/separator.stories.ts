@@ -1,7 +1,12 @@
 import { Meta, StoryObj, moduleMetadata } from "@storybook/angular";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { SeparatorComponent } from "./separator.component";
 import { ColComponent } from "../grid/col/col.component";
 import { RowComponent } from "../grid/row/row.component";
+import { TextComponent } from "../../base/text/text.component";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/%E2%9D%97TEDI-READY%E2%9D%97(follow-the-badges-in-header-to-see-which-components-are-ready-(designed%2Fdeveloped))?node-id=3518-32729&t=yVRJ7sVF6JXMsCSA-4" target="_blank">Figma ↗</a><br>
@@ -13,9 +18,12 @@ export default {
   component: SeparatorComponent,
   decorators: [
     moduleMetadata({
-      imports: [SeparatorComponent, RowComponent, ColComponent],
+      imports: [SeparatorComponent, RowComponent, ColComponent, TextComponent],
     }),
   ],
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
   argTypes: {
     axis: {
       description: "Axis of separator.",
@@ -143,10 +151,7 @@ export const Default: StoryObj<SeparatorComponent> = {
   }),
 };
 
-export const HorizontalColors: StoryObj<SeparatorComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
+const HORIZONTAL_COLORS_TEMPLATE = `
         <tedi-row gap="5">
             <tedi-col>
                 <h3>Full width</h3>
@@ -171,14 +176,16 @@ export const HorizontalColors: StoryObj<SeparatorComponent> = {
                 <tedi-separator [spacing]="2" [thickness]="2" color="accent" size="5rem" />
             </tedi-col>
         </tedi-row>
-    `,
+    `;
+
+export const HorizontalColors: StoryObj<SeparatorComponent> = {
+  render: (args) => ({
+    props: args,
+    template: HORIZONTAL_COLORS_TEMPLATE,
   }),
 };
 
-export const VerticalColors: StoryObj<SeparatorComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
+const VERTICAL_COLORS_TEMPLATE = `
         <tedi-row gap="5">
             <tedi-col>
                 <h3>Full height</h3>
@@ -207,14 +214,16 @@ export const VerticalColors: StoryObj<SeparatorComponent> = {
                 </div>
             </tedi-col>
         </tedi-row>
-    `,
+    `;
+
+export const VerticalColors: StoryObj<SeparatorComponent> = {
+  render: (args) => ({
+    props: args,
+    template: VERTICAL_COLORS_TEMPLATE,
   }),
 };
 
-export const PaddedEven: StoryObj<SeparatorComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
+const PADDED_EVEN_TEMPLATE = `
         <tedi-row gap="5">
             <tedi-col>
                 <p>Some content</p>
@@ -227,14 +236,16 @@ export const PaddedEven: StoryObj<SeparatorComponent> = {
                 <p>Other content</p>
             </tedi-col>
         </tedi-row>
-    `,
+    `;
+
+export const PaddedEven: StoryObj<SeparatorComponent> = {
+  render: (args) => ({
+    props: args,
+    template: PADDED_EVEN_TEMPLATE,
   }),
 };
 
-export const PaddedUneven: StoryObj<SeparatorComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
+const PADDED_UNEVEN_TEMPLATE = `
         <tedi-row gap="5">
             <tedi-col>
                 <p>Some content</p>
@@ -247,13 +258,17 @@ export const PaddedUneven: StoryObj<SeparatorComponent> = {
                 <p>Other content</p>
             </tedi-col>
         </tedi-row>
-    `,
+    `;
+
+export const PaddedUneven: StoryObj<SeparatorComponent> = {
+  render: (args) => ({
+    props: args,
+    template: PADDED_UNEVEN_TEMPLATE,
   }),
 };
 
 export const VerticalThick: StoryObj<SeparatorComponent> = {
   parameters: {
-    chromatic: { disableSnapshot: true },
     layout: "fullscreen",
   },
   render: (args) => ({
@@ -263,7 +278,7 @@ export const VerticalThick: StoryObj<SeparatorComponent> = {
             <div style="padding: 1rem;">12.12.2012</div>
             <tedi-separator axis="vertical" [spacing]="2" [thickness]="2" />
             <div style="padding: 1rem;">
-                <h6>Title</h6>
+                <h4 tedi-text modifiers="h6">Title</h4>
                 <p>
                     Lorem ipsum dolor sit, amet consectetur adipisicing elit.
                     Exercitationem rem nisi quae? Rem, amet! Veritatis laboriosam consectetur ipsum quae.
@@ -274,6 +289,21 @@ export const VerticalThick: StoryObj<SeparatorComponent> = {
     `,
   }),
 };
+
+const VERTICAL_DOTTED_TEMPLATE = `
+        <div style="display: flex; height: 7rem;">
+            <div style="padding: 1rem;">12.12.2012</div>
+            <tedi-separator axis="vertical" [spacing]="2" color="accent" variant="dotted" />
+            <div style="padding: 1rem;">
+                <h4 tedi-text modifiers="h6">Title</h4>
+                <p>
+                    Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+                    Exercitationem rem nisi quae? Rem, amet! Veritatis laboriosam consectetur ipsum quae.
+                    Amet voluptatibus quod eaque at nostrum id provident? Cum, maiores libero!
+                </p>
+            </div>
+        </div>
+    `;
 
 export const VerticalDotted: StoryObj<SeparatorComponent> = {
   parameters: {
@@ -281,12 +311,16 @@ export const VerticalDotted: StoryObj<SeparatorComponent> = {
   },
   render: (args) => ({
     props: args,
-    template: `
+    template: VERTICAL_DOTTED_TEMPLATE,
+  }),
+};
+
+const VERTICAL_DOTTED_SMALL_TEMPLATE = `
         <div style="display: flex; height: 7rem;">
             <div style="padding: 1rem;">12.12.2012</div>
-            <tedi-separator axis="vertical" [spacing]="2" color="accent" variant="dotted" />
+            <tedi-separator axis="vertical" [spacing]="2" color="accent" variant="dotted-small" />
             <div style="padding: 1rem;">
-                <h6>Title</h6>
+                <h4 tedi-text modifiers="h6">Title</h4>
                 <p>
                     Lorem ipsum dolor sit, amet consectetur adipisicing elit.
                     Exercitationem rem nisi quae? Rem, amet! Veritatis laboriosam consectetur ipsum quae.
@@ -294,9 +328,7 @@ export const VerticalDotted: StoryObj<SeparatorComponent> = {
                 </p>
             </div>
         </div>
-    `,
-  }),
-};
+    `;
 
 export const VerticalDottedSmall: StoryObj<SeparatorComponent> = {
   parameters: {
@@ -304,39 +336,25 @@ export const VerticalDottedSmall: StoryObj<SeparatorComponent> = {
   },
   render: (args) => ({
     props: args,
-    template: `
-        <div style="display: flex; height: 7rem;">
-            <div style="padding: 1rem;">12.12.2012</div>
-            <tedi-separator axis="vertical" [spacing]="2" color="accent" variant="dotted-small" />
-            <div style="padding: 1rem;">
-                <h6>Title</h6>
-                <p>
-                    Lorem ipsum dolor sit, amet consectetur adipisicing elit.
-                    Exercitationem rem nisi quae? Rem, amet! Veritatis laboriosam consectetur ipsum quae.
-                    Amet voluptatibus quod eaque at nostrum id provident? Cum, maiores libero!
-                </p>
-            </div>
-        </div>
-    `,
+    template: VERTICAL_DOTTED_SMALL_TEMPLATE,
   }),
 };
 
-export const HorizontalDottedSeparator: StoryObj<SeparatorComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
+const HORIZONTAL_DOTTED_TEMPLATE = `
       <div class="w-50">
         <tedi-separator [spacing]="2" color="accent" variant="dotted" />
         <tedi-separator [spacing]="2" color="accent" variant="dotted-small" />
       </div>
-    `,
+    `;
+
+export const HorizontalDottedSeparator: StoryObj<SeparatorComponent> = {
+  render: (args) => ({
+    props: args,
+    template: HORIZONTAL_DOTTED_TEMPLATE,
   }),
 };
 
-export const DotOnly: StoryObj<SeparatorComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
+const DOT_ONLY_TEMPLATE = `
       <tedi-row [gap]="3">
         <div style="display: flex; align-items: center; gap: 1rem;">
           <tedi-separator color="secondary" variant="dot-only" dotSize="extra-small" />
@@ -357,14 +375,16 @@ export const DotOnly: StoryObj<SeparatorComponent> = {
           <tedi-separator color="secondary" variant="dot-only" dotSize="large" [dotFilled]="false" [thickness]="2" />
         </div>
       </tedi-row>
-    `,
+    `;
+
+export const DotOnly: StoryObj<SeparatorComponent> = {
+  render: (args) => ({
+    props: args,
+    template: DOT_ONLY_TEMPLATE,
   }),
 };
 
-export const InlineSeparatorUsedInText: StoryObj<SeparatorComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
+const INLINE_TEMPLATE = `
       <tedi-row [cols]="1" [gap]="3">
         <tedi-col>
           Lorem ipsum dolor sit, amet
@@ -387,6 +407,36 @@ export const InlineSeparatorUsedInText: StoryObj<SeparatorComponent> = {
           consectetur adipisicing elit.
         </tedi-col>
       </tedi-row>
-    `,
+    `;
+
+export const InlineSeparatorUsedInText: StoryObj<SeparatorComponent> = {
+  render: (args) => ({
+    props: args,
+    template: INLINE_TEMPLATE,
   }),
+};
+
+/** Chromatic snapshot for Separator: add every new visual variant here too. */
+export const VisualTest: StoryObj<SeparatorComponent> = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
+  render: () =>
+    visualTest([
+      { label: "Default", story: Default },
+      { label: "Horizontal colors", story: HorizontalColors },
+      { label: "Vertical colors", story: VerticalColors },
+      { label: "Padded even", story: PaddedEven },
+      { label: "Padded uneven", story: PaddedUneven },
+      { label: "Vertical thick", story: VerticalThick },
+      { label: "Vertical dotted", story: VerticalDotted },
+      { label: "Vertical dotted small", story: VerticalDottedSmall },
+      { label: "Horizontal dotted", story: HorizontalDottedSeparator },
+      { label: "Dot only", story: DotOnly },
+      {
+        label: "Inline separator used in text",
+        story: InlineSeparatorUsedInText,
+      },
+    ]),
 };

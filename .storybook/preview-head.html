@@ -13,6 +13,12 @@
     background-color: var(--general-surface-primary);
   }
 
+  /* Stories with `docs.story.inline: false` render in an inline iframe; its
+     baseline gap overflows the docs wrapper and adds a stray scrollbar. */
+  .docs-story iframe {
+    display: block;
+  }
+
   .docblock-argstable label {
     color: inherit;
   }
@@ -22,5 +28,11 @@
     min-height: 100vh !important;
     margin: 0 !important;
     box-sizing: border-box !important;
+  }
+
+  /* A story shown in its own iframe (docs.story.inline: false) sits on the text baseline,
+     which makes the scrolling docs block a few pixels taller than the iframe. */
+  .docs-story iframe {
+    display: block;
   }
 </style>

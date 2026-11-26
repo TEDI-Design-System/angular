@@ -1,5 +1,17 @@
-import { argsToTemplate, Meta, StoryObj } from "@storybook/angular";
+import {
+  argsToTemplate,
+  Meta,
+  moduleMetadata,
+  StoryObj,
+} from "@storybook/angular";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { SpinnerComponent } from "./spinner.component";
+import { RowComponent } from "../../helpers/grid/row/row.component";
+import { ColComponent } from "../../helpers/grid/col/col.component";
+import { TextComponent } from "../../base/text/text.component";
 
 const SIZES = [10, 16, 48];
 const COLORS = ["primary", "secondary"];
@@ -12,6 +24,14 @@ const COLORS = ["primary", "secondary"];
 export default {
   title: "TEDI-Ready/Components/Loader/Spinner",
   component: SpinnerComponent,
+  decorators: [
+    moduleMetadata({
+      imports: [RowComponent, ColComponent, TextComponent],
+    }),
+  ],
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
   argTypes: {
     size: {
       control: "radio",
@@ -125,4 +145,18 @@ export const Color: StoryObj<SpinnerComponent> = {
       </div>
     `,
   }),
+};
+
+/** Chromatic snapshot for Spinner: add every new visual variant here too. */
+export const VisualTest: StoryObj<SpinnerComponent> = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
+  render: () =>
+    visualTest([
+      { label: "Default", story: Default },
+      { label: "Size", story: Size },
+      { label: "Color", story: Color },
+    ]),
 };

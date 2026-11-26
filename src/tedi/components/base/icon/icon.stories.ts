@@ -4,8 +4,15 @@ import {
   StoryObj,
   moduleMetadata,
 } from "@storybook/angular";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { IconComponent } from "./icon.component";
 import { TextComponent } from "../text/text.component";
+import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
+import { RowComponent } from "../../helpers/grid/row/row.component";
+import { ColComponent } from "../../helpers/grid/col/col.component";
 
 const SIZES = [8, 12, 16, 18, 24, 36, 48, "inherit"];
 const SIZES_WITH_BG = [16, 24];
@@ -46,9 +53,16 @@ export default {
   component: IconComponent,
   decorators: [
     moduleMetadata({
-      imports: [IconComponent, TextComponent],
+      imports: [
+        IconComponent,
+        TextComponent,
+        VerticalSpacingDirective,
+        RowComponent,
+        ColComponent,
+      ],
     }),
   ],
+  parameters: { chromatic: { disableSnapshot: true } },
   argTypes: {
     name: {
       description:
@@ -134,7 +148,6 @@ export default {
 } as Meta<IconComponent>;
 
 export const Default: StoryObj<IconComponent> = {
-  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     name: "account_circle",
   },
@@ -349,4 +362,21 @@ export const UsedInsideText: StoryObj<IconComponent> = {
       </div>
     `,
   }),
+};
+
+/** Chromatic snapshot for Icon: add every new visual variant here too. */
+export const VisualTest: StoryObj<IconComponent> = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
+  render: () =>
+    visualTest([
+      { label: "Default", story: Default },
+      { label: "Size", story: IconSize },
+      { label: "Size inside background", story: IconSizeInsideBackground },
+      { label: "Colors", story: IconColors },
+      { label: "Background colors", story: IconBackgroundColors },
+      { label: "Used inside text", story: UsedInsideText },
+    ]),
 };

@@ -37,6 +37,17 @@ describe("SliderComponent", () => {
     expect(getInput()).toBeTruthy();
   });
 
+  it("marks the input required", () => {
+    expect(getInput().required).toBe(false);
+
+    fixture.componentRef.setInput("label", "Helitugevus");
+    fixture.componentRef.setInput("required", true);
+    fixture.detectChanges();
+
+    expect(getInput().required).toBe(true);
+    expect(getInput().labels?.[0].textContent?.trim()).toBe("Helitugevus*");
+  });
+
   it("forwards min, max and step to the input", () => {
     fixture.componentRef.setInput("min", 10);
     fixture.componentRef.setInput("max", 20);

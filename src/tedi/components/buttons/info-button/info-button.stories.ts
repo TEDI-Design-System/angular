@@ -26,10 +26,20 @@ import {
   TextGroupValueComponent,
 } from "../../content/text-group";
 import { SeparatorComponent } from "../../helpers/separator/separator.component";
+import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+  VisualTestStory,
+} from "../../../../../.storybook/visual-test-story";
 
 const PSEUDO_STATE = ["Default", "Hover", "Active", "Focus"];
 
-type TemplateType = InfoButtonComponent & { titleColor?: TextColor };
+type TemplateType = InfoButtonComponent & {
+  titleColor?: TextColor;
+  /** Keeps the state ids unique where the template repeats. */
+  idPrefix?: string;
+};
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-(work-in-progress)?node-id=4514-72997&m=dev" target="_blank">Figma ↗</a><br/>
@@ -39,7 +49,7 @@ type TemplateType = InfoButtonComponent & { titleColor?: TextColor };
  * It can be used in various contexts, such as forms, dashboards, or any other UI where additional information is needed.
  */
 
-export default {
+const meta = {
   title: "TEDI-Ready/Components/Buttons/InfoButton",
   argTypes: {
     "aria-label": {
@@ -53,6 +63,7 @@ export default {
         "Color variant. Use `inverted` on dark or colored backgrounds.",
     },
   },
+  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     "aria-label": undefined,
     color: "primary",
@@ -61,6 +72,7 @@ export default {
   decorators: [
     moduleMetadata({
       imports: [
+        VerticalSpacingDirective,
         InfoButtonComponent,
         RowComponent,
         ColComponent,
@@ -82,8 +94,9 @@ export default {
   ],
 } as Meta<InfoButtonComponent>;
 
+export default meta;
+
 export const Default: StoryObj<InfoButtonComponent> = {
-  parameters: { chromatic: { disableSnapshot: true } },
   render: (args) => ({
     props: args,
     template: `
@@ -94,6 +107,7 @@ export const Default: StoryObj<InfoButtonComponent> = {
 
 const StatesTemplate: StoryObj<TemplateType>["render"] = ({
   titleColor = "primary",
+  idPrefix = "",
   ...args
 }) => ({
   props: { ...args, titleColor, pseudoState: PSEUDO_STATE },
@@ -101,7 +115,7 @@ const StatesTemplate: StoryObj<TemplateType>["render"] = ({
     <tedi-row [cols]="1" [gapY]="5">
       <tedi-col *ngFor="let state of pseudoState;" style="max-width: 200px; display: grid; grid-template-columns: repeat(2, 1fr);">
         <p tedi-text modifiers="bold" [color]="titleColor">{{ state }}</p>
-        <button tedi-info-button ${argsToTemplate(args)} [id]="state"></button>
+        <button tedi-info-button ${argsToTemplate(args)} id="${idPrefix}{{ state }}"></button>
       </tedi-col>
     </tedi-row>
   `,
@@ -185,4 +199,47 @@ export const UsageWithTooltipAndPopover: StoryObj<InfoButtonComponent> = {
       </div>
     `,
   }),
+};
+
+/** Renders a docs story that sits on the `brand` background inside `bg bg-primary`. */
+const onBrand = (story: StoryObj<TemplateType>): VisualTestStory => ({
+  args: story.args,
+  render: (args: never, context: never) => {
+    const result = story.render!(args, context);
+    return {
+      ...result,
+      template: `<div class="bg bg-primary">${result.template}</div>`,
+    };
+  },
+});
+
+/** Chromatic snapshot for InfoButton: add every new visual variant here too. */
+export const VisualTest: StoryObj<InfoButtonComponent> = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+    controls: { disable: true },
+    pseudo: {
+      hover: ["#vt-primary-Hover", "#vt-inverted-Hover"],
+      active: ["#vt-primary-Active", "#vt-inverted-Active"],
+      focusVisible: ["#vt-primary-Focus", "#vt-inverted-Focus"],
+    },
+  },
+  render: () =>
+    visualTest(
+      [
+        { label: "Default", story: Default },
+        { label: "States", story: States, args: { idPrefix: "vt-primary-" } },
+        {
+          label: "Inverted",
+          story: onBrand(Inverted),
+          args: { idPrefix: "vt-inverted-" },
+        },
+        {
+          label: "Usage with tooltip and popover",
+          story: UsageWithTooltipAndPopover,
+        },
+      ],
+      { args: meta.args },
+    ),
 };

@@ -6,6 +6,7 @@ import {
   PopoverWidth,
 } from "./popover-content/popover-content.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
+import { CardPadding } from "../../content/card/card.utils";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { LinkComponent } from "../../navigation/link/link.component";
@@ -206,6 +207,36 @@ export default {
         },
       },
     },
+    openWith: {
+      control: "radio",
+      description:
+        "How the popover is opened. With `hover` it also opens on trigger focus and clicking the trigger does not toggle it.",
+      options: ["click", "hover"],
+      table: {
+        category: "popover inputs",
+        type: {
+          summary: "PopoverOpenWith",
+        },
+        defaultValue: {
+          summary: "click",
+        },
+      },
+    },
+    delay: {
+      control: "select",
+      description:
+        'Time in ms the pointer has to stay over the trigger before the popover opens on hover. Only applies with `openWith="hover"`.',
+      options: [0, 100, 200, 300],
+      table: {
+        category: "popover inputs",
+        type: {
+          summary: "PopoverDelay",
+        },
+        defaultValue: {
+          summary: "0",
+        },
+      },
+    },
     timeoutDelay: {
       control: "number",
       description:
@@ -272,6 +303,23 @@ export default {
         },
       },
     },
+    padding: {
+      control: { type: "select" },
+      options: [0, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 2.5, 3],
+      description:
+        "Inner padding on the `tedi-card` scale: rems, `{ vertical, horizontal }` or `{ top, right, bottom, left }` (missing sides are 0).",
+      table: {
+        category: "popover-content inputs",
+        type: {
+          summary: "CardPadding",
+          detail:
+            "0 | 0.25 | 0.5 | 0.75 | 1 | 1.25 | 1.5 | 2 | 2.5 | 3\n{ vertical, horizontal }\n{ top?, right?, bottom?, left? }",
+        },
+        defaultValue: {
+          summary: "1",
+        },
+      },
+    },
     underline: {
       description: "Underline the trigger element.",
       defaultValue: {
@@ -305,6 +353,7 @@ type Story = StoryObj<
     maxWidth: PopoverWidth;
     title: string;
     showClose: boolean;
+    padding?: CardPadding;
     interactive: boolean;
   }
 >;
@@ -318,6 +367,8 @@ export const Default: Story = {
     withBorder: false,
     withArrow: true,
     lockScroll: false,
+    openWith: "click",
+    delay: 0,
     timeoutDelay: 100,
     offset: 8,
     maxWidth: "small",
@@ -328,11 +379,11 @@ export const Default: Story = {
   render: (args) => ({
     props: args,
     template: `
-      <tedi-popover [position]="position" [preventOverflow]="preventOverflow" [dismissible]="dismissible" [hideOnScroll]="hideOnScroll" [withBorder]="withBorder" [withArrow]="withArrow" [lockScroll]="lockScroll" [timeoutDelay]="timeoutDelay" [offset]="offset">
+      <tedi-popover [position]="position" [openWith]="openWith" [delay]="delay" [preventOverflow]="preventOverflow" [dismissible]="dismissible" [hideOnScroll]="hideOnScroll" [withBorder]="withBorder" [withArrow]="withArrow" [lockScroll]="lockScroll" [timeoutDelay]="timeoutDelay" [offset]="offset">
         <button tedi-button tedi-popover-trigger [interactive]="interactive">
           Popover Trigger
         </button>
-        <tedi-popover-content [maxWidth]="maxWidth" [title]="title" [showClose]="showClose">
+        <tedi-popover-content [maxWidth]="maxWidth" [title]="title" [showClose]="showClose" [padding]="padding">
             ${POLAR_BEAR_TEXT}
         </tedi-popover-content>
       </tedi-popover>

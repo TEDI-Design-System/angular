@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Component } from "@angular/core";
+import { Component, computed } from "@angular/core";
 import {
   ComponentFixture,
   TestBed,
@@ -23,6 +23,10 @@ import {
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 import { COUNTER_TAG_WIDTH, TAG_GAP } from "../../../utils/tag-overflow.util";
 import { InputState } from "../form-field/form-field.component";
+import {
+  FieldContext,
+  TEDI_FIELD_CONTEXT,
+} from "../form-field/field-context.token";
 
 @Component({
   standalone: true,
@@ -211,6 +215,34 @@ describe("SelectComponent", () => {
       const requiredIndicator = hostEl.querySelector(".tedi-label--required");
       expect(requiredIndicator).toBeTruthy();
       expect(requiredIndicator?.textContent).toBe("*");
+    });
+
+    it("sets aria-required on the combobox only when required", () => {
+      expect(getTrigger().hasAttribute("aria-required")).toBe(false);
+
+      host.required = true;
+      fixture.detectChanges();
+
+      expect(getTrigger().getAttribute("aria-required")).toBe("true");
+    });
+
+    it("moves aria-required to the search input when searchable", () => {
+      host.required = true;
+      host.searchable = true;
+      fixture.detectChanges();
+
+      expect(getTrigger().hasAttribute("aria-required")).toBe(false);
+      expect(getSearchInput().getAttribute("aria-required")).toBe("true");
+    });
+
+    it("sets aria-required on the search input of a searchable multiselect", () => {
+      host.required = true;
+      host.searchable = true;
+      host.allowMultiple = true;
+      host.control.setValue(["Option 1"]);
+      fixture.detectChanges();
+
+      expect(getSearchInput().getAttribute("aria-required")).toBe("true");
     });
 
     it("should apply small size class", () => {
@@ -789,6 +821,102 @@ describe("SelectComponent", () => {
       expect(options.length).toBe(4);
     }));
 
+    const expectOptionsGroupedByLabel = () => {
+      const groups = Array.from(
+        document.querySelectorAll<HTMLElement>(
+          '[role="listbox"] [role="group"]',
+        ),
+      );
+      expect(groups.length).toBe(2);
+
+      const groupNames = groups.map((group) =>
+        document
+          .getElementById(group.getAttribute("aria-labelledby")!)!
+          .textContent!.trim(),
+      );
+      expect(groupNames).toEqual(["Fruits", "Vegetables"]);
+
+      const optionsPerGroup = groups.map((group) =>
+        Array.from(
+          group.querySelectorAll(
+            '[role="option"]:not(.tedi-select__group-name)',
+          ),
+        ).map((option) => option.textContent!.trim()),
+      );
+      expect(optionsPerGroup).toEqual([
+        ["Apple", "Banana"],
+        ["Carrot", "Broccoli"],
+      ]);
+    };
+
+    it("should expose each group as a named group of the listbox", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      expectOptionsGroupedByLabel();
+    }));
+
+    it("should name selectable groups by their heading option", fakeAsync(() => {
+      host.allowMultiple = true;
+      host.selectableGroups = true;
+      fixture.detectChanges();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      expectOptionsGroupedByLabel();
+      document
+        .querySelectorAll('[role="listbox"] [role="group"]')
+        .forEach((group) => {
+          const heading = document.getElementById(
+            group.getAttribute("aria-labelledby")!,
+          )!;
+          expect(heading.getAttribute("role")).toBe("option");
+          expect(group.contains(heading)).toBe(true);
+        });
+    }));
+
+    it("should not wrap ungrouped options in a group", fakeAsync(() => {
+      host.groupBy = undefined;
+      fixture.detectChanges();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      expect(
+        document.querySelectorAll('[role="listbox"] [role="group"]').length,
+      ).toBe(0);
+      expect(getOptions().length).toBe(4);
+    }));
+
+    it("should navigate across groups with the arrow keys", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const listbox = document.querySelector<HTMLElement>('[role="listbox"]')!;
+      const press = (key: string, keyCode: number) => {
+        listbox.dispatchEvent(
+          new KeyboardEvent("keydown", { key, keyCode, bubbles: true }),
+        );
+        fixture.detectChanges();
+        tick();
+      };
+      const activeLabel = () =>
+        document
+          .getElementById(listbox.getAttribute("aria-activedescendant")!)
+          ?.textContent?.trim();
+
+      press("Home", 36);
+      expect(activeLabel()).toBe("Apple");
+      press("ArrowDown", 40);
+      press("ArrowDown", 40);
+      expect(activeLabel()).toBe("Carrot");
+    }));
+
     it("should select group options when selectableGroups=true", fakeAsync(() => {
       host.allowMultiple = true;
       host.selectableGroups = true;
@@ -1054,6 +1182,33 @@ describe("SelectComponent", () => {
         expect(select.isOpen()).toBe(false);
       }));
 
+      it("Escape should not reach ancestors while it closes the dropdown", fakeAsync(() => {
+        const onKeydown = jest.fn();
+        fixture.nativeElement.addEventListener("keydown", onKeydown);
+        getTrigger().click();
+        fixture.detectChanges();
+        tick();
+
+        getSearchInput().dispatchEvent(
+          new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+        );
+        fixture.detectChanges();
+        tick();
+
+        expect(onKeydown).not.toHaveBeenCalled();
+      }));
+
+      it("Escape should reach ancestors when the dropdown is already closed", fakeAsync(() => {
+        const onKeydown = jest.fn();
+        fixture.nativeElement.addEventListener("keydown", onKeydown);
+
+        getSearchInput().dispatchEvent(
+          new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+        );
+
+        expect(onKeydown).toHaveBeenCalledTimes(1);
+      }));
+
       it("Tab should close dropdown", fakeAsync(() => {
         getTrigger().click();
         fixture.detectChanges();
@@ -1066,6 +1221,73 @@ describe("SelectComponent", () => {
 
         expect(select.isOpen()).toBe(false);
       }));
+    });
+  });
+
+  describe("aria-describedby", () => {
+    it("is absent without feedback text or external ids", () => {
+      expect(getTrigger().hasAttribute("aria-describedby")).toBe(false);
+    });
+
+    it("points to the feedback text", () => {
+      host.feedbackText = { text: "Required", type: "error" };
+      fixture.detectChanges();
+
+      expect(getTrigger().getAttribute("aria-describedby")).toBe(
+        `${select.inputId()}-feedback`,
+      );
+    });
+
+    it("includes ids passed to setDescribedBy on the non-searchable combobox", () => {
+      select.setDescribedBy(["external-error"]);
+      fixture.detectChanges();
+
+      expect(getTrigger().getAttribute("aria-describedby")).toBe(
+        "external-error",
+      );
+    });
+
+    it("lists external ids before the feedback text id", () => {
+      host.feedbackText = { text: "Required", type: "error" };
+      select.setDescribedBy(["external-error", "other"]);
+      fixture.detectChanges();
+
+      expect(getTrigger().getAttribute("aria-describedby")).toBe(
+        `external-error other ${select.inputId()}-feedback`,
+      );
+    });
+
+    it("includes ids passed to setDescribedBy on the searchable combobox", () => {
+      host.searchable = true;
+      host.feedbackText = { text: "Required", type: "error" };
+      fixture.detectChanges();
+      select.setDescribedBy(["external-error"]);
+      fixture.detectChanges();
+
+      expect(getSearchInput().getAttribute("aria-describedby")).toBe(
+        `external-error ${select.inputId()}-feedback`,
+      );
+      expect(getTrigger().hasAttribute("aria-describedby")).toBe(false);
+    });
+
+    it("removes the ids when cleared", () => {
+      select.setDescribedBy(["external-error"]);
+      fixture.detectChanges();
+      select.setDescribedBy([]);
+      fixture.detectChanges();
+
+      expect(getTrigger().hasAttribute("aria-describedby")).toBe(false);
+    });
+
+    it("does not repeat an id that is also the feedback id", () => {
+      host.feedbackText = { text: "Required", type: "error" };
+      fixture.detectChanges();
+      select.setDescribedBy([`${select.inputId()}-feedback`]);
+      fixture.detectChanges();
+
+      expect(getTrigger().getAttribute("aria-describedby")).toBe(
+        `${select.inputId()}-feedback`,
+      );
     });
   });
 
@@ -1091,6 +1313,29 @@ describe("SelectComponent", () => {
       fixture.detectChanges();
 
       expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    });
+
+    it("trigger should not have aria-disabled when enabled", () => {
+      expect(getTrigger().hasAttribute("aria-disabled")).toBe(false);
+    });
+
+    it("trigger should have aria-disabled when disabled", () => {
+      select.setDisabledState(true);
+      fixture.detectChanges();
+
+      expect(getTrigger().getAttribute("aria-disabled")).toBe("true");
+    });
+
+    it("trigger should follow the form control's disabled state in aria-disabled", () => {
+      host.control.disable();
+      fixture.detectChanges();
+
+      expect(getTrigger().getAttribute("aria-disabled")).toBe("true");
+
+      host.control.enable();
+      fixture.detectChanges();
+
+      expect(getTrigger().hasAttribute("aria-disabled")).toBe(false);
     });
 
     it("trigger should have aria-haspopup", () => {
@@ -2513,6 +2758,44 @@ describe("SelectComponent", () => {
       tick();
 
       expect(select.triggerRef()?.nativeElement).toBe(getTrigger());
+      expect(document.activeElement).toBe(getTrigger());
+    }));
+
+    it("should keep focus on another element that was clicked while the dropdown was open", fakeAsync(() => {
+      const other = document.createElement("button");
+      document.body.appendChild(other);
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+      expect(select.isOpen()).toBe(true);
+
+      other.focus();
+      other.click();
+      fixture.detectChanges();
+      tick(500);
+      fixture.detectChanges();
+
+      expect(select.isOpen()).toBe(false);
+      expect(document.activeElement).toBe(other);
+
+      other.remove();
+    }));
+
+    it("should restore focus to the trigger when closing with Escape", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const listbox = document.querySelector("[cdkListbox]") as HTMLElement;
+      listbox.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+      );
+      fixture.detectChanges();
+      tick(500);
+      fixture.detectChanges();
+
+      expect(select.isOpen()).toBe(false);
       expect(document.activeElement).toBe(getTrigger());
     }));
   });
@@ -4081,4 +4364,51 @@ describe("SelectComponent multiselect with an option whose value is ''", () => {
     expect(select.isGroupSelected("A")).toBe(true);
     expect(select.isGroupIndeterminate("A")).toBe(false);
   }));
+});
+
+describe("SelectComponent in a field context", () => {
+  const context = (invalid: boolean): FieldContext => ({
+    size: computed(() => "default" as const),
+    ownsSurface: computed(() => false),
+    invalid: computed(() => invalid),
+    valid: computed(() => false),
+    disabled: computed(() => false),
+    clearable: computed(() => false),
+  });
+
+  @Component({
+    standalone: true,
+    imports: [SelectComponent],
+    template: `<tedi-select
+      inputId="ctx-select"
+      ariaLabel="Riik"
+      [options]="options"
+    />`,
+  })
+  class ContextHostComponent {
+    options = [{ value: "ee", label: "Eesti" }];
+  }
+
+  const render = (invalid: boolean) => {
+    TestBed.configureTestingModule({
+      imports: [ContextHostComponent],
+      providers: [
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+        { provide: TEDI_FIELD_CONTEXT, useValue: context(invalid) },
+      ],
+    });
+    const fixture = TestBed.createComponent(ContextHostComponent);
+    fixture.detectChanges();
+    return fixture.nativeElement.querySelector(
+      '[role="combobox"]',
+    ) as HTMLElement;
+  };
+
+  it("marks the combobox invalid when the field context is invalid", () => {
+    expect(render(true).getAttribute("aria-invalid")).toBe("true");
+  });
+
+  it("leaves the combobox valid when the field context is valid", () => {
+    expect(render(false).hasAttribute("aria-invalid")).toBe(false);
+  });
 });

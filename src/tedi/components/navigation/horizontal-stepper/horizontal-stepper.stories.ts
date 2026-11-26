@@ -1,5 +1,9 @@
-import { Component, signal } from "@angular/core";
+import { Component, input, signal } from "@angular/core";
 import { Meta, StoryObj, moduleMetadata } from "@storybook/angular";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { HorizontalStepperComponent } from "./horizontal-stepper.component";
 import { HorizontalStepperItemComponent } from "./horizontal-stepper-item/horizontal-stepper-item.component";
@@ -34,7 +38,7 @@ class StepClickNavigationDemoComponent {
   imports: [HorizontalStepperComponent, HorizontalStepperItemComponent],
   template: `
     <div style="max-width: 480px;">
-      <tedi-horizontal-stepper [ariaLabel]="'Vormi edenemine'" [compact]="true">
+      <tedi-horizontal-stepper [ariaLabel]="ariaLabel()" [compact]="true">
         @for (label of steps; track label; let i = $index) {
           <tedi-horizontal-stepper-item
             [label]="label"
@@ -49,6 +53,7 @@ class StepClickNavigationDemoComponent {
   `,
 })
 class CompactNavigationDemoComponent {
+  ariaLabel = input("Vormi edenemine");
   steps = STEPS;
   current = signal(1);
 }
@@ -118,7 +123,7 @@ class ExternalNavigationDemoComponent {
  * A horizontal stepper component for displaying multi-step progress flows.
  * Each step can be in default, selected, completed, or error state.
  */
-export default {
+const meta = {
   title: "TEDI-Ready/Components/Navigation/HorizontalStepper",
   component: HorizontalStepperComponent,
   decorators: [
@@ -126,6 +131,9 @@ export default {
       imports: [HorizontalStepperComponent, HorizontalStepperItemComponent],
     }),
   ],
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
   argTypes: {
     ariaLabel: {
       name: "ariaLabel",
@@ -160,6 +168,8 @@ export default {
   },
 } as Meta<HorizontalStepperComponent>;
 
+export default meta;
+
 type Story = StoryObj<HorizontalStepperComponent>;
 
 export const Default: Story = {
@@ -185,7 +195,7 @@ export const SecondStep: Story = {
   render: (props) => ({
     props,
     template: `
-      <tedi-horizontal-stepper [ariaLabel]="'Vormi edenemine'" [background]="background">
+      <tedi-horizontal-stepper [ariaLabel]="ariaLabel" [background]="background">
         <tedi-horizontal-stepper-item label="Kutse" completed />
         <tedi-horizontal-stepper-item label="Tahteavaldus" selected />
         <tedi-horizontal-stepper-item label="Geenianalüüs" />
@@ -194,6 +204,7 @@ export const SecondStep: Story = {
     `,
   }),
   args: {
+    ariaLabel: "Vormi edenemine",
     background: "default",
   },
 };
@@ -202,7 +213,7 @@ export const ThirdStep: Story = {
   render: (props) => ({
     props,
     template: `
-      <tedi-horizontal-stepper [ariaLabel]="'Vormi edenemine'" [background]="background">
+      <tedi-horizontal-stepper [ariaLabel]="ariaLabel" [background]="background">
         <tedi-horizontal-stepper-item label="Kutse" completed />
         <tedi-horizontal-stepper-item label="Tahteavaldus" completed />
         <tedi-horizontal-stepper-item label="Geenianalüüs" selected />
@@ -211,6 +222,7 @@ export const ThirdStep: Story = {
     `,
   }),
   args: {
+    ariaLabel: "Vormi edenemine",
     background: "default",
   },
 };
@@ -281,7 +293,7 @@ export const TransparentBackground: Story = {
   render: (props) => ({
     props,
     template: `
-      <tedi-horizontal-stepper [ariaLabel]="'Vormi edenemine'" background="transparent">
+      <tedi-horizontal-stepper [ariaLabel]="ariaLabel" background="transparent">
         <tedi-horizontal-stepper-item label="Kutse" completed />
         <tedi-horizontal-stepper-item label="Tahteavaldus" selected />
         <tedi-horizontal-stepper-item label="Geenianalüüs" />
@@ -289,6 +301,9 @@ export const TransparentBackground: Story = {
       </tedi-horizontal-stepper>
     `,
   }),
+  args: {
+    ariaLabel: "Vormi edenemine",
+  },
 };
 
 /**
@@ -298,9 +313,10 @@ export const TransparentBackground: Story = {
  * user can jump between steps.
  */
 export const Compact: Story = {
-  render: () => ({
+  render: (args) => ({
     moduleMetadata: { imports: [CompactNavigationDemoComponent] },
-    template: `<story-compact-navigation />`,
+    props: { ariaLabel: args.ariaLabel },
+    template: `<story-compact-navigation [ariaLabel]="ariaLabel" />`,
   }),
   parameters: {
     docs: {
@@ -330,6 +346,9 @@ export class FormWizardComponent {
       },
     },
   },
+  args: {
+    ariaLabel: "Vormi edenemine",
+  },
 };
 
 /**
@@ -343,6 +362,7 @@ export const ClickToNavigate: Story = {
     template: `<story-step-click-navigation />`,
   }),
   parameters: {
+    visualTest: false,
     docs: {
       source: {
         type: "code",
@@ -427,4 +447,47 @@ export class FormWizardComponent {
       },
     },
   },
+};
+
+/** Chromatic snapshot for HorizontalStepper: add every new visual variant here too. */
+export const VisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    controls: { disable: true },
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
+  render: () =>
+    visualTest(
+      [
+        {
+          label: "First step",
+          story: Default,
+          args: { ariaLabel: "Vormi edenemine (samm 1)" },
+        },
+        {
+          label: "Second step",
+          story: SecondStep,
+          args: { ariaLabel: "Vormi edenemine (samm 2)" },
+        },
+        {
+          label: "Third step",
+          story: ThirdStep,
+          args: { ariaLabel: "Vormi edenemine (samm 3)" },
+        },
+        { label: "With errors", story: WithErrors },
+        { label: "With descriptions", story: WithDescriptions },
+        {
+          label: "Transparent background",
+          story: TransparentBackground,
+          args: { ariaLabel: "Vormi edenemine (läbipaistev)" },
+        },
+        {
+          label: "Compact",
+          story: Compact,
+          args: { ariaLabel: "Vormi edenemine (kompaktne)" },
+        },
+        { label: "External navigation", story: ExternalNavigation },
+      ],
+      { args: meta.args },
+    ),
 };

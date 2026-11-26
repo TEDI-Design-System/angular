@@ -1,0 +1,7 @@
+.tedi-table-card-group {
+  display: block;
+
+  &__rows-content {
+    border-top: 1px solid var(--card-border-primary);
+  }
+}

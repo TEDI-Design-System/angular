@@ -7,6 +7,11 @@ import {
 import { PaginationComponent } from "./pagination.component";
 import { TediPaginationResultsDirective } from "./pagination-results.directive";
 import { createBreakpointArgTypes } from "../../../../dev-tools/createBreakpointArgTypes";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+  VisualTestBlock,
+} from "../../../../../.storybook/visual-test-story";
 
 /**
  * Navigation between paginated sets of content. Renders a row of page buttons
@@ -15,7 +20,7 @@ import { createBreakpointArgTypes } from "../../../../dev-tools/createBreakpoint
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.45.70?node-id=8478-72385&m=dev" target="_BLANK">Figma ↗</a><br/>
  * <a href="https://www.tedi.ee/1ee8444b7/p/35aad8-pagination" target="_BLANK">Zeroheight ↗</a>
  */
-export default {
+const meta = {
   title: "TEDI-Ready/Components/Navigation/Pagination",
   component: PaginationComponent,
   decorators: [
@@ -27,6 +32,7 @@ export default {
     status: {
       type: ["breakpointSupport"],
     },
+    chromatic: { disableSnapshot: true },
     design: {
       type: "figma",
       url: "https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.45.70?node-id=8478-72385&m=dev",
@@ -261,6 +267,8 @@ export default {
   },
 } as Meta<PaginationComponent>;
 
+export default meta;
+
 type Story = StoryObj<PaginationComponent>;
 
 export const Default: Story = {
@@ -322,7 +330,7 @@ export const WithoutDropdown: Story = {
 };
 
 export const ControlledPage: Story = {
-  parameters: { chromatic: { disableSnapshot: true } },
+  parameters: { visualTest: false },
   args: { pageCount: 10, page: 3 },
   render: (args) => ({
     props: args,
@@ -385,7 +393,12 @@ export const Transparent: Story = {
   }),
 };
 
-export const TopBottomSplit: Story = {
+type Labels = ReturnType<PaginationComponent["labels"]>;
+
+/** VisualTest passes `splitLabels`, since both navs would otherwise share one landmark name. */
+export const TopBottomSplit: StoryObj<
+  PaginationComponent & { splitLabels?: { top: Labels; bottom: Labels } }
+> = {
   args: {
     pageCount: 10,
     page: 3,
@@ -393,14 +406,18 @@ export const TopBottomSplit: Story = {
     pageSize: 10,
     pageSizeOptions: [10, 25, 50, 100],
   },
-  render: (args) => ({
-    props: args,
-    template: `
-      <tedi-pagination ${argsToTemplate(args)} [hidePager]="true" dividerPosition="bottom" />
+  render: ({ splitLabels, ...args }) => {
+    const labels = (slot: "top" | "bottom") =>
+      splitLabels ? ` [labels]="splitLabels.${slot}"` : "";
+    return {
+      props: { ...args, splitLabels },
+      template: `
+      <tedi-pagination ${argsToTemplate(args)}${labels("top")} [hidePager]="true" dividerPosition="bottom" />
       <div style="padding: 24px 0; color: var(--general-text-tertiary); text-align: center;">— table content goes here —</div>
-      <tedi-pagination ${argsToTemplate(args)} [hideResults]="true" [hidePageSize]="true" />
+      <tedi-pagination ${argsToTemplate(args)}${labels("bottom")} [hideResults]="true" [hidePageSize]="true" />
     `,
-  }),
+    };
+  },
   parameters: {
     docs: {
       description: {
@@ -629,7 +646,6 @@ export const CustomResultsSlot: Story = {
     `,
   }),
   parameters: {
-    chromatic: { disableSnapshot: true },
     docs: {
       description: {
         story:
@@ -673,7 +689,7 @@ export const ShowAll: Story = {
     `,
   }),
   parameters: {
-    chromatic: { disableSnapshot: true },
+    visualTest: false,
     docs: {
       description: {
         story:
@@ -694,8 +710,7 @@ export const CustomLabels: Story = {
       ariaLabel: "Lehekülgede sirvimine",
       previous: "Eelmine lehekülg",
       next: "Järgmine lehekülg",
-      pageAriaLabel: (page) => `Mine leheküljele ${page}`,
-      currentPageAriaLabel: (page) => `Praegune lehekülg, lehekülg ${page}`,
+      pageAriaLabel: (page) => `Lehekülg ${page}`,
       results: (count) => `${count} rida`,
       pageSize: "Kirjete arv lehel",
       pageTitle: "Vali lehekülg",
@@ -706,4 +721,61 @@ export const CustomLabels: Story = {
     props: args,
     template: `<tedi-pagination ${argsToTemplate(args)} />`,
   }),
+};
+
+/** A unique landmark label per block, since every pagination is a `nav`. */
+const vtLabels = (label: string) => ({
+  labels: { ariaLabel: `Lehekülgede sirvimine: ${label}` },
+});
+
+const vtBlock = (label: string, story: Story): VisualTestBlock => ({
+  label,
+  story,
+  args: vtLabels(label),
+});
+
+/** Chromatic snapshot for Pagination: add every new visual variant here too. */
+export const VisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    controls: { disable: true },
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
+  render: () =>
+    visualTest(
+      [
+        vtBlock("Default", Default),
+        vtBlock("First", First),
+        vtBlock("Last", Last),
+        vtBlock("All properties shown", AllPropertiesShown),
+        vtBlock("Without results number", WithoutResultsNumber),
+        vtBlock("Without dropdown", WithoutDropdown),
+        vtBlock("Few pages", FewPages),
+        vtBlock("Many pages ellipsis", ManyPagesEllipsis),
+        vtBlock("Huge page count", HugePageCount),
+        vtBlock("Wider siblings", WiderSiblings),
+        vtBlock("Transparent", Transparent),
+        {
+          label: "Top and bottom split",
+          story: TopBottomSplit,
+          args: {
+            splitLabels: {
+              top: vtLabels("Top split").labels,
+              bottom: vtLabels("Bottom split").labels,
+            },
+          },
+        },
+        vtBlock("Left aligned", LeftAligned),
+        vtBlock("Responsive align", ResponsiveAlign),
+        vtBlock("Responsive visibility", ResponsiveVisibility),
+        vtBlock("Divider bottom", DividerBottom),
+        vtBlock("Disabled boundary arrows", DisabledBoundaryArrows),
+        vtBlock("Arrows with labels", ArrowsWithLabels),
+        vtBlock("Custom arrow icons", CustomArrowIcons),
+        vtBlock("Arrows primary variant", ArrowsPrimaryVariant),
+        vtBlock("Custom results slot", CustomResultsSlot),
+        { label: "Custom labels", story: CustomLabels },
+      ],
+      { args: meta.args },
+    ),
 };

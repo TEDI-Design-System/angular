@@ -1,35 +1,16 @@
-import {
-  AfterViewInit,
-  Directive,
-  ElementRef,
-  input,
-  Renderer2,
-  inject,
-} from "@angular/core";
+import { computed, Directive, input } from "@angular/core";
 import type { VerticalSpacingSize } from "./vertical-spacing.directive";
 
 @Directive({
   selector: "[tediVerticalSpacingItem]",
   standalone: true,
+  host: {
+    class: "tedi-vertical-spacing__item",
+    "[style.--vertical-spacing-internal]": "spacingValue()",
+  },
 })
-export class VerticalSpacingItemDirective implements AfterViewInit {
-  private readonly el = inject(ElementRef);
-  private readonly renderer = inject(Renderer2);
-
+export class VerticalSpacingItemDirective {
   tediVerticalSpacingItem = input<VerticalSpacingSize>(0);
 
-  ngAfterViewInit(): void {
-    this.renderer.addClass(
-      this.el.nativeElement,
-      "tedi-vertical-spacing__item",
-    );
-
-    const spacingValue = `${this.tediVerticalSpacingItem()}em`;
-
-    this.renderer.setAttribute(
-      this.el.nativeElement,
-      "style",
-      `--vertical-spacing-internal: ${spacingValue}`,
-    );
-  }
+  readonly spacingValue = computed(() => `${this.tediVerticalSpacingItem()}em`);
 }

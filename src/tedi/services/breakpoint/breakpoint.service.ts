@@ -118,6 +118,22 @@ export class BreakpointService {
     return resolvedInputs as TInputs;
   }
 
+  /**
+   * The value of a `breakpointInput()` object for the current breakpoint: the
+   * nearest breakpoint at or below it that sets a value, else `xs`. Reactive
+   * when read inside a `computed`.
+   */
+  resolveBreakpointInput<T>(value: BreakpointObject<T>): T {
+    const current = this._currentBreakpoint();
+
+    for (let i = current ? breakpointsOrder.indexOf(current) : 0; i > 0; i--) {
+      const resolved = value[breakpointsOrder[i] as Exclude<Breakpoint, "xs">];
+      if (resolved !== undefined) return resolved;
+    }
+
+    return value.xs;
+  }
+
   isBelowBreakpoint(breakpoint: Breakpoint | Signal<Breakpoint>) {
     return computed(() => {
       const current = this._currentBreakpoint();

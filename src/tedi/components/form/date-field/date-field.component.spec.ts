@@ -111,6 +111,14 @@ describe("DateFieldComponent", () => {
       expect(input?.id).toBe("test-date-field");
     });
 
+    it("marks the input required", () => {
+      const { el } = createField({ required: true });
+      const input = el.querySelector(
+        "input.tedi-date-input__input",
+      ) as HTMLInputElement;
+      expect(input.required).toBe(true);
+    });
+
     it("assigns the name to the date-input", () => {
       const { el } = createField({ name: "birth-date" });
       const input = el.querySelector(
@@ -717,6 +725,21 @@ describe("DateFieldComponent", () => {
   });
 
   describe("modal-below-breakpoint", () => {
+    it("passes the opt-in full-width layout to the modal and removes the compact cap", () => {
+      const { component, modalService } = createField({
+        modal: true,
+        calendarFullWidth: true,
+      });
+      modalService.open.mockReturnValue({
+        closed: { subscribe: jest.fn() },
+      });
+
+      component.handleIconClick();
+      const config = modalService.open.mock.calls[0][1];
+      expect(config.data.calendarFullWidth).toBe(true);
+      expect(config.maxWidth).toBeUndefined();
+    });
+
     it("opens a modal when below the configured breakpoint", () => {
       const { component, modalService } = createField({ modal: "md" });
       const bp = TestBed.inject(
