@@ -1,3 +1,10 @@
+# [10.0.0-rc.35](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.34...angular-10.0.0-rc.35) (2026-11-26)
+
+
+### Features
+
+* **skills:** add tedi-angular-migrate consumer skill [#925](https://github.com/TEDI-Design-System/angular/issues/925) ([#927](https://github.com/TEDI-Design-System/angular/issues/927)) ([9528b1c](https://github.com/TEDI-Design-System/angular/commit/9528b1c04579cc3e4ee4078113a9f428b942e1cd))
+
 # [10.0.0-rc.34](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.33...angular-10.0.0-rc.34) (2026-11-25)
 
 
