@@ -61,7 +61,7 @@ export class TableCardGroupComponent implements BreakpointInputs<TableCardInputs
    * `primary` keeps it on the card surface.
    * @default tertiary
    */
-  background = input<CardBackground>("tertiary");
+  backgroundColor = input<CardBackground>("tertiary");
 
   layout = input<TableCardLayout>();
   columns = input<number>();

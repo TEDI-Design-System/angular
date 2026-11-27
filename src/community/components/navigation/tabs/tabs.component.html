@@ -1,6 +1,6 @@
 <ng-template #tabsList><ng-content select="[tedi-tab]" /></ng-template>
 
-<tedi-card background="primary" [padding]="0">
+<tedi-card backgroundColor="primary" [padding]="0">
   <tedi-card-content>
     <div role="tablist" class="tedi-tabs__tab-list">
       @if (!mobileTabsOpened()) {
@@ -32,7 +32,7 @@
 @if (mobileTabsOpened()) {
   <tedi-card
     class="tedi-tabs__mobile-dropdown"
-    background="primary"
+    backgroundColor="primary"
     [padding]="0"
   >
     <tedi-card-content

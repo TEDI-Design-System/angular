@@ -124,7 +124,7 @@ class TestHostComponent {
       <tedi-table-card-group
         [layout]="groupLayout"
         [columns]="groupColumns"
-        [background]="groupBackground"
+        [backgroundColor]="groupBackground"
       >
         <div
           tedi-table-card-row

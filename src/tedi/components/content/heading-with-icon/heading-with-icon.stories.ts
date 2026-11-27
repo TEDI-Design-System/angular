@@ -180,7 +180,7 @@ const EXAMPLES_TEMPLATE = `
           </tedi-card-content>
         </tedi-card>
 
-        <tedi-card background="brand-primary" style="width: 300px">
+        <tedi-card backgroundColor="brand-primary" style="width: 300px">
           <tedi-card-content>
             <div [tediVerticalSpacing]="0.5">
               <tedi-heading-with-icon icon="assignment_ind" headingColor="white" iconColor="white">
@@ -200,7 +200,7 @@ const EXAMPLES_TEMPLATE = `
           </tedi-card-content>
         </tedi-card>
 
-        <tedi-card background="brand-primary" style="width: 300px">
+        <tedi-card backgroundColor="brand-primary" style="width: 300px">
           <tedi-card-content>
             <div [tediVerticalSpacing]="0.5">
               <tedi-heading-with-icon icon="assignment_ind" headingColor="white" iconColor="white">

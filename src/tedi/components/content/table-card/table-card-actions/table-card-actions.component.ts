@@ -53,7 +53,7 @@ export class TableCardActionsComponent {
 
   protected readonly inGroup = !!this.group;
 
-  readonly background = computed<CardBackground>(
-    () => this.group?.background() ?? "primary",
+  readonly backgroundColor = computed<CardBackground>(
+    () => this.group?.backgroundColor() ?? "primary",
   );
 }

@@ -20,7 +20,7 @@ export type HorizontalStepperBackground = "default" | "transparent";
   host: {
     "[class.tedi-horizontal-stepper]": "true",
     "[class.tedi-horizontal-stepper--transparent]":
-      "background() === 'transparent'",
+      "backgroundColor() === 'transparent'",
     "[class.tedi-horizontal-stepper--compact]": "compact() === true",
     "[class.tedi-horizontal-stepper--compact-sm]": "compact() === 'sm'",
     "[class.tedi-horizontal-stepper--compact-md]": "compact() === 'md'",
@@ -33,7 +33,7 @@ export type HorizontalStepperBackground = "default" | "transparent";
 })
 export class HorizontalStepperComponent {
   ariaLabel = input<string>();
-  background = input<HorizontalStepperBackground>("default");
+  backgroundColor = input<HorizontalStepperBackground>("default");
   /**
    * Collapse labels so only indicators plus the selected step's label are visible.
    * `true` — always collapsed. A breakpoint (`'sm'`, `'md'`, `'lg'`, `'xl'`, `'xxl'`) — collapsed below that breakpoint. @default 'sm'

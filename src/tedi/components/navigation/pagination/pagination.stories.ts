@@ -106,7 +106,7 @@ const meta = {
         type: { summary: "Partial<PaginationLabels>" },
       },
     },
-    background: {
+    backgroundColor: {
       description:
         "Background variant. `transparent` removes the surface fill and top border.",
       control: { type: "radio" },
@@ -385,7 +385,7 @@ export const Transparent: Story = {
     totalItems: 97,
     pageSize: 10,
     pageSizeOptions: [10, 25, 50, 100],
-    background: "transparent",
+    backgroundColor: "transparent",
   },
   render: (args) => ({
     props: args,

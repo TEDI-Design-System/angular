@@ -99,7 +99,7 @@ export class PaginationComponent {
    * use it when pagination sits on a non-white container.
    * @default 'white'
    */
-  readonly background = input<PaginationBackground>("white");
+  readonly backgroundColor = input<PaginationBackground>("white");
 
   /**
    * Where the divider line sits relative to the pagination row.
@@ -193,7 +193,7 @@ export class PaginationComponent {
 
   /**
    * Per-breakpoint overrides for the layout inputs (`align`, `showArrowLabels`,
-   * `arrowVariant`, `dividerPosition`, `background`). Applied mobile-first: an
+   * `arrowVariant`, `dividerPosition`, `backgroundColor`). Applied mobile-first: an
    * override set here takes effect at this breakpoint and every larger one, on
    * top of the base inputs.
    */
@@ -230,7 +230,7 @@ export class PaginationComponent {
       showArrowLabels: this.showArrowLabels(),
       arrowVariant: this.arrowVariant(),
       dividerPosition: this.dividerPosition(),
-      background: this.background(),
+      backgroundColor: this.backgroundColor(),
       xs: this.xs(),
       sm: this.sm(),
       md: this.md(),
@@ -254,7 +254,7 @@ export class PaginationComponent {
     const inputs = this.breakpointInputs();
     const classes = [
       "tedi-pagination",
-      `tedi-pagination--bg-${inputs.background}`,
+      `tedi-pagination--bg-${inputs.backgroundColor}`,
       `tedi-pagination--divider-${inputs.dividerPosition}`,
       `tedi-pagination--align-${inputs.align}`,
     ];

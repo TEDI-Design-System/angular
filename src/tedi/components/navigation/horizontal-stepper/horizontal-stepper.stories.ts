@@ -144,7 +144,7 @@ const meta = {
         category: "inputs",
       },
     },
-    background: {
+    backgroundColor: {
       control: "select",
       options: ["default", "transparent"],
       description: "Background style of the stepper container.",
@@ -176,7 +176,7 @@ export const Default: Story = {
   render: (props) => ({
     props,
     template: `
-      <tedi-horizontal-stepper [ariaLabel]="ariaLabel" [background]="background" [compact]="compact">
+      <tedi-horizontal-stepper [ariaLabel]="ariaLabel" [backgroundColor]="backgroundColor" [compact]="compact">
         <tedi-horizontal-stepper-item label="Kutse" selected />
         <tedi-horizontal-stepper-item label="Tahteavaldus" />
         <tedi-horizontal-stepper-item label="Geenianalüüs" />
@@ -186,7 +186,7 @@ export const Default: Story = {
   }),
   args: {
     ariaLabel: "Vormi edenemine",
-    background: "default",
+    backgroundColor: "default",
     compact: "sm",
   },
 };
@@ -195,7 +195,7 @@ export const SecondStep: Story = {
   render: (props) => ({
     props,
     template: `
-      <tedi-horizontal-stepper [ariaLabel]="ariaLabel" [background]="background">
+      <tedi-horizontal-stepper [ariaLabel]="ariaLabel" [backgroundColor]="backgroundColor">
         <tedi-horizontal-stepper-item label="Kutse" completed />
         <tedi-horizontal-stepper-item label="Tahteavaldus" selected />
         <tedi-horizontal-stepper-item label="Geenianalüüs" />
@@ -205,7 +205,7 @@ export const SecondStep: Story = {
   }),
   args: {
     ariaLabel: "Vormi edenemine",
-    background: "default",
+    backgroundColor: "default",
   },
 };
 
@@ -213,7 +213,7 @@ export const ThirdStep: Story = {
   render: (props) => ({
     props,
     template: `
-      <tedi-horizontal-stepper [ariaLabel]="ariaLabel" [background]="background">
+      <tedi-horizontal-stepper [ariaLabel]="ariaLabel" [backgroundColor]="backgroundColor">
         <tedi-horizontal-stepper-item label="Kutse" completed />
         <tedi-horizontal-stepper-item label="Tahteavaldus" completed />
         <tedi-horizontal-stepper-item label="Geenianalüüs" selected />
@@ -223,7 +223,7 @@ export const ThirdStep: Story = {
   }),
   args: {
     ariaLabel: "Vormi edenemine",
-    background: "default",
+    backgroundColor: "default",
   },
 };
 
@@ -232,13 +232,13 @@ export const WithErrors: Story = {
     props,
     template: `
       <div style="display: flex; flex-direction: column; gap: 16px;">
-        <tedi-horizontal-stepper [ariaLabel]="'Veaga vorm'" [background]="background">
+        <tedi-horizontal-stepper [ariaLabel]="'Veaga vorm'" [backgroundColor]="backgroundColor">
           <tedi-horizontal-stepper-item label="Kutse" error />
           <tedi-horizontal-stepper-item label="Tahteavaldus" selected />
           <tedi-horizontal-stepper-item label="Geenianalüüs" />
           <tedi-horizontal-stepper-item label="Vastus" />
         </tedi-horizontal-stepper>
-        <tedi-horizontal-stepper [ariaLabel]="'Vorm vea kirjeldusega'" [background]="background">
+        <tedi-horizontal-stepper [ariaLabel]="'Vorm vea kirjeldusega'" [backgroundColor]="backgroundColor">
           <tedi-horizontal-stepper-item label="Kutse" completed />
           <tedi-horizontal-stepper-item label="Tahteavaldus" error description="Sammus esinevad vead" />
           <tedi-horizontal-stepper-item label="Geenianalüüs" selected />
@@ -248,7 +248,7 @@ export const WithErrors: Story = {
     `,
   }),
   args: {
-    background: "default",
+    backgroundColor: "default",
   },
 };
 
@@ -257,25 +257,25 @@ export const WithDescriptions: Story = {
     props,
     template: `
       <div style="display: flex; flex-direction: column; gap: 16px;">
-        <tedi-horizontal-stepper [ariaLabel]="'Kirjeldustega sammud (samm 1)'" [background]="background">
+        <tedi-horizontal-stepper [ariaLabel]="'Kirjeldustega sammud (samm 1)'" [backgroundColor]="backgroundColor">
           <tedi-horizontal-stepper-item label="Kutse" selected />
           <tedi-horizontal-stepper-item label="Tahteavaldus" />
           <tedi-horizontal-stepper-item label="Geenianalüüs" description="Ametnik täidab" />
           <tedi-horizontal-stepper-item label="Vastus" description="Ametnik täidab" />
         </tedi-horizontal-stepper>
-        <tedi-horizontal-stepper [ariaLabel]="'Kirjeldustega sammud (samm 2)'" [background]="background">
+        <tedi-horizontal-stepper [ariaLabel]="'Kirjeldustega sammud (samm 2)'" [backgroundColor]="backgroundColor">
           <tedi-horizontal-stepper-item label="Kutse" completed />
           <tedi-horizontal-stepper-item label="Tahteavaldus" selected />
           <tedi-horizontal-stepper-item label="Geenianalüüs" description="Ametnik täidab" />
           <tedi-horizontal-stepper-item label="Vastus" description="Ametnik täidab" />
         </tedi-horizontal-stepper>
-        <tedi-horizontal-stepper [ariaLabel]="'Kirjeldustega sammud (samm 3)'" [background]="background">
+        <tedi-horizontal-stepper [ariaLabel]="'Kirjeldustega sammud (samm 3)'" [backgroundColor]="backgroundColor">
           <tedi-horizontal-stepper-item label="Kutse" completed />
           <tedi-horizontal-stepper-item label="Tahteavaldus" completed />
           <tedi-horizontal-stepper-item label="Geenianalüüs" selected description="Ametnik täidab" />
           <tedi-horizontal-stepper-item label="Vastus" description="Ametnik täidab" />
         </tedi-horizontal-stepper>
-        <tedi-horizontal-stepper [ariaLabel]="'Kirjeldustega sammud (samm 4)'" [background]="background">
+        <tedi-horizontal-stepper [ariaLabel]="'Kirjeldustega sammud (samm 4)'" [backgroundColor]="backgroundColor">
           <tedi-horizontal-stepper-item label="Kutse" completed />
           <tedi-horizontal-stepper-item label="Tahteavaldus" completed />
           <tedi-horizontal-stepper-item label="Geenianalüüs" completed description="Ametnik täidab" />
@@ -285,7 +285,7 @@ export const WithDescriptions: Story = {
     `,
   }),
   args: {
-    background: "default",
+    backgroundColor: "default",
   },
 };
 
@@ -293,7 +293,7 @@ export const TransparentBackground: Story = {
   render: (props) => ({
     props,
     template: `
-      <tedi-horizontal-stepper [ariaLabel]="ariaLabel" background="transparent">
+      <tedi-horizontal-stepper [ariaLabel]="ariaLabel" backgroundColor="transparent">
         <tedi-horizontal-stepper-item label="Kutse" completed />
         <tedi-horizontal-stepper-item label="Tahteavaldus" selected />
         <tedi-horizontal-stepper-item label="Geenianalüüs" />

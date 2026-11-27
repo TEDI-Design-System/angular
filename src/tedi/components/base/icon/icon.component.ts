@@ -74,7 +74,7 @@ export class IconComponent {
   /**
    * Background color for the icon (adds a circular background).
    */
-  background = input<IconBackgroundColor>();
+  backgroundColor = input<IconBackgroundColor>();
   /**
    * Whether the icon should be filled or outlined.
    * @default outlined
@@ -96,7 +96,7 @@ export class IconComponent {
   iconSizeVar = computed<string | null>(() => {
     const size = this.size();
 
-    if (this.background()) {
+    if (this.backgroundColor()) {
       const bgSize =
         size !== undefined &&
         size !== "inherit" &&
@@ -114,7 +114,7 @@ export class IconComponent {
   });
 
   iconBgPadding = computed<string | null>(() => {
-    if (!this.background()) {
+    if (!this.backgroundColor()) {
       return null;
     }
 
@@ -140,8 +140,8 @@ export class IconComponent {
       `tedi-icon--color-${this.color()}`,
     ];
 
-    if (this.background()) {
-      classes.push("tedi-icon--bg", `tedi-icon--bg-${this.background()}`);
+    if (this.backgroundColor()) {
+      classes.push("tedi-icon--bg", `tedi-icon--bg-${this.backgroundColor()}`);
     } else if (this.size() === "inherit") {
       classes.push("tedi-icon--size-inherit");
     }

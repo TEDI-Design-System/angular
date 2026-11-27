@@ -1125,7 +1125,7 @@ describe("TediTableComponent", () => {
       );
       fixture.componentInstance.pagination.set({
         pageSize: 5,
-        background: "transparent",
+        backgroundColor: "transparent",
         dividerPosition: "none",
       });
       fixture.detectChanges();

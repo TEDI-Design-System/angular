@@ -20,7 +20,7 @@ import {
 } from "./card.utils";
 
 export type CardInputs = {
-  background?: CardBackground;
+  backgroundColor?: CardBackground;
   padding?: CardPadding;
   borderRadius?: CardBorderRadius;
   borderless?: boolean;
@@ -30,7 +30,7 @@ export type CardInputs = {
 /**
  * Card is a container for grouping related content. Compose it from
  * `tedi-card-header`, `tedi-card-content` and `tedi-card-notification` blocks.
- * `background` and `padding` set here act as defaults for all child blocks.
+ * `backgroundColor` and `padding` set here act as defaults for all child blocks.
  */
 @Component({
   selector: "tedi-card",
@@ -47,7 +47,7 @@ export class CardComponent implements BreakpointInputs<CardInputs> {
   /**
    * Default background color for child content blocks.
    */
-  background = input<CardBackground>();
+  backgroundColor = input<CardBackground>();
   /**
    * Default padding for child content blocks.
    * Value is either a predefined number in rems or an object of
@@ -82,7 +82,7 @@ export class CardComponent implements BreakpointInputs<CardInputs> {
 
   breakpointInputs = computed(() => {
     return this.breakpointService.getBreakpointInputs<CardInputs>({
-      background: this.background(),
+      backgroundColor: this.backgroundColor(),
       padding: this.padding(),
       borderRadius: this.borderRadius(),
       borderless: this.borderless(),

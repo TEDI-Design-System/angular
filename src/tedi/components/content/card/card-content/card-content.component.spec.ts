@@ -11,7 +11,7 @@ import { CardBackground, CardPadding } from "../card.utils";
   imports: [CardContentComponent],
   template: `
     <tedi-card-content
-      [background]="background"
+      [backgroundColor]="background"
       [padding]="padding"
       [backgroundImage]="backgroundImage"
       [backgroundPosition]="backgroundPosition"
@@ -35,8 +35,8 @@ class TestHostComponent {
   standalone: true,
   imports: [CardComponent, CardContentComponent],
   template: `
-    <tedi-card [background]="cardBackground" [padding]="cardPadding">
-      <tedi-card-content [background]="background" [padding]="padding">
+    <tedi-card [backgroundColor]="cardBackground" [padding]="cardPadding">
+      <tedi-card-content [backgroundColor]="background" [padding]="padding">
         Content
       </tedi-card-content>
     </tedi-card>
