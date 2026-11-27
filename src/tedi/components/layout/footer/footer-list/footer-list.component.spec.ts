@@ -123,6 +123,20 @@ describe("FooterListComponent", () => {
       expect(followed()).toEqual(["A", "B"]);
     });
 
+    it("recomputes the dots when navigationLabel swaps the list element", () => {
+      host.separator.set(true);
+      fixture.detectChanges();
+      expect(followed()).toEqual(["A"]);
+
+      // The projected items stay the same, but the layout changes with the new list.
+      firstRowEndsAfter = 1;
+      host.navigationLabel.set("Legal");
+      fixture.detectChanges();
+
+      expect(el.querySelector("nav ul")).not.toBeNull();
+      expect(followed()).toEqual(["B"]);
+    });
+
     it("shows no dots when separator is off", () => {
       expect(followed()).toEqual([]);
     });

@@ -8,6 +8,7 @@ import {
   inject,
   input,
   Renderer2,
+  viewChild,
   ViewEncapsulation,
 } from "@angular/core";
 import { NgTemplateOutlet } from "@angular/common";
@@ -49,17 +50,21 @@ export class FooterListComponent {
   private readonly items = contentChildren(FooterListItemDirective, {
     read: ElementRef,
   });
+  // The rendered <ul>; it is recreated when `navigationLabel` adds or removes the <nav> wrapper.
+  private readonly list = viewChild<ElementRef<HTMLUListElement>>("list");
+
   private resizeObserver?: ResizeObserver;
 
   constructor() {
     afterRenderEffect(() => {
+      const list = this.list()?.nativeElement;
       const items = this.items().map(
         (item) => item.nativeElement as HTMLElement,
       );
       this.resizeObserver?.disconnect();
       this.resizeObserver = undefined;
 
-      if (!this.separator()) {
+      if (!this.separator() || !list) {
         items.forEach((item) =>
           this.renderer.removeClass(item, FOLLOWED_CLASS),
         );
@@ -72,8 +77,7 @@ export class FooterListComponent {
       if (typeof ResizeObserver !== "undefined" && items.length) {
         const observer = new ResizeObserver(update);
         items.forEach((item) => observer.observe(item));
-        const list = items[0].parentElement;
-        if (list) observer.observe(list);
+        observer.observe(list);
         this.resizeObserver = observer;
       }
     });
