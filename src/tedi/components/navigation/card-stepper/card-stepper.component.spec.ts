@@ -239,6 +239,18 @@ describe("CardStepperComponent", () => {
     expect(icons).toEqual(["check"]);
   });
 
+  it("should keep the title text apart from the status icon so only the text is truncated", () => {
+    host.showStatusIcon.set(true);
+    host.secondCompleted.set(true);
+    fixture.detectChanges();
+
+    const text = query(".tedi-card-stepper__title-text");
+
+    expect(text?.textContent?.trim()).toBe("Dokumendid");
+    expect(text?.querySelector(".tedi-card-stepper__status-icon")).toBeNull();
+    expect(query(".tedi-card-stepper__status-icon")).toBeTruthy();
+  });
+
   it("should project the step's bottom content only for the active step", () => {
     host.withBottomSlot.set(true);
     fixture.detectChanges();

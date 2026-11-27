@@ -84,7 +84,13 @@
   font-weight: var(--heading-h4-weight);
   line-height: var(--heading-h4-line-height);
   color: var(--general-text-brand);
-  overflow-wrap: anywhere;
+}
+
+.tedi-card-stepper__title-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .tedi-card-stepper__status-icon {

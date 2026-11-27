@@ -155,7 +155,7 @@
 </ng-template>
 
 <ng-template #titleTemplate>
-  {{ current()?.title() }}
+  <span class="tedi-card-stepper__title-text">{{ current()?.title() }}</span>
   @if (showStatusIcon() && current()?.progressState() === "completed") {
     <tedi-icon
       class="tedi-card-stepper__status-icon"
