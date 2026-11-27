@@ -1,0 +1,19 @@
+<ng-template #listTemplate>
+  <ul
+    #list
+    class="tedi-footer-list"
+    role="list"
+    [class.tedi-footer-list--separator]="separator()"
+    [attr.aria-label]="ariaLabel() ?? null"
+  >
+    <ng-content />
+  </ul>
+</ng-template>
+
+@if (navigationLabel(); as label) {
+  <nav [attr.aria-label]="label">
+    <ng-container [ngTemplateOutlet]="listTemplate" />
+  </nav>
+} @else {
+  <ng-container [ngTemplateOutlet]="listTemplate" />
+}
