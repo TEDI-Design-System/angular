@@ -18,6 +18,8 @@ import { FooterBodyComponent } from "./footer-body/footer-body.component";
 import { FooterSectionComponent } from "./footer-section/footer-section.component";
 import { FooterSideComponent } from "./footer-side/footer-side.component";
 import { FooterBottomComponent } from "./footer-bottom/footer-bottom.component";
+import { FooterListComponent } from "./footer-list/footer-list.component";
+import { FooterListItemDirective } from "./footer-list/footer-list-item.directive";
 import { TextComponent } from "../../base/text/text.component";
 import { LinkComponent } from "../../navigation/link/link.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
@@ -190,6 +192,7 @@ const breakpointArgType = (breakpoint: string) => ({
  *
  * - `tedi-footer-body`: the row of sections.
  * - `tedi-footer-section`: a heading with links and an optional icon; becomes an accordion on mobile with `collapsible`.
+ * - `tedi-footer-list`: wraps links so assistive technology announces them as a list. Project one `<li tedi-footer-list-item>` per link. `separator` adds dots between items and `navigationLabel` wraps the list in a labelled `<nav>`; both are opt-in.
  * - `tedi-footer-side`: logo slot before or after the body.
  * - `tedi-footer-bottom`: strip below the footer for extra links or a logo.
  */
@@ -204,6 +207,8 @@ export default {
         FooterSectionComponent,
         FooterSideComponent,
         FooterBottomComponent,
+        FooterListComponent,
+        FooterListItemDirective,
         TextComponent,
         LinkComponent,
         ButtonComponent,
@@ -340,9 +345,19 @@ export default {
         defaultValue: { summary: "center" },
       },
     },
+    navigationLabel: {
+      control: "text",
+      description:
+        "Wraps the first list in a `<nav>` landmark with this label. Opt-in; the label must be unique within the page.",
+      table: {
+        category: "footer-list inputs",
+        type: { summary: "string" },
+      },
+    },
     separator: {
       control: false,
-      description: "Shows a dot between items.",
+      description:
+        "Shows a dot between items. On `tedi-footer-list` it applies to the list; on `tedi-footer-bottom` it applies to directly projected children.",
       table: {
         category: "footer-bottom inputs",
         type: { summary: "boolean" },
@@ -363,30 +378,39 @@ type Story = StoryObj;
 const sectionsTemplate = (
   contactIcon?: "call" | "location_on",
   bindings = "",
+  firstListBindings = "",
 ) => `
   <tedi-footer-section heading="Uuri lähemalt" ${contactIcon ? 'icon="info"' : ""} ${bindings}>
-    <a tedi-link variant="inverted" href="#">Privaatsuspoliitika</a>
-    <a tedi-link variant="inverted" href="#">Küpsised</a>
-    <a tedi-link variant="inverted" href="#">Korduma kippuvad küsimused</a>
-    <a tedi-link variant="inverted" href="#">Karjäärivõimalused</a>
+    <tedi-footer-list ${firstListBindings}>
+      <li tedi-footer-list-item><a tedi-link variant="inverted" href="#">Privaatsuspoliitika</a></li>
+      <li tedi-footer-list-item><a tedi-link variant="inverted" href="#">Küpsised</a></li>
+      <li tedi-footer-list-item><a tedi-link variant="inverted" href="#">Korduma kippuvad küsimused</a></li>
+      <li tedi-footer-list-item><a tedi-link variant="inverted" href="#">Karjäärivõimalused</a></li>
+    </tedi-footer-list>
   </tedi-footer-section>
   <tedi-footer-section heading="Sotsiaalmeedia ja uuendused" ${contactIcon ? 'icon="share"' : ""} ${bindings}>
-    <a tedi-link variant="inverted" href="#">Uudiskirja tellimine</a>
-    <a tedi-link variant="inverted" href="https://x.com">Jälgi meid Twitteris</a>
-    <a tedi-link variant="inverted" href="https://www.facebook.com/TEHIK">Jälgi meid Facebookis</a>
-    <a tedi-link variant="inverted" href="#">Liitu meie kogukonnaga</a>
+    <tedi-footer-list>
+      <li tedi-footer-list-item><a tedi-link variant="inverted" href="#">Uudiskirja tellimine</a></li>
+      <li tedi-footer-list-item><a tedi-link variant="inverted" href="https://x.com">Jälgi meid Twitteris</a></li>
+      <li tedi-footer-list-item><a tedi-link variant="inverted" href="https://www.facebook.com/TEHIK">Jälgi meid Facebookis</a></li>
+      <li tedi-footer-list-item><a tedi-link variant="inverted" href="#">Liitu meie kogukonnaga</a></li>
+    </tedi-footer-list>
   </tedi-footer-section>
   <tedi-footer-section heading="Kontakt" ${contactIcon ? `icon="${contactIcon}"` : ""} ${bindings}>
-    <a tedi-link variant="inverted" href="tel:+3725555555">+372 555 5555</a>
-    <a tedi-link variant="inverted" href="mailto:tedi@tehik.ee">tedi@tehik.ee</a>
-    <a tedi-link variant="inverted" href="#">Pärnu mnt. 132, 11317 Tallinn</a>
+    <tedi-footer-list>
+      <li tedi-footer-list-item><a tedi-link variant="inverted" href="tel:+3725555555">+372 555 5555</a></li>
+      <li tedi-footer-list-item><a tedi-link variant="inverted" href="mailto:tedi@tehik.ee">tedi@tehik.ee</a></li>
+      <li tedi-footer-list-item><a tedi-link variant="inverted" href="#">Pärnu mnt. 132, 11317 Tallinn</a></li>
+    </tedi-footer-list>
   </tedi-footer-section>
 `;
 
 const contactLinks = `
-  <a tedi-link variant="inverted" href="tel:+3725555555">+372 555 5555</a>
-  <a tedi-link variant="inverted" href="mailto:tedi@tehik.ee">tedi@tehik.ee</a>
-  <a tedi-link variant="inverted" href="#">Pärnu mnt. 132, 11317 Tallinn</a>
+  <tedi-footer-list>
+    <li tedi-footer-list-item><a tedi-link variant="inverted" href="tel:+3725555555">+372 555 5555</a></li>
+    <li tedi-footer-list-item><a tedi-link variant="inverted" href="mailto:tedi@tehik.ee">tedi@tehik.ee</a></li>
+    <li tedi-footer-list-item><a tedi-link variant="inverted" href="#">Pärnu mnt. 132, 11317 Tallinn</a></li>
+  </tedi-footer-list>
 `;
 
 const logoSide = (attributes = "") => `
@@ -419,6 +443,7 @@ export const Default: Story = {
           ${sectionsTemplate(
             "call",
             `[collapsible]="collapsible" [defaultOpen]="defaultOpen" [headingLevel]="headingLevel" [iconBreakpoint]="iconBreakpoint"`,
+            `[navigationLabel]="navigationLabel"`,
           )}
         </tedi-footer-body>
         <tedi-footer-side [placement]="placement" [position]="position">
@@ -538,16 +563,20 @@ export const DeviceFrameSourceAccordionsOpen: Story = {
       <tedi-footer>
         <tedi-footer-body>
           <tedi-footer-section heading="Uuri lähemalt" icon="info" [collapsible]="true" [defaultOpen]="true">
-            <a tedi-link variant="inverted" href="#">Privaatsuspoliitika</a>
-            <a tedi-link variant="inverted" href="#">Küpsised</a>
-            <a tedi-link variant="inverted" href="#">Korduma kippuvad küsimused</a>
-            <a tedi-link variant="inverted" href="#">Karjäärivõimalused</a>
+            <tedi-footer-list>
+              <li tedi-footer-list-item><a tedi-link variant="inverted" href="#">Privaatsuspoliitika</a></li>
+              <li tedi-footer-list-item><a tedi-link variant="inverted" href="#">Küpsised</a></li>
+              <li tedi-footer-list-item><a tedi-link variant="inverted" href="#">Korduma kippuvad küsimused</a></li>
+              <li tedi-footer-list-item><a tedi-link variant="inverted" href="#">Karjäärivõimalused</a></li>
+            </tedi-footer-list>
           </tedi-footer-section>
           <tedi-footer-section heading="Sotsiaalmeedia ja uuendused" icon="share" [collapsible]="true">
-            <a tedi-link variant="inverted" href="#">Uudiskirja tellimine</a>
-            <a tedi-link variant="inverted" href="https://x.com">Jälgi meid Twitteris</a>
-            <a tedi-link variant="inverted" href="https://www.facebook.com/TEHIK">Jälgi meid Facebookis</a>
-            <a tedi-link variant="inverted" href="#">Liitu meie kogukonnaga</a>
+            <tedi-footer-list>
+              <li tedi-footer-list-item><a tedi-link variant="inverted" href="#">Uudiskirja tellimine</a></li>
+              <li tedi-footer-list-item><a tedi-link variant="inverted" href="https://x.com">Jälgi meid Twitteris</a></li>
+              <li tedi-footer-list-item><a tedi-link variant="inverted" href="https://www.facebook.com/TEHIK">Jälgi meid Facebookis</a></li>
+              <li tedi-footer-list-item><a tedi-link variant="inverted" href="#">Liitu meie kogukonnaga</a></li>
+            </tedi-footer-list>
           </tedi-footer-section>
           <tedi-footer-section heading="Kontakt" icon="call" [collapsible]="true">
             ${contactLinks}
@@ -589,20 +618,24 @@ export const LogoPosition: Story = {
 
 const bottomSections = `
   <tedi-footer-section heading="Uuri lähemalt" icon="info">
-    <a tedi-link variant="inverted" href="#">Privaatsuspoliitika</a>
-    <a tedi-link variant="inverted" href="#">Küpsised</a>
-    <a tedi-link variant="inverted" href="#">Korduma kippuvad küsimused</a>
-    <a tedi-link variant="inverted" href="#">Karjäärivõimalused</a>
+    <tedi-footer-list>
+      <li tedi-footer-list-item><a tedi-link variant="inverted" href="#">Privaatsuspoliitika</a></li>
+      <li tedi-footer-list-item><a tedi-link variant="inverted" href="#">Küpsised</a></li>
+      <li tedi-footer-list-item><a tedi-link variant="inverted" href="#">Korduma kippuvad küsimused</a></li>
+      <li tedi-footer-list-item><a tedi-link variant="inverted" href="#">Karjäärivõimalused</a></li>
+    </tedi-footer-list>
   </tedi-footer-section>
   <tedi-footer-section heading="Kontakt" icon="location_on">
     ${contactLinks}
   </tedi-footer-section>
 `;
 
-const bottomLinks = `
-  <a tedi-link variant="inverted" [underline]="false" href="https://www.facebook.com/TEHIK">Facebook</a>
-  <a tedi-link variant="inverted" [underline]="false" href="https://www.instagram.com/nahtamatudkangelased/">Instagram</a>
-  <a tedi-link variant="inverted" [underline]="false" href="https://www.linkedin.com/showcase/tedi-disain/">LinkedIn</a>
+const bottomLinks = (separator = false) => `
+  <tedi-footer-list ${separator ? '[separator]="true"' : ""}>
+    <li tedi-footer-list-item><a tedi-link variant="inverted" [underline]="false" href="https://www.facebook.com/TEHIK">Facebook</a></li>
+    <li tedi-footer-list-item><a tedi-link variant="inverted" [underline]="false" href="https://www.instagram.com/nahtamatudkangelased/">Instagram</a></li>
+    <li tedi-footer-list-item><a tedi-link variant="inverted" [underline]="false" href="https://www.linkedin.com/showcase/tedi-disain/">LinkedIn</a></li>
+  </tedi-footer-list>
 `;
 
 export const WithBottomSection: Story = {
@@ -613,12 +646,12 @@ export const WithBottomSection: Story = {
         <tedi-footer>
           <tedi-footer-body>${bottomSections}</tedi-footer-body>
           ${logoSide('placement="end"')}
-          <tedi-footer-bottom>${bottomLinks}</tedi-footer-bottom>
+          <tedi-footer-bottom>${bottomLinks()}</tedi-footer-bottom>
         </tedi-footer>
         <tedi-footer>
           <tedi-footer-body>${bottomSections}</tedi-footer-body>
           ${logoSide('placement="end"')}
-          <tedi-footer-bottom [separator]="true">${bottomLinks}</tedi-footer-bottom>
+          <tedi-footer-bottom>${bottomLinks(true)}</tedi-footer-bottom>
         </tedi-footer>
       </section>
     `,
@@ -686,17 +719,23 @@ export const CustomContent: Story = {
         <tedi-footer>
           <tedi-footer-body [columns]="4">
             <tedi-footer-section heading="Uuri lähemalt">
-              <a tedi-link variant="inverted" href="#">Privaatsuspoliitika</a>
-              <a tedi-link variant="inverted" href="#">Küpsised</a>
-              <a tedi-link variant="inverted" href="#">Korduma kippuvad küsimused</a>
+              <tedi-footer-list>
+                <li tedi-footer-list-item><a tedi-link variant="inverted" href="#">Privaatsuspoliitika</a></li>
+                <li tedi-footer-list-item><a tedi-link variant="inverted" href="#">Küpsised</a></li>
+                <li tedi-footer-list-item><a tedi-link variant="inverted" href="#">Korduma kippuvad küsimused</a></li>
+              </tedi-footer-list>
             </tedi-footer-section>
             <tedi-footer-section heading="Sotsiaalmeedia">
-              <a tedi-link variant="inverted" href="https://x.com">Jälgi meid Twitteris</a>
-              <a tedi-link variant="inverted" href="https://www.facebook.com/TEHIK">Jälgi meid Facebookis</a>
-              <a tedi-link variant="inverted" href="#">Liitu meie kogukonnaga</a>
+              <tedi-footer-list>
+                <li tedi-footer-list-item><a tedi-link variant="inverted" href="https://x.com">Jälgi meid Twitteris</a></li>
+                <li tedi-footer-list-item><a tedi-link variant="inverted" href="https://www.facebook.com/TEHIK">Jälgi meid Facebookis</a></li>
+                <li tedi-footer-list-item><a tedi-link variant="inverted" href="#">Liitu meie kogukonnaga</a></li>
+              </tedi-footer-list>
             </tedi-footer-section>
             <tedi-footer-section heading="Uudised">
-              <a tedi-link variant="inverted" href="#">Uudiskirja tellimine</a>
+              <tedi-footer-list>
+                <li tedi-footer-list-item><a tedi-link variant="inverted" href="#">Uudiskirja tellimine</a></li>
+              </tedi-footer-list>
             </tedi-footer-section>
             <tedi-footer-section heading="Kontakt" icon="call">
               ${contactLinks}
@@ -752,14 +791,18 @@ export const MaxWidthAndColumns: Story = {
         <tedi-footer-body [columns]="2" [lg]="{ columns: 4 }">
           ${sectionsTemplate("call")}
           <tedi-footer-section heading="Uudised" icon="local_library">
-            <a tedi-link variant="inverted" href="#">Pressiteated</a>
-            <a tedi-link variant="inverted" href="#">Blogi</a>
+            <tedi-footer-list>
+              <li tedi-footer-list-item><a tedi-link variant="inverted" href="#">Pressiteated</a></li>
+              <li tedi-footer-list-item><a tedi-link variant="inverted" href="#">Blogi</a></li>
+            </tedi-footer-list>
           </tedi-footer-section>
         </tedi-footer-body>
-        <tedi-footer-bottom [separator]="true">
-          <a tedi-link variant="inverted" [underline]="false" href="#">Privaatsuspoliitika</a>
-          <a tedi-link variant="inverted" [underline]="false" href="#">Küpsised</a>
-          <a tedi-link variant="inverted" [underline]="false" href="#">Ligipääsetavus</a>
+        <tedi-footer-bottom>
+          <tedi-footer-list [separator]="true">
+            <li tedi-footer-list-item><a tedi-link variant="inverted" [underline]="false" href="#">Privaatsuspoliitika</a></li>
+            <li tedi-footer-list-item><a tedi-link variant="inverted" [underline]="false" href="#">Küpsised</a></li>
+            <li tedi-footer-list-item><a tedi-link variant="inverted" [underline]="false" href="#">Ligipääsetavus</a></li>
+          </tedi-footer-list>
         </tedi-footer-bottom>
       </tedi-footer>
     `,
