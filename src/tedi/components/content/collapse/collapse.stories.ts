@@ -24,6 +24,7 @@ const meta = {
     arrowType: "default",
     size: "default",
     inverted: false,
+    underline: true,
   },
   argTypes: {
     size: {
@@ -41,6 +42,13 @@ const meta = {
         "Render with inverted colors (white text/icon, tinted state backgrounds) for use on a brand-coloured surface.",
       table: {
         defaultValue: { summary: "false" },
+      },
+    },
+    underline: {
+      control: "boolean",
+      description: "Underlines the toggle text.",
+      table: {
+        defaultValue: { summary: "true" },
       },
     },
     openText: {

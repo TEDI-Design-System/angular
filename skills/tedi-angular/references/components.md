@@ -290,6 +290,10 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   dropped rather than queued. Removal involves no dialog, so it needs neither. Announcements go through
   `ToastAnnouncerService`, whose regions live on `<body>`: a live region inside the component is
   silently dropped when the rows around it re-render, which is what happens on every selection.
+- **Footer parts belong inside `<tedi-footer>`.** `tedi-footer-body`, `-side`, `-section` and
+  `-bottom` read the footer's `mobileBreakpoint` through DI and fall back to `sm` outside one.
+  Template order doesn't position them: sides go where their `placement` says, and
+  `tedi-footer-bottom` always renders below the row.
 
 ### File upload
 

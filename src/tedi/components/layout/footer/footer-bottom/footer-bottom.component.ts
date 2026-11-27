@@ -1,23 +1,19 @@
 import {
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
-  ContentChildren,
+  DestroyRef,
   ElementRef,
   inject,
-  QueryList,
+  input,
   Renderer2,
-  TemplateRef,
-  ViewChild,
+  viewChild,
   ViewEncapsulation,
-  AfterContentInit,
-  effect,
-  Injector,
-  runInInjectionContext,
-  ViewContainerRef,
-  EmbeddedViewRef,
 } from "@angular/core";
-import { LinkComponent } from "../../../navigation/link/link.component";
-import { BreakpointService } from "../../../../services/breakpoint/breakpoint.service";
+import { injectFooter } from "../footer-context";
+
+const DOT_CLASS = "tedi-footer-bottom__dot";
+const VISIBLE_DOT_CLASS = "tedi-footer-bottom__dot--visible";
 
 @Component({
   standalone: true,
@@ -28,76 +24,106 @@ import { BreakpointService } from "../../../../services/breakpoint/breakpoint.se
   styleUrl: "./footer-bottom.component.scss",
   host: {
     class: "tedi-footer-bottom",
-    "[class.tedi-footer-bottom--mobile]": "mobileLayout()",
+    "[class.tedi-footer-bottom--mobile]": "isMobile()",
   },
 })
-export class FooterBottomComponent implements AfterContentInit {
-  private injector = inject(Injector);
-  private renderer = inject(Renderer2);
-  private breakpointService = inject(BreakpointService);
-  private hostRef = inject(ElementRef<HTMLElement>);
-  private viewContainerRef = inject(ViewContainerRef);
-  private ellipsisViews: Array<EmbeddedViewRef<void>> = [];
+export class FooterBottomComponent {
+  private readonly renderer = inject(Renderer2);
+  private readonly context = injectFooter();
 
-  @ViewChild("ellipsis", { static: true }) ellipsis!: TemplateRef<void>;
-  @ContentChildren(LinkComponent, { descendants: true, read: ElementRef })
-  links!: QueryList<ElementRef>;
+  /**
+   * Shows a dot between items.
+   * @default false
+   */
+  readonly separator = input<boolean>(false);
 
-  mobileLayout = this.breakpointService.isBelowBreakpoint("sm");
+  readonly isMobile = this.context.isMobile;
+  readonly maxWidth = this.context.footer?.maxWidthValue;
 
-  ngAfterContentInit(): void {
-    runInInjectionContext(this.injector, () => {
-      effect(() => {
-        if (this.mobileLayout()) {
-          this.addEllipsisElements();
-        } else {
-          this.removeEllipsisElements();
-        }
-      });
+  private readonly inner = viewChild.required<ElementRef<HTMLElement>>("inner");
+  private mutationObserver?: MutationObserver;
+  private resizeObserver?: ResizeObserver;
+
+  constructor() {
+    afterRenderEffect(() => {
+      // A breakpoint can change the gap even when the strip has a fixed width.
+      this.isMobile();
+      this.syncDots(this.separator());
+    });
+    inject(DestroyRef).onDestroy(() => {
+      this.mutationObserver?.disconnect();
+      this.resizeObserver?.disconnect();
     });
   }
 
-  private addEllipsisElements() {
-    if (!this.links || this.links.length === 0) return;
-    const linksArray = this.links.toArray();
-    this.removeEllipsisElements();
+  private syncDots(separator: boolean): void {
+    const inner = this.inner().nativeElement;
+    this.mutationObserver?.disconnect();
+    this.resizeObserver?.disconnect();
 
-    linksArray.forEach((link, index) => {
-      const nativeElement = link.nativeElement;
+    inner
+      .querySelectorAll(`:scope > .${DOT_CLASS}`)
+      .forEach((dot) => this.renderer.removeChild(inner, dot));
 
-      if (index < linksArray.length - 1) {
-        const parent = nativeElement.parentNode;
-        if (!parent) return;
+    if (!separator) return;
 
-        const embeddedView = this.viewContainerRef.createEmbeddedView(
-          this.ellipsis,
-        );
-        embeddedView.detectChanges();
-        this.ellipsisViews.push(embeddedView);
-        const ellipsisElement = embeddedView.rootNodes[0];
-        this.renderer.addClass(ellipsisElement, "tedi-footer-bottom__ellipsis");
+    const items = Array.from(inner.children);
+    const dots = items.slice(0, -1).map((item) => {
+      const dot = this.renderer.createElement("span") as HTMLElement;
+      this.renderer.addClass(dot, DOT_CLASS);
+      this.renderer.setAttribute(dot, "aria-hidden", "true");
+      this.renderer.insertBefore(inner, dot, item.nextSibling);
 
-        this.renderer.insertBefore(
-          parent,
-          ellipsisElement,
-          nativeElement.nextSibling,
-        );
+      return dot;
+    });
+
+    if (dots.length) {
+      const positionDots = () => this.positionDots(inner, items, dots);
+      positionDots();
+
+      if (typeof ResizeObserver !== "undefined") {
+        const observer = new ResizeObserver(positionDots);
+        observer.observe(inner);
+        items.forEach((item) => observer.observe(item));
+        this.resizeObserver = observer;
       }
-    });
-  }
+    }
 
-  private removeEllipsisElements(): void {
-    const ellipsisEls = this.hostRef.nativeElement.querySelectorAll(
-      ".tedi-footer-bottom__ellipsis",
+    this.mutationObserver ??= new MutationObserver(() =>
+      this.syncDots(this.separator()),
     );
+    this.mutationObserver.observe(inner, { childList: true });
+  }
 
-    ellipsisEls.forEach((el: HTMLElement) => {
-      const parent = el.parentNode;
-      if (parent) {
-        this.renderer.removeChild(parent, el);
+  private positionDots(
+    inner: HTMLElement,
+    items: Element[],
+    dots: HTMLElement[],
+  ): void {
+    const bounds = inner.getBoundingClientRect();
+    const rects = items.map((item) => item.getBoundingClientRect());
+
+    dots.forEach((dot, index) => {
+      const before = rects[index];
+      const after = rects[index + 1];
+      const centerY = before.top + before.height / 2;
+      // Flex items on the same row share their vertical center.
+      if (
+        !before.height ||
+        !after.height ||
+        Math.abs(centerY - after.top - after.height / 2) >= 1
+      ) {
+        this.renderer.removeClass(dot, VISIBLE_DOT_CLASS);
+        return;
       }
+
+      const [left, right] =
+        before.left < after.left ? [before, after] : [after, before];
+      const centerX = (left.right + right.left) / 2;
+
+      this.renderer.setStyle(dot, "left", `${centerX - bounds.left}px`);
+      this.renderer.setStyle(dot, "top", `${centerY - bounds.top}px`);
+      this.renderer.addClass(dot, VISIBLE_DOT_CLASS);
     });
-    this.ellipsisViews.forEach((view) => view.destroy());
-    this.ellipsisViews = [];
   }
 }
