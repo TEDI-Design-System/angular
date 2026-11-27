@@ -5,6 +5,13 @@ $transition-duration: 300ms;
 }
 
 .tedi-collapse {
+  &__heading {
+    margin: 0;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+  }
+
   &--inverted {
     color: var(--general-text-white);
   }

@@ -3,19 +3,57 @@
   [class.tedi-collapse--open]="isOpen() === true"
   [class.tedi-collapse--inverted]="isInvertedActive()"
 >
-  <button
-    tedi-collapse-button
-    [open]="isOpen()"
-    [openText]="openText()"
-    [closeText]="closeText()"
-    [hideText]="hideCollapseText()"
-    [arrowType]="arrowType()"
-    [size]="size()"
-    [inverted]="inverted()"
-    [underline]="underline()"
-    [ariaControls]="collapseContentId"
-    (openChange)="isOpen.set($event)"
-  ></button>
+  <ng-template #toggle>
+    <button
+      tedi-collapse-button
+      [open]="isOpen()"
+      [openText]="openText()"
+      [closeText]="closeText()"
+      [hideText]="hideCollapseText()"
+      [arrowType]="arrowType()"
+      [size]="size()"
+      [inverted]="inverted()"
+      [underline]="underline()"
+      [ariaControls]="collapseContentId"
+      (openChange)="isOpen.set($event)"
+    ></button>
+  </ng-template>
+
+  @switch (headingLevel()) {
+    @case ("h1") {
+      <h1 class="tedi-collapse__heading">
+        <ng-container [ngTemplateOutlet]="toggle" />
+      </h1>
+    }
+    @case ("h2") {
+      <h2 class="tedi-collapse__heading">
+        <ng-container [ngTemplateOutlet]="toggle" />
+      </h2>
+    }
+    @case ("h3") {
+      <h3 class="tedi-collapse__heading">
+        <ng-container [ngTemplateOutlet]="toggle" />
+      </h3>
+    }
+    @case ("h4") {
+      <h4 class="tedi-collapse__heading">
+        <ng-container [ngTemplateOutlet]="toggle" />
+      </h4>
+    }
+    @case ("h5") {
+      <h5 class="tedi-collapse__heading">
+        <ng-container [ngTemplateOutlet]="toggle" />
+      </h5>
+    }
+    @case ("h6") {
+      <h6 class="tedi-collapse__heading">
+        <ng-container [ngTemplateOutlet]="toggle" />
+      </h6>
+    }
+    @default {
+      <ng-container [ngTemplateOutlet]="toggle" />
+    }
+  }
   <div class="tedi-collapse__content" [id]="collapseContentId">
     <div class="tedi-collapse__extender">
       <ng-content></ng-content>

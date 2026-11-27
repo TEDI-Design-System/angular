@@ -40,8 +40,8 @@ export class FooterSectionComponent {
    */
   readonly heading = input<string>();
   /**
-   * Semantic heading level of the section heading on desktop; the visual style stays the same
-   * regardless. Set it to fit the host page's heading outline (WCAG 1.3.1).
+   * Semantic heading level of the section heading, also for the accordion toggle on mobile; the
+   * visual style stays the same regardless. Set it to fit the host page's heading outline (WCAG 1.3.1).
    * @default h2
    */
   readonly headingLevel = input<FooterSectionHeadingLevel>("h2");

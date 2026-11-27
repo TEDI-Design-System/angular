@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from "@angular/common";
 import {
   Component,
   computed,
@@ -16,11 +17,12 @@ import { generateUUID } from "../../../helpers/generate-uuid";
 
 export type ArrowType = CollapseButtonArrowType;
 export type CollapseSize = CollapseButtonSize;
+export type CollapseHeadingLevel = "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
 
 @Component({
   standalone: true,
   selector: "tedi-collapse",
-  imports: [CollapseButtonComponent],
+  imports: [CollapseButtonComponent, NgTemplateOutlet],
   templateUrl: "./collapse.component.html",
   styleUrls: ["./collapse.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -70,6 +72,12 @@ export class CollapseComponent implements AfterViewInit {
    * @default true
    */
   underline = input<boolean>(true);
+  /**
+   * Renders the toggle button inside a heading of this level, following the WAI-ARIA accordion
+   * pattern: one control, named once by its visible text, that is also a heading. Set the label
+   * with `openText` / `closeText`. Leave unset to render the button on its own.
+   */
+  headingLevel = input<CollapseHeadingLevel>();
 
   collapseContentId: string = `collapse-content-${generateUUID()}`;
   isOpen = signal<boolean>(false);

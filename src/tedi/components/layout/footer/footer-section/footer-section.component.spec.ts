@@ -134,6 +134,22 @@ describe("FooterSectionComponent", () => {
     expect(button.getAttribute("aria-expanded")).toBe("true");
   });
 
+  it("puts the accordion toggle inside the heading at headingLevel on mobile", () => {
+    host.collapsible.set(true);
+    host.headingLevel.set("h4");
+    breakpoint._currentBreakpoint.set("xs");
+    fixture.detectChanges();
+
+    const heading = section.querySelector("h4")!;
+    expect(heading).not.toBeNull();
+    expect(heading.contains(toggle()!)).toBe(true);
+    expect(section.querySelectorAll("h1, h2, h3, h4, h5, h6")).toHaveLength(1);
+
+    host.headingLevel.set("h2");
+    fixture.detectChanges();
+    expect(section.querySelector("h2")!.contains(toggle()!)).toBe(true);
+  });
+
   it("keeps the projected content when switching between layouts", () => {
     host.collapsible.set(true);
     breakpoint._currentBreakpoint.set("xs");

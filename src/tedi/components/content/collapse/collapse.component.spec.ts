@@ -132,4 +132,58 @@ describe("CollapseComponent", () => {
     expect(button.getAttribute("type")).toBe("button");
     expect(button.type).toBe("button");
   });
+
+  describe("headingLevel", () => {
+    const heading = () =>
+      fixture.nativeElement.querySelector("h1, h2, h3, h4, h5, h6");
+    const button = () =>
+      fixture.nativeElement.querySelector("button[tedi-collapse-button]");
+
+    it("renders the button on its own when headingLevel is not set", () => {
+      expect(heading()).toBeNull();
+      expect(button().parentElement.classList).toContain("tedi-collapse");
+    });
+
+    it.each(["h1", "h2", "h3", "h4", "h5", "h6"] as const)(
+      "wraps the toggle button in an %s",
+      (level) => {
+        fixture.componentRef.setInput("headingLevel", level);
+        fixture.componentRef.setInput("openText", "Section");
+        fixture.detectChanges();
+
+        expect(heading().tagName.toLowerCase()).toBe(level);
+        expect(heading().contains(button())).toBe(true);
+        expect(button().textContent).toContain("Section");
+      },
+    );
+
+    it("keeps the toggle working and controlling the content", () => {
+      fixture.componentRef.setInput("headingLevel", "h3");
+      fixture.detectChanges();
+
+      button().click();
+      fixture.detectChanges();
+
+      expect(component.isOpen()).toBe(true);
+      expect(button().getAttribute("aria-expanded")).toBe("true");
+      expect(button().getAttribute("aria-controls")).toBe(
+        component.collapseContentId,
+      );
+    });
+
+    it("switches the heading level and removes the heading again", () => {
+      fixture.componentRef.setInput("headingLevel", "h2");
+      fixture.detectChanges();
+      expect(heading().tagName).toBe("H2");
+
+      fixture.componentRef.setInput("headingLevel", "h4");
+      fixture.detectChanges();
+      expect(heading().tagName).toBe("H4");
+
+      fixture.componentRef.setInput("headingLevel", undefined);
+      fixture.detectChanges();
+      expect(heading()).toBeNull();
+      expect(button()).not.toBeNull();
+    });
+  });
 });
